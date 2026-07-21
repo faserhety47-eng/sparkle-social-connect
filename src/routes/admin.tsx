@@ -472,7 +472,16 @@ function PlatformsManager() {
           <input placeholder="Описание (напр. Короткие видео)" value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
             className="sm:col-span-2 rounded-xl border border-input bg-background px-3 py-2 text-sm" />
-          <input placeholder="Ссылка на иконку (https://…)" value={form.icon_url}
+          <div className="sm:col-span-2">
+            <div className="text-xs text-muted-foreground mb-1">Иконка соцсети</div>
+            <IconPicker
+              value={form.icon_url}
+              onChange={(url, color) =>
+                setForm({ ...form, icon_url: url ?? "", color: color ?? form.color })
+              }
+            />
+          </div>
+          <input placeholder="Или ссылка на картинку (https://…)" value={form.icon_url.startsWith("builtin:") ? "" : form.icon_url}
             onChange={(e) => setForm({ ...form, icon_url: e.target.value })}
             className="rounded-xl border border-input bg-background px-3 py-2 text-sm" />
           <input placeholder="Или эмодзи (📱)" value={form.icon_emoji}
