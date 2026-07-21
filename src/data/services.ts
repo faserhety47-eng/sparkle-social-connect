@@ -4,6 +4,7 @@ export type ServiceCategory = {
   color: string; // background color for tile icon
   letter: string; // fallback letter
   emoji?: string;
+  description?: string;
 };
 
 // 41 platforms mirroring the reference layout (rebranded — same structure, different name)
