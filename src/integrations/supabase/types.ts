@@ -77,6 +77,33 @@ export type Database = {
         }
         Relationships: []
       }
+      service_prices: {
+        Row: {
+          created_at: string
+          id: string
+          platform: string
+          price_per_unit: number
+          service_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          platform: string
+          price_per_unit?: number
+          service_type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          platform?: string
+          price_per_unit?: number
+          service_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
