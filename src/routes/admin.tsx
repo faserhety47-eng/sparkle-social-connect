@@ -534,7 +534,15 @@ function PlatformsManager() {
                   <input defaultValue={p.description ?? ""} placeholder="Описание"
                     onBlur={(e) => (e.target.value || null) !== p.description && update(p, { description: e.target.value || null })}
                     className="rounded-lg border border-input bg-background px-3 py-1.5 text-sm" />
-                  <input defaultValue={p.icon_url ?? ""} placeholder="Ссылка на иконку"
+                  <div className="sm:col-span-2">
+                    <IconPicker
+                      value={p.icon_url}
+                      onChange={(url, color) =>
+                        update(p, color && !p.icon_url?.startsWith("builtin:") ? { icon_url: url, color } : { icon_url: url })
+                      }
+                    />
+                  </div>
+                  <input defaultValue={p.icon_url && !p.icon_url.startsWith("builtin:") ? p.icon_url : ""} placeholder="Или ссылка на картинку"
                     onBlur={(e) => (e.target.value || null) !== p.icon_url && update(p, { icon_url: e.target.value || null })}
                     className="rounded-lg border border-input bg-background px-3 py-1.5 text-sm" />
                   <input defaultValue={p.icon_emoji ?? ""} placeholder="Эмодзи"
