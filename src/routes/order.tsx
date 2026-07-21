@@ -12,9 +12,9 @@ export const Route = createFileRoute("/order")({
   }),
   head: () => ({
     meta: [
-      { title: "Оформить заказ — OzTop Media" },
-      { name: "description", content: "Оформите заказ на накрутку подписчиков, лайков или просмотров в один клик." },
-      { property: "og:title", content: "Оформить заказ — OzTop Media" },
+      { title: "Оформить заказ — SMM Rails" },
+      { name: "description", content: "Оформите заказ на накрутку подписчиков, лайков или просмотров в Max, VK, Telegram, Одноклассники, Instagram, RuTube и YouTube." },
+      { property: "og:title", content: "Оформить заказ — SMM Rails" },
       { property: "og:description", content: "Быстрое оформление SMM-заказа." },
     ],
   }),
