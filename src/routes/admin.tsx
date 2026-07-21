@@ -45,7 +45,15 @@ const STATUSES: { key: string; label: string; color: string }[] = [
   { key: "cancelled", label: "Отменён", color: "bg-red-500/15 text-red-400" },
 ];
 
-type Tab = "orders" | "prices" | "platforms" | "types" | "payments";
+type Tab = "dashboard" | "orders" | "users" | "prices" | "platforms" | "types" | "payments";
+
+const STATUS_MESSAGES: Record<string, string> = {
+  payment_reported: "Спасибо! Мы получили информацию об оплате и проверяем её.",
+  paid: "Оплата подтверждена. Приступаем к выполнению заказа.",
+  processing: "Заказ взят в работу. Скоро всё будет готово ✨",
+  completed: "Заказ выполнен! Спасибо, что выбрали нас 💜",
+  cancelled: "Заказ отменён. Если это ошибка — напишите нам в чате.",
+};
 
 function AdminPage() {
   const { user, loading: sessionLoading } = useSession();
