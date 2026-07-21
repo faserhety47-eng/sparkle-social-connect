@@ -169,11 +169,54 @@ function OrdersTab({ adminId }: { adminId: string }) {
     toast.success("Цена обновлена");
   };
 
-  const filtered = filter === "all" ? orders : orders.filter((o) => o.status === filter);
+  const q = query.trim().toLowerCase();
+  const filtered = orders.filter((o) => {
+    if (filter !== "all" && o.status !== filter) return false;
+    if (!q) return true;
+    const prof = profiles[o.user_id];
+    return (
+      o.id.toLowerCase().includes(q) ||
+      o.link.toLowerCase().includes(q) ||
+      platformName(o.platform).toLowerCase().includes(q) ||
+      typeLabel(o.service_type).toLowerCase().includes(q) ||
+      (prof?.email ?? "").toLowerCase().includes(q) ||
+      (prof?.name ?? "").toLowerCase().includes(q)
+    );
+  });
+
+  const exportCsv = () => {
+    const rows = [
+      ["ID", "Дата", "Клиент", "Email", "Платформа", "Услуга", "Ссылка", "Кол-во", "Цена ₽", "Статус"],
+      ...filtered.map((o) => {
+        const p = profiles[o.user_id];
+        return [
+          o.id, new Date(o.created_at).toLocaleString("ru-RU"),
+          p?.name ?? "", p?.email ?? "",
+          platformName(o.platform), typeLabel(o.service_type),
+          o.link, String(o.quantity), String(o.price_rub), o.status,
+        ];
+      }),
+    ];
+    const csv = rows.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `orders-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click(); URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="mt-6">
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center gap-2">
+        <input value={query} onChange={(e) => setQuery(e.target.value)}
+          placeholder="Поиск: ID, ссылка, email, клиент…"
+          className="flex-1 min-w-52 rounded-full border border-border bg-background px-4 py-2 text-sm" />
+        <button onClick={exportCsv}
+          className="rounded-full border border-border px-4 py-2 text-xs font-semibold hover:border-primary/50">
+          Экспорт CSV
+        </button>
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2">
         <button onClick={() => setFilter("all")}
           className={`rounded-full px-3 py-1.5 text-xs font-semibold border ${filter === "all" ? "bg-primary text-primary-foreground border-primary" : "border-border"}`}>
           Все ({orders.length})
