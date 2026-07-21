@@ -131,6 +131,9 @@ function AdminPage() {
         </div>
       </div>
 
+      <PricesManager />
+
+
       {loading ? (
         <div className="mt-10 text-muted-foreground">Загрузка заказов…</div>
       ) : filtered.length === 0 ? (
