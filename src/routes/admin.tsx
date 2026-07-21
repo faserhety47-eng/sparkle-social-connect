@@ -83,6 +83,14 @@ function AdminPage() {
     toast.success("Статус обновлён");
   };
 
+  const updatePrice = async (id: string, price: number) => {
+    if (!Number.isFinite(price) || price < 0) { toast.error("Некорректная цена"); return; }
+    const { error } = await supabase.from("orders").update({ price_rub: price }).eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    setOrders((os) => os.map((o) => (o.id === id ? { ...o, price_rub: price } : o)));
+    toast.success("Цена обновлена");
+  };
+
   if (sessionLoading || adminLoading) {
     return <section className="mx-auto max-w-6xl px-4 py-14 text-muted-foreground">Загрузка…</section>;
   }
@@ -152,7 +160,7 @@ function AdminPage() {
                   </div>
                   <div className="text-right">
                     <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${s.color}`}>{s.label}</span>
-                    <div className="mt-3 text-2xl font-extrabold text-primary">{Number(o.price_rub).toFixed(2)} ₽</div>
+                    <PriceEditor price={Number(o.price_rub)} onSave={(p) => updatePrice(o.id, p)} />
                   </div>
                 </div>
 
@@ -174,5 +182,40 @@ function AdminPage() {
         </div>
       )}
     </section>
+  );
+}
+
+function PriceEditor({ price, onSave }: { price: number; onSave: (p: number) => void | Promise<void> }) {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(price.toFixed(2));
+
+  if (!editing) {
+    return (
+      <button
+        onClick={() => { setValue(price.toFixed(2)); setEditing(true); }}
+        className="mt-3 text-2xl font-extrabold text-primary hover:underline"
+        title="Изменить цену"
+      >
+        {price.toFixed(2)} ₽
+      </button>
+    );
+  }
+  return (
+    <div className="mt-3 flex items-center gap-2 justify-end">
+      <input
+        type="number" step="0.01" min="0" autoFocus
+        value={value} onChange={(e) => setValue(e.target.value)}
+        className="w-28 rounded-lg border border-border bg-background px-2 py-1 text-right text-lg font-bold"
+      />
+      <span className="text-sm text-muted-foreground">₽</span>
+      <button
+        onClick={async () => { await onSave(parseFloat(value)); setEditing(false); }}
+        className="rounded-lg bg-primary text-primary-foreground px-3 py-1 text-xs font-semibold"
+      >OK</button>
+      <button
+        onClick={() => setEditing(false)}
+        className="rounded-lg border border-border px-3 py-1 text-xs"
+      >×</button>
+    </div>
   );
 }
