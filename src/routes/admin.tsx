@@ -330,16 +330,32 @@ function PricesManager() {
 
 function PlatformsManager() {
   const { platforms, loading, reload } = usePlatforms({ onlyActive: false });
-  const [form, setForm] = useState({ id: "", name: "", sort_order: 100 });
+  const [form, setForm] = useState({
+    id: "",
+    name: "",
+    description: "",
+    color: "#7B4FFF",
+    icon_url: "",
+    icon_emoji: "",
+    letter: "",
+    sort_order: 100,
+  });
 
   const add = async () => {
     if (!form.id.trim() || !form.name.trim()) return toast.error("Заполните ID и название");
     const { error } = await supabase.from("platforms").insert({
-      id: form.id.trim().toLowerCase(), name: form.name.trim(), sort_order: Number(form.sort_order) || 100,
+      id: form.id.trim().toLowerCase(),
+      name: form.name.trim(),
+      description: form.description.trim() || null,
+      color: form.color || "#7B4FFF",
+      icon_url: form.icon_url.trim() || null,
+      icon_emoji: form.icon_emoji.trim() || null,
+      letter: form.letter.trim() || null,
+      sort_order: Number(form.sort_order) || 100,
     });
     if (error) return toast.error(error.message);
     toast.success("Платформа добавлена");
-    setForm({ id: "", name: "", sort_order: 100 });
+    setForm({ id: "", name: "", description: "", color: "#7B4FFF", icon_url: "", icon_emoji: "", letter: "", sort_order: 100 });
     reload();
   };
 
@@ -357,21 +373,60 @@ function PlatformsManager() {
     reload();
   };
 
+  const previewIcon = (p: { icon_url: string | null; icon_emoji: string | null; letter: string | null; name: string; color: string }) => (
+    <div className="h-12 w-12 shrink-0 rounded-xl flex items-center justify-center overflow-hidden ring-1 ring-white/5"
+      style={{ backgroundColor: p.color || "#7B4FFF" }}>
+      {p.icon_url ? (
+        <img src={p.icon_url} alt="" className="h-7 w-7 object-contain" />
+      ) : p.icon_emoji ? (
+        <span className="text-xl">{p.icon_emoji}</span>
+      ) : (
+        <span className="text-white font-bold">{p.letter ?? p.name.slice(0, 1)}</span>
+      )}
+    </div>
+  );
+
   return (
     <div className="mt-6 space-y-6">
       <div className="rounded-3xl bg-card p-6 shadow-tile">
-        <h2 className="text-lg font-bold">Добавить платформу</h2>
-        <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_1fr_120px_auto]">
+        <h2 className="text-lg font-bold">Добавить платформу / соцсеть</h2>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Иконка: укажите ссылку на картинку (PNG/SVG) или эмодзи, или букву-заглушку. Цвет — фон плитки.
+        </p>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
           <input placeholder="ID (латиницей, напр. tiktok)" value={form.id}
             onChange={(e) => setForm({ ...form, id: e.target.value })}
             className="rounded-xl border border-input bg-background px-3 py-2 text-sm" />
           <input placeholder="Название (напр. TikTok)" value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
             className="rounded-xl border border-input bg-background px-3 py-2 text-sm" />
+          <input placeholder="Описание (напр. Короткие видео)" value={form.description}
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
+            className="sm:col-span-2 rounded-xl border border-input bg-background px-3 py-2 text-sm" />
+          <input placeholder="Ссылка на иконку (https://…)" value={form.icon_url}
+            onChange={(e) => setForm({ ...form, icon_url: e.target.value })}
+            className="rounded-xl border border-input bg-background px-3 py-2 text-sm" />
+          <input placeholder="Или эмодзи (📱)" value={form.icon_emoji}
+            onChange={(e) => setForm({ ...form, icon_emoji: e.target.value })}
+            className="rounded-xl border border-input bg-background px-3 py-2 text-sm" />
+          <div className="flex items-center gap-2">
+            <input type="color" value={form.color}
+              onChange={(e) => setForm({ ...form, color: e.target.value })}
+              className="h-10 w-14 rounded-lg border border-input bg-background cursor-pointer" />
+            <input placeholder="Цвет плитки (#RRGGBB)" value={form.color}
+              onChange={(e) => setForm({ ...form, color: e.target.value })}
+              className="flex-1 rounded-xl border border-input bg-background px-3 py-2 text-sm" />
+          </div>
+          <input placeholder="Буква-заглушка (напр. T)" value={form.letter}
+            onChange={(e) => setForm({ ...form, letter: e.target.value })}
+            className="rounded-xl border border-input bg-background px-3 py-2 text-sm" />
           <input type="number" placeholder="Порядок" value={form.sort_order}
             onChange={(e) => setForm({ ...form, sort_order: Number(e.target.value) })}
             className="rounded-xl border border-input bg-background px-3 py-2 text-sm" />
-          <button onClick={add} className="btn-primary text-sm">Добавить</button>
+        </div>
+        <div className="mt-4 flex items-center gap-3">
+          {previewIcon({ ...form, icon_url: form.icon_url || null, icon_emoji: form.icon_emoji || null, letter: form.letter || null })}
+          <button onClick={add} className="btn-primary text-sm">Добавить платформу</button>
         </div>
       </div>
 
@@ -380,20 +435,42 @@ function PlatformsManager() {
         {loading ? (
           <div className="mt-4 text-muted-foreground">Загрузка…</div>
         ) : (
-          <div className="mt-4 space-y-2">
+          <div className="mt-4 space-y-3">
             {platforms.map((p) => (
-              <div key={p.id} className="flex items-center gap-3 flex-wrap rounded-2xl border border-border p-3">
-                <div className="text-xs text-muted-foreground w-16">{p.id}</div>
-                <input defaultValue={p.name} onBlur={(e) => e.target.value !== p.name && update(p, { name: e.target.value })}
-                  className="flex-1 min-w-40 rounded-lg border border-input bg-background px-3 py-1.5 text-sm" />
-                <input type="number" defaultValue={p.sort_order}
-                  onBlur={(e) => Number(e.target.value) !== p.sort_order && update(p, { sort_order: Number(e.target.value) })}
-                  className="w-20 rounded-lg border border-input bg-background px-2 py-1.5 text-sm text-right" />
-                <label className="flex items-center gap-1.5 text-xs">
-                  <input type="checkbox" checked={p.is_active} onChange={(e) => update(p, { is_active: e.target.checked })} />
-                  Активна
-                </label>
-                <button onClick={() => remove(p.id)} className="text-xs text-red-400 hover:underline">Удалить</button>
+              <div key={p.id} className="rounded-2xl border border-border p-4 space-y-3">
+                <div className="flex items-center gap-3 flex-wrap">
+                  {previewIcon(p)}
+                  <div className="text-xs text-muted-foreground w-16">{p.id}</div>
+                  <input defaultValue={p.name} onBlur={(e) => e.target.value !== p.name && update(p, { name: e.target.value })}
+                    className="flex-1 min-w-40 rounded-lg border border-input bg-background px-3 py-1.5 text-sm font-semibold" />
+                  <input type="number" defaultValue={p.sort_order}
+                    onBlur={(e) => Number(e.target.value) !== p.sort_order && update(p, { sort_order: Number(e.target.value) })}
+                    className="w-20 rounded-lg border border-input bg-background px-2 py-1.5 text-sm text-right" />
+                  <label className="flex items-center gap-1.5 text-xs">
+                    <input type="checkbox" checked={p.is_active} onChange={(e) => update(p, { is_active: e.target.checked })} />
+                    Активна
+                  </label>
+                  <button onClick={() => remove(p.id)} className="text-xs text-red-400 hover:underline">Удалить</button>
+                </div>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <input defaultValue={p.description ?? ""} placeholder="Описание"
+                    onBlur={(e) => (e.target.value || null) !== p.description && update(p, { description: e.target.value || null })}
+                    className="rounded-lg border border-input bg-background px-3 py-1.5 text-sm" />
+                  <input defaultValue={p.icon_url ?? ""} placeholder="Ссылка на иконку"
+                    onBlur={(e) => (e.target.value || null) !== p.icon_url && update(p, { icon_url: e.target.value || null })}
+                    className="rounded-lg border border-input bg-background px-3 py-1.5 text-sm" />
+                  <input defaultValue={p.icon_emoji ?? ""} placeholder="Эмодзи"
+                    onBlur={(e) => (e.target.value || null) !== p.icon_emoji && update(p, { icon_emoji: e.target.value || null })}
+                    className="rounded-lg border border-input bg-background px-3 py-1.5 text-sm" />
+                  <div className="flex items-center gap-2">
+                    <input type="color" defaultValue={p.color || "#7B4FFF"}
+                      onBlur={(e) => e.target.value !== p.color && update(p, { color: e.target.value })}
+                      className="h-9 w-12 rounded-lg border border-input bg-background cursor-pointer" />
+                    <input defaultValue={p.color || ""} placeholder="Цвет #RRGGBB"
+                      onBlur={(e) => e.target.value !== p.color && update(p, { color: e.target.value })}
+                      className="flex-1 rounded-lg border border-input bg-background px-3 py-1.5 text-sm" />
+                  </div>
+                </div>
               </div>
             ))}
           </div>
@@ -402,6 +479,7 @@ function PlatformsManager() {
     </div>
   );
 }
+
 
 function ServiceTypesManager() {
   const { types, loading, reload } = useServiceTypes({ onlyActive: false });
