@@ -83,6 +83,14 @@ function AdminPage() {
     toast.success("Статус обновлён");
   };
 
+  const updatePrice = async (id: string, price: number) => {
+    if (!Number.isFinite(price) || price < 0) return toast.error("Некорректная цена");
+    const { error } = await supabase.from("orders").update({ price_rub: price }).eq("id", id);
+    if (error) return toast.error(error.message);
+    setOrders((os) => os.map((o) => (o.id === id ? { ...o, price_rub: price } : o)));
+    toast.success("Цена обновлена");
+  };
+
   if (sessionLoading || adminLoading) {
     return <section className="mx-auto max-w-6xl px-4 py-14 text-muted-foreground">Загрузка…</section>;
   }
@@ -152,7 +160,7 @@ function AdminPage() {
                   </div>
                   <div className="text-right">
                     <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${s.color}`}>{s.label}</span>
-                    <div className="mt-3 text-2xl font-extrabold text-primary">{Number(o.price_rub).toFixed(2)} ₽</div>
+                    <PriceEditor price={Number(o.price_rub)} onSave={(p) => updatePrice(o.id, p)} />
                   </div>
                 </div>
 
