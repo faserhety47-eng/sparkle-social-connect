@@ -7,8 +7,6 @@ import {
   SiTiktok,
   SiFacebook,
   SiX,
-  SiTwitter,
-  SiLinkedin,
   SiPinterest,
   SiSnapchat,
   SiReddit,
