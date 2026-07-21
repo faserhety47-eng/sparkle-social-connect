@@ -72,7 +72,7 @@ export const ICON_LIBRARY: BrandIcon[] = [
   { key: "tumblr", label: "Tumblr", color: "#36465D", Icon: SiTumblr },
   { key: "vimeo", label: "Vimeo", color: "#1AB7EA", Icon: SiVimeo },
   { key: "dailymotion", label: "Dailymotion", color: "#0066DC", Icon: SiDailymotion },
-  { key: "yandex", label: "Яндекс", color: "#FF0000", Icon: SiYandex },
+  { key: "yandex", label: "Яндекс", color: "#FF0000", Icon: SiYandexcloud },
   { key: "github", label: "GitHub", color: "#181717", Icon: SiGithub },
   { key: "gitlab", label: "GitLab", color: "#FC6D26", Icon: SiGitlab },
   { key: "medium", label: "Medium", color: "#000000", Icon: SiMedium },
