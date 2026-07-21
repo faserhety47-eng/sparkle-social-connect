@@ -33,7 +33,7 @@ function Tile({ svc }: { svc: ServiceCategory }) {
 
 export function ServicesGrid() {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 xl:grid-cols-9 gap-3">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
       {SERVICES.map((s) => (
         <Tile key={s.id} svc={s} />
       ))}
