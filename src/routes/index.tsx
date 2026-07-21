@@ -1,18 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ServicesGrid } from "@/components/site/ServicesGrid";
-import { Stats } from "@/components/site/Stats";
-import { FreeBoost } from "@/components/site/FreeBoost";
-import { Advantages } from "@/components/site/Advantages";
-import { Team } from "@/components/site/Team";
-import { Faq } from "@/components/site/Faq";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "OzTop Media — Бесплатная и платная SMM накрутка" },
-      { name: "description", content: "Быстрая и качественная накрутка подписчиков, лайков и просмотров в 40+ соцсетях. Регистрация не требуется." },
-      { property: "og:title", content: "OzTop Media — Бесплатная и платная SMM накрутка" },
-      { property: "og:description", content: "Быстрая и качественная накрутка подписчиков, лайков и просмотров в 40+ соцсетях. Регистрация не требуется." },
+      { title: "SMM Rails — Продвижение в социальных сетях" },
+      { name: "description", content: "Быстрая и качественная накрутка подписчиков, лайков и просмотров в Max, VK, Telegram, Одноклассники, Instagram, RuTube и YouTube." },
+      { property: "og:title", content: "SMM Rails — Продвижение в социальных сетях" },
+      { property: "og:description", content: "Быстрая и качественная накрутка подписчиков, лайков и просмотров в Max, VK, Telegram, Одноклассники, Instagram, RuTube и YouTube." },
     ],
   }),
   component: Index,
@@ -33,19 +28,13 @@ function Index() {
             Продвижение в <span className="brand-logo">социальных&nbsp;сетях</span>
           </h1>
           <p className="mt-5 text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
-            Повысьте аппетит и привлекательность вашего блога или личной страницы
+            Повысьте активность и привлекательность вашего блога или личной страницы
           </p>
         </div>
 
         <div className="mt-14">
           <ServicesGrid />
         </div>
-
-        <Stats />
-        <FreeBoost />
-        <Advantages />
-        <Team />
-        <Faq />
       </section>
     </div>
   );
