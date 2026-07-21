@@ -437,18 +437,23 @@ function PlatformsManager() {
     reload();
   };
 
-  const previewIcon = (p: { icon_url: string | null; icon_emoji: string | null; letter: string | null; name: string; color: string }) => (
-    <div className="h-12 w-12 shrink-0 rounded-xl flex items-center justify-center overflow-hidden ring-1 ring-white/5"
-      style={{ backgroundColor: p.color || "#7B4FFF" }}>
-      {p.icon_url ? (
-        <img src={p.icon_url} alt="" className="h-7 w-7 object-contain" />
-      ) : p.icon_emoji ? (
-        <span className="text-xl">{p.icon_emoji}</span>
-      ) : (
-        <span className="text-white font-bold">{p.letter ?? p.name.slice(0, 1)}</span>
-      )}
-    </div>
-  );
+  const previewIcon = (p: { icon_url: string | null; icon_emoji: string | null; letter: string | null; name: string; color: string }) => {
+    const builtin = parseBuiltinIcon(p.icon_url);
+    return (
+      <div className="h-12 w-12 shrink-0 rounded-xl flex items-center justify-center overflow-hidden ring-1 ring-white/5"
+        style={{ backgroundColor: p.color || "#7B4FFF" }}>
+        {builtin ? (
+          <builtin.Icon width={26} height={26} color="#ffffff" />
+        ) : p.icon_url ? (
+          <img src={p.icon_url} alt="" className="h-7 w-7 object-contain" />
+        ) : p.icon_emoji ? (
+          <span className="text-xl">{p.icon_emoji}</span>
+        ) : (
+          <span className="text-white font-bold">{p.letter ?? p.name.slice(0, 1)}</span>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="mt-6 space-y-6">
