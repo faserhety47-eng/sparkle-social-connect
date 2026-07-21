@@ -1,10 +1,12 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Moon, User } from "lucide-react";
+import { Moon, User, Shield } from "lucide-react";
 import { useSession } from "@/hooks/useSession";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { supabase } from "@/integrations/supabase/client";
 
 export function Header() {
   const { user, loading } = useSession();
+  const { isAdmin } = useIsAdmin();
   const navigate = useNavigate();
 
   const logout = async () => {
@@ -36,6 +38,11 @@ export function Header() {
           </button>
           {loading ? null : user ? (
             <>
+              {isAdmin && (
+                <Link to="/admin" className="btn-ghost text-sm inline-flex items-center gap-1.5">
+                  <Shield className="h-4 w-4" /> Админ
+                </Link>
+              )}
               <Link to="/account" className="btn-ghost text-sm inline-flex items-center gap-1.5">
                 <User className="h-4 w-4" /> Кабинет
               </Link>
