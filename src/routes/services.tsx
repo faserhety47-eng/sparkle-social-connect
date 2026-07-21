@@ -5,9 +5,9 @@ import { BRAND_ICONS } from "@/data/service-icons";
 export const Route = createFileRoute("/services")({
   head: () => ({
     meta: [
-      { title: "Услуги SMM Rails — 7 платформ для накрутки" },
-      { name: "description", content: "Каталог услуг накрутки SMM Rails: Max, VK, Telegram, Одноклассники, Instagram, RuTube и YouTube." },
-      { property: "og:title", content: "Услуги SMM Rails" },
+      { title: "Услуги Oz Top — 7 платформ для накрутки" },
+      { name: "description", content: "Каталог услуг накрутки Oz Top: Max, VK, Telegram, Одноклассники, Instagram, RuTube и YouTube." },
+      { property: "og:title", content: "Услуги Oz Top" },
       { property: "og:description", content: "Каталог из 7 платформ с прозрачными ценами." },
     ],
   }),
