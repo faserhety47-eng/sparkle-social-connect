@@ -122,6 +122,7 @@ function OrdersTab({ adminId }: { adminId: string }) {
   const [profiles, setProfiles] = useState<Record<string, Profile>>({});
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("all");
+  const [query, setQuery] = useState("");
   const [openChat, setOpenChat] = useState<Record<string, boolean>>({});
   const { platforms } = usePlatforms({ onlyActive: false });
   const { types } = useServiceTypes({ onlyActive: false });
