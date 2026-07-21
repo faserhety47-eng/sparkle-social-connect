@@ -99,13 +99,13 @@ function OrderPage() {
         <div>
           <label className="text-sm font-semibold">Тип услуги</label>
           <div className="mt-2 grid grid-cols-2 sm:grid-cols-4 gap-2">
-            {SERVICE_TYPES.map((t) => (
+            {SERVICE_TYPE_LIST.map((t) => (
               <button type="button" key={t.id} onClick={() => setType(t.id)}
                 className={`rounded-xl border px-3 py-3 text-sm font-medium transition ${
                   type === t.id ? "border-primary bg-primary/10 text-primary" : "border-border hover:border-primary/50"
                 }`}>
                 {t.label}
-                <div className="text-[11px] text-muted-foreground font-normal mt-0.5">от {t.price} ₽/шт</div>
+                <div className="text-[11px] text-muted-foreground font-normal mt-0.5">{getPrice(platform, t.id)} ₽/шт</div>
               </button>
             ))}
           </div>
