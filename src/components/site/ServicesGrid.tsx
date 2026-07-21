@@ -6,8 +6,8 @@ function Tile({ svc }: { svc: ServiceCategory }) {
   const Icon = BRAND_ICONS[svc.id];
   return (
     <Link
-      to="/services/$platform"
-      params={{ platform: svc.id }}
+      to="/order"
+      search={{ platform: svc.id } as never}
       className="service-tile group"
       aria-label={svc.name}
     >

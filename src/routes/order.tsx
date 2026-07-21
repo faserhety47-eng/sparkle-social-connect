@@ -4,12 +4,11 @@ import { SERVICES } from "@/data/services";
 import { toast } from "sonner";
 import { z } from "zod";
 
-type Search = { platform?: string; service?: string };
+type Search = { platform?: string };
 
 export const Route = createFileRoute("/order")({
   validateSearch: (s: Record<string, unknown>): Search => ({
     platform: typeof s.platform === "string" ? s.platform : undefined,
-    service: typeof s.service === "string" ? s.service : undefined,
   }),
   head: () => ({
     meta: [
