@@ -707,3 +707,200 @@ function PaymentMethodsManager() {
     </div>
   );
 }
+
+function DashboardTab() {
+  const [stats, setStats] = useState<{
+    total: number; today: number; awaiting: number; processing: number; completed: number;
+    revenueTotal: number; revenueToday: number; revenueMonth: number;
+    recent: Order[];
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
+      const list = (data ?? []) as Order[];
+      const now = new Date();
+      const startDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+      const startMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+      const paidStatuses = new Set(["paid", "processing", "completed"]);
+      let revenueTotal = 0, revenueToday = 0, revenueMonth = 0;
+      let today = 0, awaiting = 0, processing = 0, completed = 0;
+      for (const o of list) {
+        const t = new Date(o.created_at).getTime();
+        const price = Number(o.price_rub) || 0;
+        if (t >= startDay) today++;
+        if (o.status === "awaiting_payment" || o.status === "payment_reported") awaiting++;
+        if (o.status === "processing") processing++;
+        if (o.status === "completed") completed++;
+        if (paidStatuses.has(o.status)) {
+          revenueTotal += price;
+          if (t >= startDay) revenueToday += price;
+          if (t >= startMonth) revenueMonth += price;
+        }
+      }
+      setStats({
+        total: list.length, today, awaiting, processing, completed,
+        revenueTotal, revenueToday, revenueMonth,
+        recent: list.slice(0, 5),
+      });
+      setLoading(false);
+    })();
+  }, []);
+
+  if (loading || !stats) return <div className="mt-6 text-muted-foreground">Загрузка…</div>;
+
+  const Card = ({ label, value, hint }: { label: string; value: string; hint?: string }) => (
+    <div className="rounded-3xl bg-card p-5 shadow-tile">
+      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className="mt-1 text-2xl font-extrabold">{value}</div>
+      {hint && <div className="mt-1 text-xs text-muted-foreground">{hint}</div>}
+    </div>
+  );
+
+  return (
+    <div className="mt-6 space-y-6">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <Card label="Заказов всего" value={stats.total.toString()} hint={`Сегодня: +${stats.today}`} />
+        <Card label="Ожидают оплаты" value={stats.awaiting.toString()} hint="Требуют внимания" />
+        <Card label="В работе" value={stats.processing.toString()} hint={`Выполнено: ${stats.completed}`} />
+        <Card label="Выручка (всё время)" value={`${stats.revenueTotal.toLocaleString("ru-RU")} ₽`} hint={`Сегодня: ${stats.revenueToday.toLocaleString("ru-RU")} ₽ · Месяц: ${stats.revenueMonth.toLocaleString("ru-RU")} ₽`} />
+      </div>
+
+      <div className="rounded-3xl bg-card p-6 shadow-tile">
+        <h2 className="text-lg font-bold">Последние заказы</h2>
+        {stats.recent.length === 0 ? (
+          <div className="mt-3 text-sm text-muted-foreground">Заказов пока нет.</div>
+        ) : (
+          <div className="mt-4 space-y-2 text-sm">
+            {stats.recent.map((o) => {
+              const s = STATUSES.find((x) => x.key === o.status);
+              return (
+                <div key={o.id} className="flex items-center justify-between gap-3 border-b border-border/50 py-2 last:border-0">
+                  <div className="min-w-0 flex-1">
+                    <div className="font-semibold truncate">#{o.id.slice(0, 8)} · {o.platform} / {o.service_type}</div>
+                    <div className="text-xs text-muted-foreground">{new Date(o.created_at).toLocaleString("ru-RU")}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-bold">{Number(o.price_rub).toLocaleString("ru-RU")} ₽</div>
+                    {s && <div className={`inline-block mt-0.5 rounded-full px-2 py-0.5 text-[10px] font-semibold ${s.color}`}>{s.label}</div>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+type UserRow = { id: string; email: string | null; name: string | null; isAdmin: boolean; ordersCount: number; totalSpent: number };
+
+function UsersTab({ currentUserId }: { currentUserId: string }) {
+  const [users, setUsers] = useState<UserRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState("");
+
+  const load = async () => {
+    setLoading(true);
+    const [{ data: profs }, { data: roles }, { data: ords }] = await Promise.all([
+      supabase.from("profiles").select("id, email, name"),
+      supabase.from("user_roles").select("user_id, role"),
+      supabase.from("orders").select("user_id, price_rub, status"),
+    ]);
+    const adminIds = new Set((roles ?? []).filter((r: any) => r.role === "admin").map((r: any) => r.user_id));
+    const paid = new Set(["paid", "processing", "completed"]);
+    const stats = new Map<string, { count: number; total: number }>();
+    (ords ?? []).forEach((o: any) => {
+      const s = stats.get(o.user_id) ?? { count: 0, total: 0 };
+      s.count++;
+      if (paid.has(o.status)) s.total += Number(o.price_rub) || 0;
+      stats.set(o.user_id, s);
+    });
+    setUsers((profs ?? []).map((p: any) => ({
+      id: p.id, email: p.email, name: p.name,
+      isAdmin: adminIds.has(p.id),
+      ordersCount: stats.get(p.id)?.count ?? 0,
+      totalSpent: stats.get(p.id)?.total ?? 0,
+    })).sort((a, b) => b.totalSpent - a.totalSpent));
+    setLoading(false);
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const toggleAdmin = async (u: UserRow) => {
+    if (u.id === currentUserId && u.isAdmin) {
+      if (!confirm("Снять с себя роль администратора? Вы потеряете доступ.")) return;
+    }
+    if (u.isAdmin) {
+      const { error } = await supabase.from("user_roles").delete().eq("user_id", u.id).eq("role", "admin");
+      if (error) return toast.error(error.message);
+      toast.success("Роль снята");
+    } else {
+      const { error } = await supabase.from("user_roles").insert({ user_id: u.id, role: "admin" });
+      if (error) return toast.error(error.message);
+      toast.success("Назначен администратором");
+    }
+    load();
+  };
+
+  const q = query.trim().toLowerCase();
+  const filtered = q
+    ? users.filter((u) => (u.email ?? "").toLowerCase().includes(q) || (u.name ?? "").toLowerCase().includes(q) || u.id.includes(q))
+    : users;
+
+  return (
+    <div className="mt-6 space-y-4">
+      <input value={query} onChange={(e) => setQuery(e.target.value)}
+        placeholder="Поиск по email, имени, ID…"
+        className="w-full rounded-full border border-border bg-background px-4 py-2 text-sm" />
+
+      {loading ? (
+        <div className="text-muted-foreground">Загрузка…</div>
+      ) : (
+        <div className="rounded-3xl bg-card shadow-tile overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-muted-foreground border-b border-border">
+                  <th className="py-3 px-4 font-semibold">Клиент</th>
+                  <th className="py-3 px-4 font-semibold">Заказы</th>
+                  <th className="py-3 px-4 font-semibold">Потрачено</th>
+                  <th className="py-3 px-4 font-semibold">Роль</th>
+                  <th className="py-3 px-4"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((u) => (
+                  <tr key={u.id} className="border-b border-border/40 last:border-0">
+                    <td className="py-3 px-4">
+                      <div className="font-semibold">{u.name || u.email || "—"}</div>
+                      <div className="text-xs text-muted-foreground">{u.email}</div>
+                      <div className="text-[10px] text-muted-foreground break-all">{u.id}</div>
+                    </td>
+                    <td className="py-3 px-4">{u.ordersCount}</td>
+                    <td className="py-3 px-4 font-semibold">{u.totalSpent.toLocaleString("ru-RU")} ₽</td>
+                    <td className="py-3 px-4">
+                      {u.isAdmin ? (
+                        <span className="inline-block rounded-full bg-primary/15 text-primary px-2.5 py-0.5 text-xs font-semibold">Админ</span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">Клиент</span>
+                      )}
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <button onClick={() => toggleAdmin(u)}
+                        className="rounded-full border border-border px-3 py-1.5 text-xs font-semibold hover:border-primary/50">
+                        {u.isAdmin ? "Снять админа" : "Назначить админом"}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
