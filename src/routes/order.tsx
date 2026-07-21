@@ -1,8 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { SERVICES } from "@/data/services";
 import { toast } from "sonner";
 import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
+import { useSession } from "@/hooks/useSession";
 
 type Search = { platform?: string };
 
@@ -37,6 +39,9 @@ const schema = z.object({
 
 function OrderPage() {
   const { platform: initial } = Route.useSearch();
+  const { user, loading: sessionLoading } = useSession();
+  const navigate = useNavigate();
+
   const [platform, setPlatform] = useState(initial ?? SERVICES[0].id);
   const [type, setType] = useState(SERVICE_TYPES[0].id);
   const [link, setLink] = useState("");
@@ -45,43 +50,55 @@ function OrderPage() {
 
   const price = useMemo(() => {
     const t = SERVICE_TYPES.find((x) => x.id === type)!;
-    return (t.price * count).toFixed(2);
+    return +(t.price * count).toFixed(2);
   }, [type, count]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = schema.safeParse({ platform, type, link, count });
-    if (!result.success) {
-      toast.error(result.error.issues[0].message);
+    if (!user) {
+      toast.info("Войдите или зарегистрируйтесь, чтобы оформить заказ");
+      navigate({ to: "/login" });
       return;
     }
+    const result = schema.safeParse({ platform, type, link, count });
+    if (!result.success) return toast.error(result.error.issues[0].message);
+
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 900));
-    const orderId = Math.floor(100000 + Math.random() * 900000);
-    toast.success(`Заказ #${orderId} создан`, {
-      description: `${SERVICE_TYPES.find(t => t.id === type)?.label} · ${count} шт · ${price} ₽`,
-    });
+    const { data, error } = await supabase.from("orders").insert({
+      user_id: user.id,
+      platform: result.data.platform,
+      service_type: result.data.type,
+      link: result.data.link,
+      quantity: result.data.count,
+      price_rub: price,
+    }).select("id").single();
     setLoading(false);
+
+    if (error) return toast.error("Не удалось создать заказ: " + error.message);
+    toast.success("Заказ создан. Осталось оплатить.");
+    navigate({ to: "/account", search: { order: data.id } as never });
   };
 
   return (
     <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-14">
       <h1 className="text-3xl md:text-4xl font-extrabold">Оформить заказ</h1>
       <p className="mt-2 text-muted-foreground">
-        Заполните форму — заказ уйдёт в обработку в течение нескольких минут.
+        Заполните форму. После создания заказа вы увидите реквизиты для оплаты.
       </p>
+
+      {!sessionLoading && !user && (
+        <div className="mt-6 rounded-2xl border border-border bg-card/60 p-4 text-sm text-muted-foreground">
+          Чтобы оформить заказ, нужно <Link to="/login" className="text-primary font-semibold">войти</Link> или{" "}
+          <Link to="/register" className="text-primary font-semibold">зарегистрироваться</Link>.
+        </div>
+      )}
 
       <form onSubmit={submit} className="mt-8 rounded-3xl bg-card p-6 md:p-8 shadow-tile space-y-6">
         <div>
           <label className="text-sm font-semibold">Платформа</label>
-          <select
-            value={platform}
-            onChange={(e) => setPlatform(e.target.value)}
-            className="mt-2 w-full rounded-xl border border-input bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-          >
-            {SERVICES.map((s) => (
-              <option key={s.id} value={s.id}>{s.name}</option>
-            ))}
+          <select value={platform} onChange={(e) => setPlatform(e.target.value)}
+            className="mt-2 w-full rounded-xl border border-input bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+            {SERVICES.map((s) => (<option key={s.id} value={s.id}>{s.name}</option>))}
           </select>
         </div>
 
@@ -89,20 +106,12 @@ function OrderPage() {
           <label className="text-sm font-semibold">Тип услуги</label>
           <div className="mt-2 grid grid-cols-2 sm:grid-cols-4 gap-2">
             {SERVICE_TYPES.map((t) => (
-              <button
-                type="button"
-                key={t.id}
-                onClick={() => setType(t.id)}
+              <button type="button" key={t.id} onClick={() => setType(t.id)}
                 className={`rounded-xl border px-3 py-3 text-sm font-medium transition ${
-                  type === t.id
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border hover:border-primary/50"
-                }`}
-              >
+                  type === t.id ? "border-primary bg-primary/10 text-primary" : "border-border hover:border-primary/50"
+                }`}>
                 {t.label}
-                <div className="text-[11px] text-muted-foreground font-normal mt-0.5">
-                  от {t.price} ₽/шт
-                </div>
+                <div className="text-[11px] text-muted-foreground font-normal mt-0.5">от {t.price} ₽/шт</div>
               </button>
             ))}
           </div>
@@ -110,40 +119,26 @@ function OrderPage() {
 
         <div>
           <label className="text-sm font-semibold">Ссылка на объект накрутки</label>
-          <input
-            type="url"
-            value={link}
-            onChange={(e) => setLink(e.target.value)}
-            placeholder="https://instagram.com/username"
-            className="mt-2 w-full rounded-xl border border-input bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-            required
-            maxLength={500}
-          />
+          <input type="url" value={link} onChange={(e) => setLink(e.target.value)}
+            placeholder="https://instagram.com/username" required maxLength={500}
+            className="mt-2 w-full rounded-xl border border-input bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
         </div>
 
         <div>
           <label className="text-sm font-semibold">Количество</label>
-          <input
-            type="number"
-            min={10}
-            max={1000000}
-            value={count}
+          <input type="number" min={10} max={1000000} value={count}
             onChange={(e) => setCount(Number(e.target.value))}
-            className="mt-2 w-full rounded-xl border border-input bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-          />
+            className="mt-2 w-full rounded-xl border border-input bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
         </div>
 
         <div className="flex items-center justify-between rounded-2xl bg-muted p-4">
           <div className="text-sm text-muted-foreground">Итоговая стоимость</div>
-          <div className="text-2xl font-extrabold text-primary">{price} ₽</div>
+          <div className="text-2xl font-extrabold text-primary">{price.toFixed(2)} ₽</div>
         </div>
 
         <button type="submit" disabled={loading} className="btn-primary w-full disabled:opacity-60">
-          {loading ? "Создаём заказ…" : "Оформить заказ"}
+          {loading ? "Создаём заказ…" : "Оформить и перейти к оплате"}
         </button>
-        <p className="text-xs text-muted-foreground text-center">
-          Демо-режим: заказ создаётся локально без реального списания.
-        </p>
       </form>
     </section>
   );
