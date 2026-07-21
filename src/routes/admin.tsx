@@ -4,9 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/useSession";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { SERVICES } from "@/data/services";
-import { SERVICE_TYPE_LIST, useServicePrices } from "@/hooks/useServicePrices";
+import { useServicePrices } from "@/hooks/useServicePrices";
+import { usePlatforms, type Platform } from "@/hooks/usePlatforms";
+import { useServiceTypes, type ServiceType } from "@/hooks/useServiceTypes";
+import { usePaymentMethods, type PaymentMethod } from "@/hooks/usePaymentMethods";
+import { OrderMessages } from "@/components/site/OrderMessages";
 import { toast } from "sonner";
-
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -42,28 +45,82 @@ const STATUSES: { key: string; label: string; color: string }[] = [
   { key: "cancelled", label: "Отменён", color: "bg-red-500/15 text-red-400" },
 ];
 
-const TYPE_LABEL: Record<string, string> = {
-  followers: "Подписчики", likes: "Лайки", views: "Просмотры", comments: "Комментарии",
-};
+type Tab = "orders" | "prices" | "platforms" | "types" | "payments";
 
 function AdminPage() {
   const { user, loading: sessionLoading } = useSession();
   const { isAdmin, loading: adminLoading } = useIsAdmin();
   const navigate = useNavigate();
+  const [tab, setTab] = useState<Tab>("orders");
+
+  useEffect(() => {
+    if (sessionLoading || adminLoading) return;
+    if (!user) navigate({ to: "/login" });
+  }, [user, sessionLoading, adminLoading, navigate]);
+
+  if (sessionLoading || adminLoading) {
+    return <section className="mx-auto max-w-6xl px-4 py-14 text-muted-foreground">Загрузка…</section>;
+  }
+  if (!isAdmin) {
+    return (
+      <section className="mx-auto max-w-2xl px-4 py-20 text-center">
+        <h1 className="text-2xl font-bold">Доступ запрещён</h1>
+        <p className="mt-2 text-muted-foreground text-sm">
+          У вашего аккаунта нет прав администратора.
+        </p>
+        <p className="mt-4 text-xs text-muted-foreground break-all">Ваш ID: {user?.id}</p>
+      </section>
+    );
+  }
+
+  const tabs: { key: Tab; label: string }[] = [
+    { key: "orders", label: "Заказы" },
+    { key: "prices", label: "Цены" },
+    { key: "platforms", label: "Платформы" },
+    { key: "types", label: "Типы услуг" },
+    { key: "payments", label: "Способы оплаты" },
+  ];
+
+  return (
+    <section className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-14">
+      <h1 className="text-3xl md:text-4xl font-extrabold">Админ-панель</h1>
+
+      <div className="mt-6 flex flex-wrap gap-2 border-b border-border pb-3">
+        {tabs.map((t) => (
+          <button key={t.key} onClick={() => setTab(t.key)}
+            className={`rounded-full px-4 py-2 text-sm font-semibold border transition ${
+              tab === t.key ? "bg-primary text-primary-foreground border-primary" : "border-border hover:border-primary/50"
+            }`}>
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {tab === "orders" && user && <OrdersTab adminId={user.id} />}
+      {tab === "prices" && <PricesManager />}
+      {tab === "platforms" && <PlatformsManager />}
+      {tab === "types" && <ServiceTypesManager />}
+      {tab === "payments" && <PaymentMethodsManager />}
+    </section>
+  );
+}
+
+function OrdersTab({ adminId }: { adminId: string }) {
   const [orders, setOrders] = useState<Order[]>([]);
   const [profiles, setProfiles] = useState<Record<string, Profile>>({});
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("all");
+  const [openChat, setOpenChat] = useState<Record<string, boolean>>({});
+  const { platforms } = usePlatforms({ onlyActive: false });
+  const { types } = useServiceTypes({ onlyActive: false });
+
+  const platformName = (id: string) =>
+    platforms.find((p) => p.id === id)?.name ?? SERVICES.find((p) => p.id === id)?.name ?? id;
+  const typeLabel = (id: string) => types.find((t) => t.id === id)?.label ?? id;
 
   useEffect(() => {
-    if (sessionLoading || adminLoading) return;
-    if (!user) { navigate({ to: "/login" }); return; }
-    if (!isAdmin) return;
     (async () => {
-      const { data: ord, error } = await supabase
-        .from("orders")
-        .select("*")
-        .order("created_at", { ascending: false });
+      const { data: ord, error } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
       if (error) { toast.error(error.message); setLoading(false); return; }
       const list = (ord ?? []) as Order[];
       setOrders(list);
@@ -76,7 +133,7 @@ function AdminPage() {
       }
       setLoading(false);
     })();
-  }, [user, isAdmin, sessionLoading, adminLoading, navigate]);
+  }, []);
 
   const updateStatus = async (id: string, status: string) => {
     const { error } = await supabase.from("orders").update({ status }).eq("id", id);
@@ -93,74 +150,42 @@ function AdminPage() {
     toast.success("Цена обновлена");
   };
 
-  if (sessionLoading || adminLoading) {
-    return <section className="mx-auto max-w-6xl px-4 py-14 text-muted-foreground">Загрузка…</section>;
-  }
-  if (!isAdmin) {
-    return (
-      <section className="mx-auto max-w-2xl px-4 py-20 text-center">
-        <h1 className="text-2xl font-bold">Доступ запрещён</h1>
-        <p className="mt-2 text-muted-foreground text-sm">
-          У вашего аккаунта нет прав администратора. Чтобы выдать их, добавьте свой user_id в таблицу <code>user_roles</code> с ролью <code>admin</code>.
-        </p>
-        <p className="mt-4 text-xs text-muted-foreground break-all">Ваш ID: {user?.id}</p>
-      </section>
-    );
-  }
-
   const filtered = filter === "all" ? orders : orders.filter((o) => o.status === filter);
 
   return (
-    <section className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-14">
-      <div className="flex items-end justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-3xl md:text-4xl font-extrabold">Админ-панель</h1>
-          <p className="mt-2 text-muted-foreground text-sm">Всего заказов: {orders.length}</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <button onClick={() => setFilter("all")}
-            className={`rounded-full px-3 py-1.5 text-xs font-semibold border ${filter === "all" ? "bg-primary text-primary-foreground border-primary" : "border-border"}`}>
-            Все
+    <div className="mt-6">
+      <div className="flex flex-wrap gap-2">
+        <button onClick={() => setFilter("all")}
+          className={`rounded-full px-3 py-1.5 text-xs font-semibold border ${filter === "all" ? "bg-primary text-primary-foreground border-primary" : "border-border"}`}>
+          Все ({orders.length})
+        </button>
+        {STATUSES.map((s) => (
+          <button key={s.key} onClick={() => setFilter(s.key)}
+            className={`rounded-full px-3 py-1.5 text-xs font-semibold border ${filter === s.key ? "bg-primary text-primary-foreground border-primary" : "border-border"}`}>
+            {s.label}
           </button>
-          {STATUSES.map((s) => (
-            <button key={s.key} onClick={() => setFilter(s.key)}
-              className={`rounded-full px-3 py-1.5 text-xs font-semibold border ${filter === s.key ? "bg-primary text-primary-foreground border-primary" : "border-border"}`}>
-              {s.label}
-            </button>
-          ))}
-        </div>
+        ))}
       </div>
-
-      <PricesManager />
-
 
       {loading ? (
         <div className="mt-10 text-muted-foreground">Загрузка заказов…</div>
       ) : filtered.length === 0 ? (
-        <div className="mt-10 rounded-3xl bg-card p-10 text-center shadow-tile text-muted-foreground">
-          Заказов нет
-        </div>
+        <div className="mt-10 rounded-3xl bg-card p-10 text-center shadow-tile text-muted-foreground">Заказов нет</div>
       ) : (
         <div className="mt-8 space-y-4">
           {filtered.map((o) => {
             const s = STATUSES.find((x) => x.key === o.status) ?? { label: o.status, color: "bg-muted text-foreground" };
-            const platform = SERVICES.find((p) => p.id === o.platform)?.name ?? o.platform;
             const prof = profiles[o.user_id];
             return (
               <div key={o.id} className="rounded-3xl bg-card p-6 shadow-tile">
                 <div className="flex items-start justify-between gap-4 flex-wrap">
                   <div className="min-w-0">
                     <div className="text-xs text-muted-foreground">#{o.id.slice(0, 8)} · {new Date(o.created_at).toLocaleString("ru-RU")}</div>
-                    <div className="mt-1 text-lg font-bold">
-                      {platform} · {TYPE_LABEL[o.service_type] ?? o.service_type}
-                    </div>
+                    <div className="mt-1 text-lg font-bold">{platformName(o.platform)} · {typeLabel(o.service_type)}</div>
                     <div className="mt-1 text-sm text-muted-foreground break-all">{o.link}</div>
-                    <div className="mt-2 text-sm">
-                      Количество: <span className="font-semibold">{o.quantity.toLocaleString("ru-RU")}</span>
-                    </div>
+                    <div className="mt-2 text-sm">Количество: <span className="font-semibold">{o.quantity.toLocaleString("ru-RU")}</span></div>
                     <div className="mt-2 text-xs text-muted-foreground">
-                      Клиент: {prof?.email ?? o.user_id}
-                      {prof?.name ? ` · ${prof.name}` : ""}
+                      Клиент: {prof?.email ?? o.user_id}{prof?.name ? ` · ${prof.name}` : ""}
                     </div>
                   </div>
                   <div className="text-right">
@@ -173,35 +198,43 @@ function AdminPage() {
                   {STATUSES.map((st) => (
                     <button key={st.key} onClick={() => updateStatus(o.id, st.key)} disabled={o.status === st.key}
                       className={`rounded-full px-3 py-1.5 text-xs font-semibold border transition ${
-                        o.status === st.key
-                          ? "bg-muted text-muted-foreground border-transparent cursor-default"
+                        o.status === st.key ? "bg-muted text-muted-foreground border-transparent cursor-default"
                           : "border-border hover:bg-primary hover:text-primary-foreground hover:border-primary"
                       }`}>
                       {st.label}
                     </button>
                   ))}
                 </div>
+
+                <div className="mt-4">
+                  <button
+                    onClick={() => setOpenChat((s) => ({ ...s, [o.id]: !s[o.id] }))}
+                    className="text-xs font-semibold text-primary hover:underline"
+                  >
+                    {openChat[o.id] ? "Скрыть переписку" : "Написать клиенту"}
+                  </button>
+                  {openChat[o.id] && (
+                    <OrderMessages orderId={o.id} currentUserId={adminId} sender="admin" />
+                  )}
+                </div>
               </div>
             );
           })}
         </div>
       )}
-    </section>
+    </div>
   );
 }
 
 function PriceEditor({ price, onSave }: { price: number; onSave: (p: number) => void | Promise<void> }) {
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(price.toFixed(2));
-
   if (!editing) {
     return (
       <div className="mt-3 flex flex-col items-end gap-1.5">
         <div className="text-2xl font-extrabold text-primary">{price.toFixed(2)} ₽</div>
-        <button
-          onClick={() => { setValue(price.toFixed(2)); setEditing(true); }}
-          className="rounded-full border border-border px-3 py-1 text-xs font-semibold hover:bg-primary hover:text-primary-foreground hover:border-primary transition"
-        >
+        <button onClick={() => { setValue(price.toFixed(2)); setEditing(true); }}
+          className="rounded-full border border-border px-3 py-1 text-xs font-semibold hover:bg-primary hover:text-primary-foreground hover:border-primary transition">
           Изменить цену
         </button>
       </div>
@@ -209,26 +242,20 @@ function PriceEditor({ price, onSave }: { price: number; onSave: (p: number) => 
   }
   return (
     <div className="mt-3 flex items-center gap-2 justify-end">
-      <input
-        type="number" step="0.01" min="0" autoFocus
-        value={value} onChange={(e) => setValue(e.target.value)}
-        className="w-28 rounded-lg border border-border bg-background px-2 py-1 text-right text-lg font-bold"
-      />
+      <input type="number" step="0.01" min="0" autoFocus value={value} onChange={(e) => setValue(e.target.value)}
+        className="w-28 rounded-lg border border-border bg-background px-2 py-1 text-right text-lg font-bold" />
       <span className="text-sm text-muted-foreground">₽</span>
-      <button
-        onClick={async () => { await onSave(parseFloat(value)); setEditing(false); }}
-        className="rounded-lg bg-primary text-primary-foreground px-3 py-1 text-xs font-semibold"
-      >OK</button>
-      <button
-        onClick={() => setEditing(false)}
-        className="rounded-lg border border-border px-3 py-1 text-xs"
-      >×</button>
+      <button onClick={async () => { await onSave(parseFloat(value)); setEditing(false); }}
+        className="rounded-lg bg-primary text-primary-foreground px-3 py-1 text-xs font-semibold">OK</button>
+      <button onClick={() => setEditing(false)} className="rounded-lg border border-border px-3 py-1 text-xs">×</button>
     </div>
   );
 }
 
 function PricesManager() {
   const { prices, loading, reload } = useServicePrices();
+  const { platforms } = usePlatforms({ onlyActive: false });
+  const { types } = useServiceTypes({ onlyActive: false });
   const [saving, setSaving] = useState<string | null>(null);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
 
@@ -257,12 +284,9 @@ function PricesManager() {
   };
 
   return (
-    <div className="mt-10 rounded-3xl bg-card p-6 md:p-8 shadow-tile">
+    <div className="mt-6 rounded-3xl bg-card p-6 md:p-8 shadow-tile">
       <h2 className="text-xl md:text-2xl font-extrabold">Цены на услуги (₽ за 1 шт.)</h2>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Эти цены используются в форме заказа для расчёта стоимости.
-      </p>
-
+      <p className="mt-1 text-sm text-muted-foreground">Используются в форме заказа.</p>
       {loading ? (
         <div className="mt-6 text-muted-foreground">Загрузка цен…</div>
       ) : (
@@ -271,31 +295,23 @@ function PricesManager() {
             <thead>
               <tr className="text-left text-muted-foreground border-b border-border">
                 <th className="py-2 pr-4 font-semibold">Платформа</th>
-                {SERVICE_TYPE_LIST.map((t) => (
-                  <th key={t.id} className="py-2 px-2 font-semibold">{t.label}</th>
-                ))}
+                {types.map((t) => (<th key={t.id} className="py-2 px-2 font-semibold">{t.label}</th>))}
               </tr>
             </thead>
             <tbody>
-              {SERVICES.map((s) => (
+              {platforms.map((s) => (
                 <tr key={s.id} className="border-b border-border/50">
                   <td className="py-3 pr-4 font-semibold">{s.name}</td>
-                  {SERVICE_TYPE_LIST.map((t) => {
+                  {types.map((t) => {
                     const k = keyOf(s.id, t.id);
                     return (
                       <td key={t.id} className="py-3 px-2">
                         <div className="flex items-center gap-1.5">
-                          <input
-                            type="number" step="0.01" min="0"
-                            value={getVal(s.id, t.id)}
+                          <input type="number" step="0.01" min="0" value={getVal(s.id, t.id)}
                             onChange={(e) => setDrafts((d) => ({ ...d, [k]: e.target.value }))}
-                            className="w-24 rounded-lg border border-border bg-background px-2 py-1.5 text-right"
-                          />
-                          <button
-                            onClick={() => save(s.id, t.id)}
-                            disabled={saving === k}
-                            className="rounded-lg bg-primary text-primary-foreground px-2.5 py-1.5 text-xs font-semibold disabled:opacity-60"
-                          >
+                            className="w-24 rounded-lg border border-border bg-background px-2 py-1.5 text-right" />
+                          <button onClick={() => save(s.id, t.id)} disabled={saving === k}
+                            className="rounded-lg bg-primary text-primary-foreground px-2.5 py-1.5 text-xs font-semibold disabled:opacity-60">
                             {saving === k ? "…" : "Сохранить"}
                           </button>
                         </div>
@@ -312,3 +328,242 @@ function PricesManager() {
   );
 }
 
+function PlatformsManager() {
+  const { platforms, loading, reload } = usePlatforms({ onlyActive: false });
+  const [form, setForm] = useState({ id: "", name: "", sort_order: 100 });
+
+  const add = async () => {
+    if (!form.id.trim() || !form.name.trim()) return toast.error("Заполните ID и название");
+    const { error } = await supabase.from("platforms").insert({
+      id: form.id.trim().toLowerCase(), name: form.name.trim(), sort_order: Number(form.sort_order) || 100,
+    });
+    if (error) return toast.error(error.message);
+    toast.success("Платформа добавлена");
+    setForm({ id: "", name: "", sort_order: 100 });
+    reload();
+  };
+
+  const update = async (p: Platform, patch: Partial<Platform>) => {
+    const { error } = await supabase.from("platforms").update(patch).eq("id", p.id);
+    if (error) return toast.error(error.message);
+    reload();
+  };
+
+  const remove = async (id: string) => {
+    if (!confirm("Удалить платформу? Существующие заказы останутся.")) return;
+    const { error } = await supabase.from("platforms").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Удалено");
+    reload();
+  };
+
+  return (
+    <div className="mt-6 space-y-6">
+      <div className="rounded-3xl bg-card p-6 shadow-tile">
+        <h2 className="text-lg font-bold">Добавить платформу</h2>
+        <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_1fr_120px_auto]">
+          <input placeholder="ID (латиницей, напр. tiktok)" value={form.id}
+            onChange={(e) => setForm({ ...form, id: e.target.value })}
+            className="rounded-xl border border-input bg-background px-3 py-2 text-sm" />
+          <input placeholder="Название (напр. TikTok)" value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            className="rounded-xl border border-input bg-background px-3 py-2 text-sm" />
+          <input type="number" placeholder="Порядок" value={form.sort_order}
+            onChange={(e) => setForm({ ...form, sort_order: Number(e.target.value) })}
+            className="rounded-xl border border-input bg-background px-3 py-2 text-sm" />
+          <button onClick={add} className="btn-primary text-sm">Добавить</button>
+        </div>
+      </div>
+
+      <div className="rounded-3xl bg-card p-6 shadow-tile">
+        <h2 className="text-lg font-bold">Платформы</h2>
+        {loading ? (
+          <div className="mt-4 text-muted-foreground">Загрузка…</div>
+        ) : (
+          <div className="mt-4 space-y-2">
+            {platforms.map((p) => (
+              <div key={p.id} className="flex items-center gap-3 flex-wrap rounded-2xl border border-border p-3">
+                <div className="text-xs text-muted-foreground w-16">{p.id}</div>
+                <input defaultValue={p.name} onBlur={(e) => e.target.value !== p.name && update(p, { name: e.target.value })}
+                  className="flex-1 min-w-40 rounded-lg border border-input bg-background px-3 py-1.5 text-sm" />
+                <input type="number" defaultValue={p.sort_order}
+                  onBlur={(e) => Number(e.target.value) !== p.sort_order && update(p, { sort_order: Number(e.target.value) })}
+                  className="w-20 rounded-lg border border-input bg-background px-2 py-1.5 text-sm text-right" />
+                <label className="flex items-center gap-1.5 text-xs">
+                  <input type="checkbox" checked={p.is_active} onChange={(e) => update(p, { is_active: e.target.checked })} />
+                  Активна
+                </label>
+                <button onClick={() => remove(p.id)} className="text-xs text-red-400 hover:underline">Удалить</button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ServiceTypesManager() {
+  const { types, loading, reload } = useServiceTypes({ onlyActive: false });
+  const [form, setForm] = useState({ id: "", label: "", sort_order: 100 });
+
+  const add = async () => {
+    if (!form.id.trim() || !form.label.trim()) return toast.error("Заполните поля");
+    const { error } = await supabase.from("service_types").insert({
+      id: form.id.trim().toLowerCase(), label: form.label.trim(), sort_order: Number(form.sort_order) || 100,
+    });
+    if (error) return toast.error(error.message);
+    toast.success("Тип добавлен");
+    setForm({ id: "", label: "", sort_order: 100 });
+    reload();
+  };
+  const update = async (t: ServiceType, patch: Partial<ServiceType>) => {
+    const { error } = await supabase.from("service_types").update(patch).eq("id", t.id);
+    if (error) return toast.error(error.message);
+    reload();
+  };
+  const remove = async (id: string) => {
+    if (!confirm("Удалить тип услуги?")) return;
+    const { error } = await supabase.from("service_types").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    reload();
+  };
+
+  return (
+    <div className="mt-6 space-y-6">
+      <div className="rounded-3xl bg-card p-6 shadow-tile">
+        <h2 className="text-lg font-bold">Добавить тип услуги</h2>
+        <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_1fr_120px_auto]">
+          <input placeholder="ID (напр. reposts)" value={form.id}
+            onChange={(e) => setForm({ ...form, id: e.target.value })}
+            className="rounded-xl border border-input bg-background px-3 py-2 text-sm" />
+          <input placeholder="Название (напр. Репосты)" value={form.label}
+            onChange={(e) => setForm({ ...form, label: e.target.value })}
+            className="rounded-xl border border-input bg-background px-3 py-2 text-sm" />
+          <input type="number" placeholder="Порядок" value={form.sort_order}
+            onChange={(e) => setForm({ ...form, sort_order: Number(e.target.value) })}
+            className="rounded-xl border border-input bg-background px-3 py-2 text-sm" />
+          <button onClick={add} className="btn-primary text-sm">Добавить</button>
+        </div>
+      </div>
+
+      <div className="rounded-3xl bg-card p-6 shadow-tile">
+        <h2 className="text-lg font-bold">Типы услуг</h2>
+        {loading ? (
+          <div className="mt-4 text-muted-foreground">Загрузка…</div>
+        ) : (
+          <div className="mt-4 space-y-2">
+            {types.map((t) => (
+              <div key={t.id} className="flex items-center gap-3 flex-wrap rounded-2xl border border-border p-3">
+                <div className="text-xs text-muted-foreground w-20">{t.id}</div>
+                <input defaultValue={t.label} onBlur={(e) => e.target.value !== t.label && update(t, { label: e.target.value })}
+                  className="flex-1 min-w-40 rounded-lg border border-input bg-background px-3 py-1.5 text-sm" />
+                <input type="number" defaultValue={t.sort_order}
+                  onBlur={(e) => Number(e.target.value) !== t.sort_order && update(t, { sort_order: Number(e.target.value) })}
+                  className="w-20 rounded-lg border border-input bg-background px-2 py-1.5 text-sm text-right" />
+                <label className="flex items-center gap-1.5 text-xs">
+                  <input type="checkbox" checked={t.is_active} onChange={(e) => update(t, { is_active: e.target.checked })} />
+                  Активен
+                </label>
+                <button onClick={() => remove(t.id)} className="text-xs text-red-400 hover:underline">Удалить</button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function PaymentMethodsManager() {
+  const { methods, loading, reload } = usePaymentMethods({ onlyActive: false });
+  const [form, setForm] = useState({ label: "", url: "", details: "", sort_order: 100 });
+
+  const add = async () => {
+    if (!form.label.trim()) return toast.error("Укажите название");
+    const { error } = await supabase.from("payment_methods").insert({
+      label: form.label.trim(),
+      url: form.url.trim() || null,
+      details: form.details.trim() || null,
+      sort_order: Number(form.sort_order) || 100,
+    });
+    if (error) return toast.error(error.message);
+    toast.success("Способ оплаты добавлен");
+    setForm({ label: "", url: "", details: "", sort_order: 100 });
+    reload();
+  };
+  const update = async (m: PaymentMethod, patch: Partial<PaymentMethod>) => {
+    const { error } = await supabase.from("payment_methods").update(patch).eq("id", m.id);
+    if (error) return toast.error(error.message);
+    reload();
+  };
+  const remove = async (id: string) => {
+    if (!confirm("Удалить способ оплаты?")) return;
+    const { error } = await supabase.from("payment_methods").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    reload();
+  };
+
+  return (
+    <div className="mt-6 space-y-6">
+      <div className="rounded-3xl bg-card p-6 shadow-tile">
+        <h2 className="text-lg font-bold">Добавить способ оплаты</h2>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Ссылка может вести на СБП QR, форму банка, Т-Кассу, ЮMoney, крипто-кошелёк и т.п.
+        </p>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <input placeholder="Название (напр. СБП Т-Банк)" value={form.label}
+            onChange={(e) => setForm({ ...form, label: e.target.value })}
+            className="rounded-xl border border-input bg-background px-3 py-2 text-sm" />
+          <input placeholder="Ссылка на оплату (https://…)" value={form.url}
+            onChange={(e) => setForm({ ...form, url: e.target.value })}
+            className="rounded-xl border border-input bg-background px-3 py-2 text-sm" />
+          <textarea placeholder="Детали (телефон СБП, номер карты, получатель, комментарий)"
+            value={form.details} rows={3}
+            onChange={(e) => setForm({ ...form, details: e.target.value })}
+            className="sm:col-span-2 rounded-xl border border-input bg-background px-3 py-2 text-sm" />
+          <input type="number" placeholder="Порядок" value={form.sort_order}
+            onChange={(e) => setForm({ ...form, sort_order: Number(e.target.value) })}
+            className="w-32 rounded-xl border border-input bg-background px-3 py-2 text-sm" />
+        </div>
+        <button onClick={add} className="btn-primary text-sm mt-3">Добавить способ оплаты</button>
+      </div>
+
+      <div className="rounded-3xl bg-card p-6 shadow-tile">
+        <h2 className="text-lg font-bold">Способы оплаты</h2>
+        {loading ? (
+          <div className="mt-4 text-muted-foreground">Загрузка…</div>
+        ) : methods.length === 0 ? (
+          <div className="mt-4 text-muted-foreground text-sm">Пока не добавлено ни одного способа.</div>
+        ) : (
+          <div className="mt-4 space-y-3">
+            {methods.map((m) => (
+              <div key={m.id} className="rounded-2xl border border-border p-4 space-y-2">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <input defaultValue={m.label}
+                    onBlur={(e) => e.target.value !== m.label && update(m, { label: e.target.value })}
+                    className="flex-1 min-w-48 rounded-lg border border-input bg-background px-3 py-1.5 text-sm font-semibold" />
+                  <input type="number" defaultValue={m.sort_order}
+                    onBlur={(e) => Number(e.target.value) !== m.sort_order && update(m, { sort_order: Number(e.target.value) })}
+                    className="w-20 rounded-lg border border-input bg-background px-2 py-1.5 text-sm text-right" />
+                  <label className="flex items-center gap-1.5 text-xs">
+                    <input type="checkbox" checked={m.is_active}
+                      onChange={(e) => update(m, { is_active: e.target.checked })} />
+                    Активен
+                  </label>
+                  <button onClick={() => remove(m.id)} className="text-xs text-red-400 hover:underline">Удалить</button>
+                </div>
+                <input defaultValue={m.url ?? ""} placeholder="Ссылка на оплату"
+                  onBlur={(e) => (e.target.value || null) !== m.url && update(m, { url: e.target.value || null })}
+                  className="w-full rounded-lg border border-input bg-background px-3 py-1.5 text-sm" />
+                <textarea defaultValue={m.details ?? ""} placeholder="Детали" rows={2}
+                  onBlur={(e) => (e.target.value || null) !== m.details && update(m, { details: e.target.value || null })}
+                  className="w-full rounded-lg border border-input bg-background px-3 py-1.5 text-sm" />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

@@ -1,11 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SERVICES } from "@/data/services";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/useSession";
-import { useServicePrices, SERVICE_TYPE_LIST } from "@/hooks/useServicePrices";
+import { useServicePrices } from "@/hooks/useServicePrices";
+import { usePlatforms } from "@/hooks/usePlatforms";
+import { useServiceTypes } from "@/hooks/useServiceTypes";
+import { usePaymentMethods } from "@/hooks/usePaymentMethods";
 
 type Search = { platform?: string };
 
@@ -36,16 +39,25 @@ function OrderPage() {
   const { user, loading: sessionLoading } = useSession();
   const navigate = useNavigate();
   const { getPrice } = useServicePrices();
+  const { platforms } = usePlatforms();
+  const { types } = useServiceTypes();
+  const { methods } = usePaymentMethods();
 
-  const [platform, setPlatform] = useState(initial ?? SERVICES[0].id);
-  const [type, setType] = useState(SERVICE_TYPE_LIST[0].id);
+  const [platform, setPlatform] = useState(initial ?? "");
+  const [type, setType] = useState("");
   const [link, setLink] = useState("");
   const [count, setCount] = useState(100);
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (!platform && platforms.length) setPlatform(initial ?? platforms[0].id);
+  }, [platforms, platform, initial]);
+  useEffect(() => {
+    if (!type && types.length) setType(types[0].id);
+  }, [types, type]);
+
   const unitPrice = getPrice(platform, type);
   const price = useMemo(() => +(unitPrice * count).toFixed(2), [unitPrice, count]);
-
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,14 +104,14 @@ function OrderPage() {
           <label className="text-sm font-semibold">Платформа</label>
           <select value={platform} onChange={(e) => setPlatform(e.target.value)}
             className="mt-2 w-full rounded-xl border border-input bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
-            {SERVICES.map((s) => (<option key={s.id} value={s.id}>{s.name}</option>))}
+            {platforms.map((s) => (<option key={s.id} value={s.id}>{s.name}</option>))}
           </select>
         </div>
 
         <div>
           <label className="text-sm font-semibold">Тип услуги</label>
           <div className="mt-2 grid grid-cols-2 sm:grid-cols-4 gap-2">
-            {SERVICE_TYPE_LIST.map((t) => (
+            {types.map((t) => (
               <button type="button" key={t.id} onClick={() => setType(t.id)}
                 className={`rounded-xl border px-3 py-3 text-sm font-medium transition ${
                   type === t.id ? "border-primary bg-primary/10 text-primary" : "border-border hover:border-primary/50"
@@ -134,6 +146,29 @@ function OrderPage() {
           {loading ? "Создаём заказ…" : "Оформить и перейти к оплате"}
         </button>
       </form>
+
+      {methods.length > 0 && (
+        <div className="mt-8 rounded-3xl bg-card p-6 md:p-8 shadow-tile">
+          <h2 className="text-lg font-bold">Способы оплаты</h2>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {methods.map((m) => (
+              <div key={m.id} className="rounded-2xl border border-border p-4">
+                <div className="font-semibold">{m.label}</div>
+                {m.details && <div className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap">{m.details}</div>}
+                {m.url && (
+                  <a href={m.url} target="_blank" rel="noreferrer"
+                    className="mt-3 inline-flex items-center rounded-full bg-primary/10 text-primary px-3 py-1.5 text-xs font-semibold hover:bg-primary/20">
+                    Открыть ссылку →
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
+          <p className="mt-4 text-xs text-muted-foreground">
+            После создания заказа реквизиты будут закреплены в личном кабинете. Платформы: {SERVICES.map(s=>s.name).join(", ")}.
+          </p>
+        </div>
+      )}
     </section>
   );
 }

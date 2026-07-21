@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/useSession";
 import { SERVICES } from "@/data/services";
-import { PAYMENT } from "@/config/payment";
+import { usePaymentMethods } from "@/hooks/usePaymentMethods";
+import { OrderMessages } from "@/components/site/OrderMessages";
 import { toast } from "sonner";
 
 type Search = { order?: string };
@@ -53,6 +54,8 @@ function AccountPage() {
   const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [openChat, setOpenChat] = useState<Record<string, boolean>>({});
+  const { methods } = usePaymentMethods();
 
   useEffect(() => {
     if (sessionLoading) return;
@@ -135,22 +138,45 @@ function AccountPage() {
                 {o.status === "awaiting_payment" && (
                   <div className="mt-5 rounded-2xl border border-border bg-background/50 p-5">
                     <div className="text-sm font-semibold">Реквизиты для оплаты</div>
-                    <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
-                      <div><dt className="text-muted-foreground">Способ</dt><dd className="font-medium">{PAYMENT.method}</dd></div>
-                      <div><dt className="text-muted-foreground">Телефон СБП</dt><dd className="font-medium">{PAYMENT.phone}</dd></div>
-                      <div><dt className="text-muted-foreground">Банк</dt><dd className="font-medium">{PAYMENT.bank}</dd></div>
-                      <div><dt className="text-muted-foreground">Получатель</dt><dd className="font-medium">{PAYMENT.recipient}</dd></div>
-                      <div><dt className="text-muted-foreground">Сумма</dt><dd className="font-bold text-primary">{Number(o.price_rub).toFixed(2)} ₽</dd></div>
-                      <div><dt className="text-muted-foreground">Комментарий</dt><dd className="font-mono text-xs">Заказ #{o.id.slice(0, 8)}</dd></div>
-                    </dl>
-                    <p className="mt-3 text-xs text-muted-foreground">{PAYMENT.note}</p>
+                    <div className="mt-1 text-xs text-muted-foreground">
+                      Сумма: <span className="font-bold text-primary">{Number(o.price_rub).toFixed(2)} ₽</span>{" "}
+                      · Комментарий: <span className="font-mono">Заказ #{o.id.slice(0, 8)}</span>
+                    </div>
+                    {methods.length === 0 ? (
+                      <p className="mt-3 text-xs text-muted-foreground">Способы оплаты пока не добавлены администратором.</p>
+                    ) : (
+                      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                        {methods.map((m) => (
+                          <div key={m.id} className="rounded-xl border border-border p-3 text-sm">
+                            <div className="font-semibold">{m.label}</div>
+                            {m.details && <div className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap">{m.details}</div>}
+                            {m.url && (
+                              <a href={m.url} target="_blank" rel="noreferrer"
+                                className="mt-2 inline-flex rounded-full bg-primary/10 text-primary px-3 py-1 text-xs font-semibold hover:bg-primary/20">
+                                Оплатить →
+                              </a>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                     <div className="mt-4 flex flex-wrap gap-2">
                       <button onClick={() => markPaid(o.id)} className="btn-primary text-sm">Я оплатил</button>
-                      <a href={`https://t.me/${PAYMENT.contact.replace("@", "")}`} target="_blank" rel="noreferrer"
-                        className="btn-ghost text-sm border border-border rounded-full px-4">Связаться с поддержкой</a>
                     </div>
                   </div>
                 )}
+
+                <div className="mt-4">
+                  <button
+                    onClick={() => setOpenChat((s) => ({ ...s, [o.id]: !s[o.id] }))}
+                    className="text-xs font-semibold text-primary hover:underline"
+                  >
+                    {openChat[o.id] ? "Скрыть переписку" : "Открыть переписку с администратором"}
+                  </button>
+                  {openChat[o.id] && user && (
+                    <OrderMessages orderId={o.id} currentUserId={user.id} sender="user" />
+                  )}
+                </div>
               </div>
             );
           })}
