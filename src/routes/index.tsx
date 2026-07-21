@@ -4,9 +4,9 @@ import { ServicesGrid } from "@/components/site/ServicesGrid";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "SMM Rails — Продвижение в социальных сетях" },
+      { title: "Oz Top — Продвижение в социальных сетях" },
       { name: "description", content: "Быстрая и качественная накрутка подписчиков, лайков и просмотров в Max, VK, Telegram, Одноклассники, Instagram, RuTube и YouTube." },
-      { property: "og:title", content: "SMM Rails — Продвижение в социальных сетях" },
+      { property: "og:title", content: "Oz Top — Продвижение в социальных сетях" },
       { property: "og:description", content: "Быстрая и качественная накрутка подписчиков, лайков и просмотров в Max, VK, Telegram, Одноклассники, Instagram, RuTube и YouTube." },
     ],
   }),
