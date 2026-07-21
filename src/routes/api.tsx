@@ -95,6 +95,15 @@ const endpoints = [
   },
 ];
 
+const RULES = [
+  "API-ключ — конфиденциальная информация. Не публикуйте его в открытых источниках и не передавайте третьим лицам.",
+  "Все запросы отправляются методом POST в формате application/x-www-form-urlencoded.",
+  "Ответы возвращаются в формате JSON. Обязательно проверяйте поле status — 200 означает успешное выполнение.",
+  "Массовая проверка статусов ограничена 1000 заказов за один запрос — разбивайте большие пакеты.",
+  "Частота обращений — не чаще 5 запросов в секунду с одного ключа, иначе возможна временная блокировка.",
+  "Стоимость каждой услуги фиксируется в момент создания заказа и списывается с баланса ключа.",
+];
+
 function ApiDocs() {
   return (
     <section className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-14">
@@ -103,6 +112,18 @@ function ApiDocs() {
         REST-API для реселлеров. Все запросы отправляются методом POST, ответы возвращаются в формате JSON.
         Ниже — краткое описание всех доступных методов.
       </p>
+
+      <div className="mt-8 rounded-3xl bg-gradient-to-br from-brand/10 via-brand-2/5 to-transparent p-6 md:p-8 shadow-tile">
+        <h2 className="text-xl font-bold">Правила использования API</h2>
+        <ul className="mt-4 space-y-2 text-sm">
+          {RULES.map((r, i) => (
+            <li key={i} className="flex gap-3">
+              <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold">{i + 1}</span>
+              <span className="text-foreground/85">{r}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
 
       <nav className="mt-8 rounded-2xl bg-card p-5 shadow-tile">
         <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Оглавление</h2>

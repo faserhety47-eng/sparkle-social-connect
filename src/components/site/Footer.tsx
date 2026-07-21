@@ -15,6 +15,8 @@ export function Footer() {
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li><Link to="/order" className="hover:text-primary">Оформить заказ</Link></li>
             <li><Link to="/services" className="hover:text-primary">Услуги</Link></li>
+            <li><Link to="/about" className="hover:text-primary">О компании</Link></li>
+            <li><Link to="/faq" className="hover:text-primary">F.A.Q.</Link></li>
             <li><Link to="/api" className="hover:text-primary">API</Link></li>
           </ul>
         </div>
