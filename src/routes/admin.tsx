@@ -9,6 +9,8 @@ import { usePlatforms, type Platform } from "@/hooks/usePlatforms";
 import { useServiceTypes, type ServiceType } from "@/hooks/useServiceTypes";
 import { usePaymentMethods, type PaymentMethod } from "@/hooks/usePaymentMethods";
 import { OrderMessages } from "@/components/site/OrderMessages";
+import { IconPicker } from "@/components/site/IconPicker";
+import { parseBuiltinIcon } from "@/data/icon-library";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin")({
