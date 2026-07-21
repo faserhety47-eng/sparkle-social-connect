@@ -9,6 +9,8 @@ import { usePlatforms, type Platform } from "@/hooks/usePlatforms";
 import { useServiceTypes, type ServiceType } from "@/hooks/useServiceTypes";
 import { usePaymentMethods, type PaymentMethod } from "@/hooks/usePaymentMethods";
 import { OrderMessages } from "@/components/site/OrderMessages";
+import { IconPicker } from "@/components/site/IconPicker";
+import { parseBuiltinIcon } from "@/data/icon-library";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin")({
@@ -435,18 +437,23 @@ function PlatformsManager() {
     reload();
   };
 
-  const previewIcon = (p: { icon_url: string | null; icon_emoji: string | null; letter: string | null; name: string; color: string }) => (
-    <div className="h-12 w-12 shrink-0 rounded-xl flex items-center justify-center overflow-hidden ring-1 ring-white/5"
-      style={{ backgroundColor: p.color || "#7B4FFF" }}>
-      {p.icon_url ? (
-        <img src={p.icon_url} alt="" className="h-7 w-7 object-contain" />
-      ) : p.icon_emoji ? (
-        <span className="text-xl">{p.icon_emoji}</span>
-      ) : (
-        <span className="text-white font-bold">{p.letter ?? p.name.slice(0, 1)}</span>
-      )}
-    </div>
-  );
+  const previewIcon = (p: { icon_url: string | null; icon_emoji: string | null; letter: string | null; name: string; color: string }) => {
+    const builtin = parseBuiltinIcon(p.icon_url);
+    return (
+      <div className="h-12 w-12 shrink-0 rounded-xl flex items-center justify-center overflow-hidden ring-1 ring-white/5"
+        style={{ backgroundColor: p.color || "#7B4FFF" }}>
+        {builtin ? (
+          <builtin.Icon width={26} height={26} color="#ffffff" />
+        ) : p.icon_url ? (
+          <img src={p.icon_url} alt="" className="h-7 w-7 object-contain" />
+        ) : p.icon_emoji ? (
+          <span className="text-xl">{p.icon_emoji}</span>
+        ) : (
+          <span className="text-white font-bold">{p.letter ?? p.name.slice(0, 1)}</span>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="mt-6 space-y-6">
@@ -465,7 +472,16 @@ function PlatformsManager() {
           <input placeholder="Описание (напр. Короткие видео)" value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
             className="sm:col-span-2 rounded-xl border border-input bg-background px-3 py-2 text-sm" />
-          <input placeholder="Ссылка на иконку (https://…)" value={form.icon_url}
+          <div className="sm:col-span-2">
+            <div className="text-xs text-muted-foreground mb-1">Иконка соцсети</div>
+            <IconPicker
+              value={form.icon_url}
+              onChange={(url, color) =>
+                setForm({ ...form, icon_url: url ?? "", color: color ?? form.color })
+              }
+            />
+          </div>
+          <input placeholder="Или ссылка на картинку (https://…)" value={form.icon_url.startsWith("builtin:") ? "" : form.icon_url}
             onChange={(e) => setForm({ ...form, icon_url: e.target.value })}
             className="rounded-xl border border-input bg-background px-3 py-2 text-sm" />
           <input placeholder="Или эмодзи (📱)" value={form.icon_emoji}
@@ -518,7 +534,15 @@ function PlatformsManager() {
                   <input defaultValue={p.description ?? ""} placeholder="Описание"
                     onBlur={(e) => (e.target.value || null) !== p.description && update(p, { description: e.target.value || null })}
                     className="rounded-lg border border-input bg-background px-3 py-1.5 text-sm" />
-                  <input defaultValue={p.icon_url ?? ""} placeholder="Ссылка на иконку"
+                  <div className="sm:col-span-2">
+                    <IconPicker
+                      value={p.icon_url}
+                      onChange={(url, color) =>
+                        update(p, color && !p.icon_url?.startsWith("builtin:") ? { icon_url: url, color } : { icon_url: url })
+                      }
+                    />
+                  </div>
+                  <input defaultValue={p.icon_url && !p.icon_url.startsWith("builtin:") ? p.icon_url : ""} placeholder="Или ссылка на картинку"
                     onBlur={(e) => (e.target.value || null) !== p.icon_url && update(p, { icon_url: e.target.value || null })}
                     className="rounded-lg border border-input bg-background px-3 py-1.5 text-sm" />
                   <input defaultValue={p.icon_emoji ?? ""} placeholder="Эмодзи"
