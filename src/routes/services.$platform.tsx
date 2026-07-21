@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { SERVICES } from "@/data/services";
 import { BRAND_ICONS } from "@/data/service-icons";
-import { PLATFORM_SERVICES } from "@/data/platform-services";
+import { PLATFORM_SERVICES, type PlatformService } from "@/data/platform-services";
 
 export const Route = createFileRoute("/services/$platform")({
   head: ({ params }) => {
@@ -66,7 +66,7 @@ function PlatformPage() {
       </p>
 
       <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {list.map((item) => (
+        {(list as PlatformService[]).map((item) => (
           <Link
             key={item.id}
             to="/order"
