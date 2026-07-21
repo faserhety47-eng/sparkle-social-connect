@@ -82,7 +82,9 @@ function AdminPage() {
   }
 
   const tabs: { key: Tab; label: string }[] = [
+    { key: "dashboard", label: "Дашборд" },
     { key: "orders", label: "Заказы" },
+    { key: "users", label: "Пользователи" },
     { key: "prices", label: "Цены" },
     { key: "platforms", label: "Платформы" },
     { key: "types", label: "Типы услуг" },
@@ -104,7 +106,9 @@ function AdminPage() {
         ))}
       </div>
 
+      {tab === "dashboard" && <DashboardTab />}
       {tab === "orders" && user && <OrdersTab adminId={user.id} />}
+      {tab === "users" && user && <UsersTab currentUserId={user.id} />}
       {tab === "prices" && <PricesManager />}
       {tab === "platforms" && <PlatformsManager />}
       {tab === "types" && <ServiceTypesManager />}
