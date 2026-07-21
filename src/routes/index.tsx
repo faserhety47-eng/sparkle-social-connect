@@ -8,8 +8,8 @@ export const Route = createFileRoute("/")({
     meta: [
       { title: "OzTop Media — Бесплатная и платная SMM накрутка" },
       { name: "description", content: "Быстрая и качественная накрутка подписчиков, лайков и просмотров в 40+ соцсетях. Регистрация не требуется." },
-      { property: "og:title", content: "OzTop Media — SMM накрутка" },
-      { property: "og:description", content: "40+ соцсетей, миллионы выполненных заказов, работа без регистрации." },
+      { property: "og:title", content: "OzTop Media — Бесплатная и платная SMM накрутка" },
+      { property: "og:description", content: "Быстрая и качественная накрутка подписчиков, лайков и просмотров в 40+ соцсетях. Регистрация не требуется." },
     ],
   }),
   component: Index,
