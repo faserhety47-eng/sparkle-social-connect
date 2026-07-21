@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/useSession";
+import { useServicePrices, SERVICE_TYPE_LIST } from "@/hooks/useServicePrices";
 
 type Search = { platform?: string };
 
@@ -23,13 +24,6 @@ export const Route = createFileRoute("/order")({
   component: OrderPage,
 });
 
-const SERVICE_TYPES = [
-  { id: "followers", label: "Подписчики", price: 0.5 },
-  { id: "likes", label: "Лайки", price: 0.2 },
-  { id: "views", label: "Просмотры", price: 0.05 },
-  { id: "comments", label: "Комментарии", price: 2 },
-];
-
 const schema = z.object({
   platform: z.string().min(1),
   type: z.string().min(1),
@@ -41,17 +35,17 @@ function OrderPage() {
   const { platform: initial } = Route.useSearch();
   const { user, loading: sessionLoading } = useSession();
   const navigate = useNavigate();
+  const { getPrice } = useServicePrices();
 
   const [platform, setPlatform] = useState(initial ?? SERVICES[0].id);
-  const [type, setType] = useState(SERVICE_TYPES[0].id);
+  const [type, setType] = useState(SERVICE_TYPE_LIST[0].id);
   const [link, setLink] = useState("");
   const [count, setCount] = useState(100);
   const [loading, setLoading] = useState(false);
 
-  const price = useMemo(() => {
-    const t = SERVICE_TYPES.find((x) => x.id === type)!;
-    return +(t.price * count).toFixed(2);
-  }, [type, count]);
+  const unitPrice = getPrice(platform, type);
+  const price = useMemo(() => +(unitPrice * count).toFixed(2), [unitPrice, count]);
+
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
