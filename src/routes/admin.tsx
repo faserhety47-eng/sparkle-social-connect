@@ -152,6 +152,12 @@ function OrdersTab({ adminId }: { adminId: string }) {
     const { error } = await supabase.from("orders").update({ status }).eq("id", id);
     if (error) return toast.error(error.message);
     setOrders((os) => os.map((o) => (o.id === id ? { ...o, status } : o)));
+    const autoMsg = STATUS_MESSAGES[status];
+    if (autoMsg) {
+      await supabase.from("order_messages").insert({
+        order_id: id, sender: "admin", author_id: adminId, body: autoMsg,
+      });
+    }
     toast.success("Статус обновлён");
   };
 
