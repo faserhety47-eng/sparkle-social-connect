@@ -226,3 +226,89 @@ function PriceEditor({ price, onSave }: { price: number; onSave: (p: number) => 
     </div>
   );
 }
+
+function PricesManager() {
+  const { prices, loading, reload } = useServicePrices();
+  const [saving, setSaving] = useState<string | null>(null);
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
+
+  const keyOf = (platform: string, type: string) => `${platform}:${type}`;
+  const getVal = (platform: string, type: string) => {
+    const k = keyOf(platform, type);
+    if (drafts[k] !== undefined) return drafts[k];
+    const p = prices.find((x) => x.platform === platform && x.service_type === type);
+    return p ? String(p.price_per_unit) : "0";
+  };
+
+  const save = async (platform: string, type: string) => {
+    const k = keyOf(platform, type);
+    const val = parseFloat(getVal(platform, type));
+    if (!Number.isFinite(val) || val < 0) { toast.error("Некорректная цена"); return; }
+    setSaving(k);
+    const existing = prices.find((x) => x.platform === platform && x.service_type === type);
+    const { error } = existing
+      ? await supabase.from("service_prices").update({ price_per_unit: val }).eq("id", existing.id)
+      : await supabase.from("service_prices").insert({ platform, service_type: type, price_per_unit: val });
+    setSaving(null);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Цена сохранена");
+    setDrafts((d) => { const n = { ...d }; delete n[k]; return n; });
+    reload();
+  };
+
+  return (
+    <div className="mt-10 rounded-3xl bg-card p-6 md:p-8 shadow-tile">
+      <h2 className="text-xl md:text-2xl font-extrabold">Цены на услуги (₽ за 1 шт.)</h2>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Эти цены используются в форме заказа для расчёта стоимости.
+      </p>
+
+      {loading ? (
+        <div className="mt-6 text-muted-foreground">Загрузка цен…</div>
+      ) : (
+        <div className="mt-6 overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-left text-muted-foreground border-b border-border">
+                <th className="py-2 pr-4 font-semibold">Платформа</th>
+                {SERVICE_TYPE_LIST.map((t) => (
+                  <th key={t.id} className="py-2 px-2 font-semibold">{t.label}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {SERVICES.map((s) => (
+                <tr key={s.id} className="border-b border-border/50">
+                  <td className="py-3 pr-4 font-semibold">{s.name}</td>
+                  {SERVICE_TYPE_LIST.map((t) => {
+                    const k = keyOf(s.id, t.id);
+                    return (
+                      <td key={t.id} className="py-3 px-2">
+                        <div className="flex items-center gap-1.5">
+                          <input
+                            type="number" step="0.01" min="0"
+                            value={getVal(s.id, t.id)}
+                            onChange={(e) => setDrafts((d) => ({ ...d, [k]: e.target.value }))}
+                            className="w-24 rounded-lg border border-border bg-background px-2 py-1.5 text-right"
+                          />
+                          <button
+                            onClick={() => save(s.id, t.id)}
+                            disabled={saving === k}
+                            className="rounded-lg bg-primary text-primary-foreground px-2.5 py-1.5 text-xs font-semibold disabled:opacity-60"
+                          >
+                            {saving === k ? "…" : "Сохранить"}
+                          </button>
+                        </div>
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
