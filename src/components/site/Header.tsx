@@ -1,7 +1,17 @@
-import { Link } from "@tanstack/react-router";
-import { Moon } from "lucide-react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { Moon, User } from "lucide-react";
+import { useSession } from "@/hooks/useSession";
+import { supabase } from "@/integrations/supabase/client";
 
 export function Header() {
+  const { user, loading } = useSession();
+  const navigate = useNavigate();
+
+  const logout = async () => {
+    await supabase.auth.signOut();
+    navigate({ to: "/" });
+  };
+
   return (
     <header className="sticky top-0 z-40 w-full bg-background/80 backdrop-blur-md border-b border-border/60">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
@@ -12,9 +22,9 @@ export function Header() {
 
         <nav className="hidden md:flex items-center gap-8 text-[15px] font-medium text-foreground/85">
           <Link to="/" className="hover:text-foreground transition-colors" activeProps={{ className: "text-foreground" }}>Главная</Link>
-          <Link to="/order" className="hover:text-foreground transition-colors">AI чат</Link>
-          <Link to="/api" className="hover:text-foreground transition-colors">API</Link>
+          <Link to="/order" className="hover:text-foreground transition-colors">Заказать</Link>
           <Link to="/services" className="hover:text-foreground transition-colors">Услуги</Link>
+          <Link to="/api" className="hover:text-foreground transition-colors">API</Link>
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
@@ -24,8 +34,19 @@ export function Header() {
           >
             <Moon className="h-4 w-4" />
           </button>
-          <Link to="/login" className="btn-ghost text-sm">Войти</Link>
-          <Link to="/register" className="btn-primary text-sm">Регистрация</Link>
+          {loading ? null : user ? (
+            <>
+              <Link to="/account" className="btn-ghost text-sm inline-flex items-center gap-1.5">
+                <User className="h-4 w-4" /> Кабинет
+              </Link>
+              <button onClick={logout} className="btn-ghost text-sm">Выйти</button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="btn-ghost text-sm">Войти</Link>
+              <Link to="/register" className="btn-primary text-sm">Регистрация</Link>
+            </>
+          )}
         </div>
       </div>
     </header>

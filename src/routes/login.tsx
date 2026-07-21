@@ -1,14 +1,15 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
-      { title: "Вход — OzTop Media" },
-      { name: "description", content: "Вход в личный кабинет OzTop Media." },
-      { property: "og:title", content: "Вход — OzTop Media" },
+      { title: "Вход — Oz Top" },
+      { name: "description", content: "Вход в личный кабинет Oz Top." },
+      { property: "og:title", content: "Вход — Oz Top" },
       { property: "og:description", content: "Вход в личный кабинет." },
     ],
   }),
@@ -23,19 +24,26 @@ const schema = z.object({
 function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const r = schema.safeParse({ email, password });
     if (!r.success) return toast.error(r.error.issues[0].message);
-    toast.success("Демо-вход выполнен", { description: `Добро пожаловать, ${email}` });
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword(r.data);
+    setLoading(false);
+    if (error) return toast.error("Неверный email или пароль");
+    toast.success("Вход выполнен");
+    navigate({ to: "/account" });
   };
 
   return (
     <section className="mx-auto max-w-md px-4 py-16">
       <div className="rounded-3xl bg-card p-8 shadow-tile">
         <h1 className="text-2xl font-extrabold">Вход в аккаунт</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Продолжите работу с OzTop Media.</p>
+        <p className="mt-1 text-sm text-muted-foreground">Продолжите работу с Oz Top.</p>
 
         <form onSubmit={submit} className="mt-6 space-y-4">
           <div>
@@ -48,7 +56,9 @@ function LoginPage() {
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
               className="mt-1.5 w-full rounded-xl border border-input bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
           </div>
-          <button type="submit" className="btn-primary w-full">Войти</button>
+          <button type="submit" disabled={loading} className="btn-primary w-full disabled:opacity-60">
+            {loading ? "Входим…" : "Войти"}
+          </button>
         </form>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">

@@ -1,15 +1,16 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/register")({
   head: () => ({
     meta: [
-      { title: "Регистрация — OzTop Media" },
-      { name: "description", content: "Создайте аккаунт OzTop Media, чтобы получить доступ к API и истории заказов." },
-      { property: "og:title", content: "Регистрация — OzTop Media" },
-      { property: "og:description", content: "Создание аккаунта в OzTop Media." },
+      { title: "Регистрация — Oz Top" },
+      { name: "description", content: "Создайте аккаунт Oz Top, чтобы оформлять и оплачивать заказы на продвижение." },
+      { property: "og:title", content: "Регистрация — Oz Top" },
+      { property: "og:description", content: "Создание аккаунта в Oz Top." },
     ],
   }),
   component: RegisterPage,
@@ -25,12 +26,26 @@ function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const r = schema.safeParse({ name, email, password });
     if (!r.success) return toast.error(r.error.issues[0].message);
-    toast.success("Аккаунт создан (демо)", { description: `Добро пожаловать, ${name}` });
+    setLoading(true);
+    const { error } = await supabase.auth.signUp({
+      email: r.data.email,
+      password: r.data.password,
+      options: {
+        data: { name: r.data.name },
+        emailRedirectTo: `${window.location.origin}/account`,
+      },
+    });
+    setLoading(false);
+    if (error) return toast.error(error.message);
+    toast.success("Аккаунт создан", { description: `Добро пожаловать, ${name}` });
+    navigate({ to: "/account" });
   };
 
   return (
@@ -52,10 +67,12 @@ function RegisterPage() {
           </div>
           <div>
             <label className="text-sm font-semibold">Пароль</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6}
               className="mt-1.5 w-full rounded-xl border border-input bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
           </div>
-          <button type="submit" className="btn-primary w-full">Создать аккаунт</button>
+          <button type="submit" disabled={loading} className="btn-primary w-full disabled:opacity-60">
+            {loading ? "Создаём…" : "Создать аккаунт"}
+          </button>
         </form>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
