@@ -191,13 +191,15 @@ function PriceEditor({ price, onSave }: { price: number; onSave: (p: number) => 
 
   if (!editing) {
     return (
-      <button
-        onClick={() => { setValue(price.toFixed(2)); setEditing(true); }}
-        className="mt-3 text-2xl font-extrabold text-primary hover:underline"
-        title="Изменить цену"
-      >
-        {price.toFixed(2)} ₽
-      </button>
+      <div className="mt-3 flex flex-col items-end gap-1.5">
+        <div className="text-2xl font-extrabold text-primary">{price.toFixed(2)} ₽</div>
+        <button
+          onClick={() => { setValue(price.toFixed(2)); setEditing(true); }}
+          className="rounded-full border border-border px-3 py-1 text-xs font-semibold hover:bg-primary hover:text-primary-foreground hover:border-primary transition"
+        >
+          Изменить цену
+        </button>
+      </div>
     );
   }
   return (
