@@ -129,25 +129,40 @@ export type Database = {
       }
       platforms: {
         Row: {
+          color: string
           created_at: string
+          description: string | null
+          icon_emoji: string | null
+          icon_url: string | null
           id: string
           is_active: boolean
+          letter: string | null
           name: string
           sort_order: number
           updated_at: string
         }
         Insert: {
+          color?: string
           created_at?: string
+          description?: string | null
+          icon_emoji?: string | null
+          icon_url?: string | null
           id: string
           is_active?: boolean
+          letter?: string | null
           name: string
           sort_order?: number
           updated_at?: string
         }
         Update: {
+          color?: string
           created_at?: string
+          description?: string | null
+          icon_emoji?: string | null
+          icon_url?: string | null
           id?: string
           is_active?: boolean
+          letter?: string | null
           name?: string
           sort_order?: number
           updated_at?: string
