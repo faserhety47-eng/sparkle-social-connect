@@ -4,7 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/useSession";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { SERVICES } from "@/data/services";
+import { SERVICE_TYPE_LIST, useServicePrices } from "@/hooks/useServicePrices";
 import { toast } from "sonner";
+
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
