@@ -84,9 +84,9 @@ function AdminPage() {
   };
 
   const updatePrice = async (id: string, price: number) => {
-    if (!Number.isFinite(price) || price < 0) return toast.error("Некорректная цена");
+    if (!Number.isFinite(price) || price < 0) { toast.error("Некорректная цена"); return; }
     const { error } = await supabase.from("orders").update({ price_rub: price }).eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     setOrders((os) => os.map((o) => (o.id === id ? { ...o, price_rub: price } : o)));
     toast.success("Цена обновлена");
   };
