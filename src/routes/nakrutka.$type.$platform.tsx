@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Outlet, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import {
   findType,
   findPlatform,
