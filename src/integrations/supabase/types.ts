@@ -557,6 +557,86 @@ export type Database = {
         }
         Relationships: []
       }
+      ticket_messages: {
+        Row: {
+          author_id: string | null
+          body: string
+          created_at: string
+          from_admin: boolean
+          id: string
+          ticket_id: string
+        }
+        Insert: {
+          author_id?: string | null
+          body: string
+          created_at?: string
+          from_admin?: boolean
+          id?: string
+          ticket_id: string
+        }
+        Update: {
+          author_id?: string | null
+          body?: string
+          created_at?: string
+          from_admin?: boolean
+          id?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tickets: {
+        Row: {
+          admin_unread: boolean
+          created_at: string
+          guest_email: string | null
+          guest_name: string | null
+          id: string
+          message: string
+          priority: string
+          status: string
+          subject: string
+          updated_at: string
+          user_id: string | null
+          user_unread: boolean
+        }
+        Insert: {
+          admin_unread?: boolean
+          created_at?: string
+          guest_email?: string | null
+          guest_name?: string | null
+          id?: string
+          message: string
+          priority?: string
+          status?: string
+          subject: string
+          updated_at?: string
+          user_id?: string | null
+          user_unread?: boolean
+        }
+        Update: {
+          admin_unread?: boolean
+          created_at?: string
+          guest_email?: string | null
+          guest_name?: string | null
+          id?: string
+          message?: string
+          priority?: string
+          status?: string
+          subject?: string
+          updated_at?: string
+          user_id?: string | null
+          user_unread?: boolean
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string

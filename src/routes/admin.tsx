@@ -17,6 +17,7 @@ import { useAdminNotifier } from "@/hooks/useAdminNotifier";
 import { PagesManager } from "@/components/site/PagesManager";
 import { NavManager } from "@/components/site/NavManager";
 import { ImagesManager } from "@/components/site/ImagesManager";
+import { TicketsTab } from "@/components/site/TicketsTab";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin")({
@@ -53,7 +54,7 @@ const STATUSES: { key: string; label: string; color: string }[] = [
   { key: "cancelled", label: "Отменён", color: "bg-red-500/15 text-red-400" },
 ];
 
-type Tab = "dashboard" | "orders" | "users" | "balance" | "promos" | "prices" | "smm" | "platforms" | "types" | "payments" | "pages" | "nav" | "images" | "actions" | "settings";
+type Tab = "dashboard" | "orders" | "tickets" | "users" | "balance" | "promos" | "prices" | "smm" | "platforms" | "types" | "payments" | "pages" | "nav" | "images" | "actions" | "settings";
 
 async function logAction(adminId: string, action: string, targetType?: string, targetId?: string, details?: Record<string, unknown>) {
   try {
@@ -102,6 +103,7 @@ function AdminPage() {
   const tabs: { key: Tab; label: string }[] = [
     { key: "dashboard", label: "Дашборд" },
     { key: "orders", label: "Заказы" },
+    { key: "tickets", label: "Тикеты" },
     { key: "users", label: "Пользователи" },
     { key: "balance", label: "Баланс" },
     { key: "promos", label: "Промокоды" },
@@ -134,6 +136,7 @@ function AdminPage() {
 
       {tab === "dashboard" && <DashboardTab />}
       {tab === "orders" && user && <OrdersTab adminId={user.id} />}
+      {tab === "tickets" && user && <TicketsTab adminId={user.id} />}
       {tab === "users" && user && <UsersTab currentUserId={user.id} />}
       {tab === "balance" && <BalanceTab />}
       {tab === "promos" && user && <PromoCodesTab adminId={user.id} />}
