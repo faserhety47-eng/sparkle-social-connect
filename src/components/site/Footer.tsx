@@ -1,4 +1,5 @@
 import { useNavLinks } from "@/hooks/useNavLinks";
+import { Send } from "lucide-react";
 
 export function Footer() {
   const links = useNavLinks("footer");
