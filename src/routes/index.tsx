@@ -5,7 +5,7 @@ import {
   HowItWorks, Reviews, Guarantees, LiveOrdersFeed,
   VideoDemo, BlogPreview, Comparison, SupportBlock,
 } from "@/components/site/HomeSections";
-import heroCat from "/hero-cat-transparent.png";
+const HERO_CAT = "/hero-cat-transparent.png";
 import { LANDING_TYPES, LANDING_PLATFORMS } from "@/data/landing-matrix";
 
 const FAQ_JSONLD = {
@@ -60,7 +60,7 @@ function Index() {
             <div className="relative">
               <div aria-hidden className="absolute inset-0 -z-10 rounded-full bg-brand/20 blur-3xl scale-90" />
               <img
-                src={heroCat}
+                src={HERO_CAT}
                 alt="Милый кот-маскот smm-cat.site"
                 className="w-64 sm:w-80 md:w-[420px] lg:w-[500px] h-auto drop-shadow-2xl select-none"
                 draggable={false}
