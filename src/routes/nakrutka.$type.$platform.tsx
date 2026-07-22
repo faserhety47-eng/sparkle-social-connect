@@ -70,7 +70,7 @@ function LandingPage() {
   const { platform: platformSlug } = Route.useParams();
   const { platforms } = usePlatforms({ onlyActive: true });
   const platformRow = platforms.find((x) => x.id === p.slug);
-  const price = priceHint(t.slug, p.slug);
+  
 
   return (
     <div className="relative overflow-hidden">
