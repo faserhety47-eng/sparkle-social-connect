@@ -138,6 +138,7 @@ function AdminPage() {
       {tab === "balance" && <BalanceTab />}
       {tab === "promos" && user && <PromoCodesTab adminId={user.id} />}
       {tab === "prices" && <PricesManager />}
+      {tab === "smm" && <SmmApiManager />}
       {tab === "platforms" && <PlatformsManager />}
       {tab === "types" && <ServiceTypesManager />}
       {tab === "payments" && <PaymentMethodsManager />}
