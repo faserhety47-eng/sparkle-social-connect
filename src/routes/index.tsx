@@ -1,7 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ServicesGrid } from "@/components/site/ServicesGrid";
+import { Faq, DEFAULT_FAQ } from "@/components/site/Faq";
 import heroCat from "@/assets/hero-cat-transparent.png.asset.json";
 import { LANDING_TYPES, LANDING_PLATFORMS } from "@/data/landing-matrix";
+
+const FAQ_JSONLD = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: DEFAULT_FAQ.map((it) => ({
+    "@type": "Question",
+    name: it.q,
+    acceptedAnswer: { "@type": "Answer", text: it.a },
+  })),
+};
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -10,6 +21,12 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Быстрая и качественная накрутка подписчиков, лайков и просмотров в Max, VK, Telegram, Одноклассники, Instagram, RuTube и YouTube." },
       { property: "og:title", content: "smm-cat.site — Продвижение в социальных сетях" },
       { property: "og:description", content: "Быстрая и качественная накрутка подписчиков, лайков и просмотров в Max, VK, Telegram, Одноклассники, Instagram, RuTube и YouTube." },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify(FAQ_JSONLD),
+      },
     ],
   }),
   component: Index,
@@ -148,6 +165,9 @@ function Index() {
         <p className="mt-4 text-muted-foreground">
           Служба поддержки smm-cat.site отвечает круглосуточно. Напишите в чат на сайте или в Telegram — поможем выбрать услугу, подскажем оптимальную скорость накрутки и решим любой вопрос по заказу. Мы работаем в рунете более 8 лет и выполнили свыше 11 миллионов заказов — накрутка в соцсетях с smm-cat.site это надёжно, быстро и по-настоящему выгодно.
         </p>
+        <div className="mt-4">
+          <Faq />
+        </div>
       </section>
     </div>
   );
