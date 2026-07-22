@@ -37,7 +37,7 @@ type Order = {
   payment_note: string | null;
 };
 
-type Profile = { id: string; email: string | null; name: string | null };
+type Profile = { id: string; email: string | null; name: string | null; balance_rub?: number | null };
 
 const STATUSES: { key: string; label: string; color: string }[] = [
   { key: "awaiting_payment", label: "Ожидает оплаты", color: "bg-amber-500/15 text-amber-400" },
