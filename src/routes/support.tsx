@@ -54,14 +54,13 @@ function SupportPage() {
     if (message.trim().length < 5) return toast.error("Опишите проблему подробнее");
     if (!user && !guestEmail.trim()) return toast.error("Укажите email для связи");
     setSending(true);
-    const payload: Record<string, unknown> = {
+    const { error } = await supabase.from("tickets").insert({
       subject: subject.trim().slice(0, 200),
       message: message.trim().slice(0, 4000),
       user_id: user?.id ?? null,
-      guest_name: user ? null : guestName.trim().slice(0, 100) || null,
+      guest_name: user ? null : (guestName.trim().slice(0, 100) || null),
       guest_email: user ? null : guestEmail.trim().slice(0, 200),
-    };
-    const { error } = await supabase.from("tickets").insert(payload);
+    });
     setSending(false);
     if (error) return toast.error("Не удалось отправить: " + error.message);
     toast.success("Тикет отправлен! Мы ответим вам в ближайшее время.");

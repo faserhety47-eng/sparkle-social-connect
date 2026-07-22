@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsOfServiceRouteImport } from './routes/terms-of-service'
+import { Route as SupportRouteImport } from './routes/support'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as RegisterRouteImport } from './routes/register'
@@ -31,6 +32,11 @@ import { Route as NakrutkaTypePlatformRouteImport } from './routes/nakrutka.$typ
 const TermsOfServiceRoute = TermsOfServiceRouteImport.update({
   id: '/terms-of-service',
   path: '/terms-of-service',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SupportRoute = SupportRouteImport.update({
+  id: '/support',
+  path: '/support',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -133,6 +139,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/support': typeof SupportRoute
   '/terms-of-service': typeof TermsOfServiceRoute
   '/guest-order/$token': typeof GuestOrderTokenRoute
   '/p/$slug': typeof PSlugRoute
@@ -153,6 +160,7 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/support': typeof SupportRoute
   '/terms-of-service': typeof TermsOfServiceRoute
   '/guest-order/$token': typeof GuestOrderTokenRoute
   '/p/$slug': typeof PSlugRoute
@@ -174,6 +182,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/support': typeof SupportRoute
   '/terms-of-service': typeof TermsOfServiceRoute
   '/guest-order/$token': typeof GuestOrderTokenRoute
   '/p/$slug': typeof PSlugRoute
@@ -196,6 +205,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/services'
     | '/sitemap.xml'
+    | '/support'
     | '/terms-of-service'
     | '/guest-order/$token'
     | '/p/$slug'
@@ -216,6 +226,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/services'
     | '/sitemap.xml'
+    | '/support'
     | '/terms-of-service'
     | '/guest-order/$token'
     | '/p/$slug'
@@ -236,6 +247,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/services'
     | '/sitemap.xml'
+    | '/support'
     | '/terms-of-service'
     | '/guest-order/$token'
     | '/p/$slug'
@@ -257,6 +269,7 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   ServicesRoute: typeof ServicesRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  SupportRoute: typeof SupportRoute
   TermsOfServiceRoute: typeof TermsOfServiceRoute
   GuestOrderTokenRoute: typeof GuestOrderTokenRoute
   PSlugRoute: typeof PSlugRoute
@@ -271,6 +284,13 @@ declare module '@tanstack/react-router' {
       path: '/terms-of-service'
       fullPath: '/terms-of-service'
       preLoaderRoute: typeof TermsOfServiceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/support': {
+      id: '/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof SupportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -409,6 +429,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   ServicesRoute: ServicesRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  SupportRoute: SupportRoute,
   TermsOfServiceRoute: TermsOfServiceRoute,
   GuestOrderTokenRoute: GuestOrderTokenRoute,
   PSlugRoute: PSlugRoute,
