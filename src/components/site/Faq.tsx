@@ -63,31 +63,31 @@ export function Faq({ items = DEFAULT_FAQ }: { items?: FaqItem[] }) {
 
   return (
     <section className="mt-24">
-      <div className="text-center">
+      <div className="text-center max-w-2xl mx-auto px-4">
         <h2 className="text-3xl md:text-4xl font-extrabold">F.A.Q. — частые вопросы</h2>
-        <p className="mt-3 text-muted-foreground">Ответы на вопросы, которые пользователи задают чаще всего</p>
+        <p className="mt-4 text-muted-foreground text-base md:text-lg">Ответы на вопросы, которые пользователи задают чаще всего</p>
       </div>
 
-      <div className="mt-10 mx-auto max-w-6xl grid gap-3 md:grid-cols-2">
+      <div className="mt-14 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 grid gap-5 md:grid-cols-2">
         {items.map((it, i) => {
           const isOpen = open === i;
           return (
             <div
               key={i}
-              className={`rounded-2xl bg-card shadow-tile overflow-hidden transition ${isOpen ? "ring-1 ring-primary/40" : ""}`}
+              className={`rounded-2xl bg-card shadow-tile overflow-hidden transition-all duration-300 ${isOpen ? "ring-1 ring-primary/40 shadow-tile-hover" : ""}`}
             >
               <button
                 onClick={() => setOpen(isOpen ? null : i)}
-                className="w-full flex items-center justify-between gap-4 p-4 md:p-5 text-left"
+                className="w-full flex items-center justify-between gap-4 p-5 md:p-6 text-left"
                 aria-expanded={isOpen}
               >
-                <span className="font-semibold text-sm md:text-base">{it.q}</span>
+                <span className="font-semibold text-base md:text-lg leading-snug">{it.q}</span>
                 <ChevronDown
-                  className={`h-5 w-5 shrink-0 text-primary transition-transform ${isOpen ? "rotate-180" : ""}`}
+                  className={`h-5 w-5 shrink-0 text-primary transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
                 />
               </button>
               {isOpen && (
-                <div className="px-4 md:px-5 pb-5 text-sm text-muted-foreground leading-relaxed">
+                <div className="px-5 md:px-6 pb-6 text-base text-muted-foreground leading-loose">
                   {it.a}
                 </div>
               )}
