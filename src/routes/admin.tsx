@@ -53,7 +53,7 @@ const STATUSES: { key: string; label: string; color: string }[] = [
   { key: "cancelled", label: "Отменён", color: "bg-red-500/15 text-red-400" },
 ];
 
-type Tab = "dashboard" | "orders" | "users" | "balance" | "promos" | "prices" | "platforms" | "types" | "payments" | "pages" | "nav" | "images" | "actions" | "settings";
+type Tab = "dashboard" | "orders" | "users" | "balance" | "promos" | "prices" | "smm" | "platforms" | "types" | "payments" | "pages" | "nav" | "images" | "actions" | "settings";
 
 async function logAction(adminId: string, action: string, targetType?: string, targetId?: string, details?: Record<string, unknown>) {
   try {
