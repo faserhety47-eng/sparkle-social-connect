@@ -4,6 +4,7 @@ import {
   Search, Link2, CreditCard, Rocket, ShieldCheck, KeyRound, RefreshCcw,
   MessageCircle, Send, Play, Star, Check, X, BookOpen,
 } from "lucide-react";
+import howToOrderVideo from "@/assets/how-to-order.mp4.asset.json";
 
 /* ============ How it works ============ */
 export function HowItWorks() {
