@@ -42,6 +42,9 @@ export function Footer() {
           <h4 className="text-sm font-semibold mb-3">Контакты</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li>
+              <Link to="/support" className="hover:text-primary">Служба поддержки</Link>
+            </li>
+            <li>
               <a href="https://t.me/serh465" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 hover:text-primary">
                 <Send className="h-4 w-4" />
                 Telegram
