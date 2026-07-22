@@ -946,9 +946,9 @@ function UsersTab({ currentUserId }: { currentUserId: string }) {
                           if (!raw) return;
                           const amount = parseFloat(raw.replace(",", "."));
                           if (!Number.isFinite(amount) || amount === 0) { toast.error("Неверная сумма"); return; }
-                          const note = prompt("Комментарий (необязательно):") || null;
+                          const note = prompt("Комментарий (необязательно):") || "";
                           const { error } = await supabase.rpc("admin_topup_balance", {
-                            _user_id: u.id, _amount: amount, _note: note || null,
+                            _user_id: u.id, _amount: amount, _note: note,
                           });
                           if (error) { toast.error(error.message); return; }
                           toast.success("Баланс обновлён");
