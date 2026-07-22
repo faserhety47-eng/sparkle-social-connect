@@ -792,7 +792,8 @@ function DashboardTab() {
   const [stats, setStats] = useState<{
     total: number; today: number; awaiting: number; processing: number; completed: number;
     revenueTotal: number; revenueToday: number; revenueMonth: number;
-    recent: Order[];
+    recent: Order[]; series: DayPoint[]; topServices: { key: string; count: number; revenue: number }[];
+    newUsers: number;
   } | null>(null);
   const [loading, setLoading] = useState(true);
 
