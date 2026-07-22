@@ -249,6 +249,14 @@ function AccountPage() {
                     )}
                     <div className="mt-4 flex flex-wrap gap-2">
                       <button onClick={() => markPaid(o.id)} className="btn-primary text-sm">Я оплатил</button>
+                      <button
+                        onClick={() => payFromBalance(o.id, Number(o.price_rub))}
+                        disabled={balance < Number(o.price_rub)}
+                        className="rounded-full border border-primary/40 text-primary px-4 py-2 text-sm font-semibold hover:bg-primary/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                        title={balance < Number(o.price_rub) ? "Недостаточно средств на балансе" : ""}
+                      >
+                        Оплатить с баланса ({balance.toFixed(2)} ₽)
+                      </button>
                     </div>
                   </div>
                 )}
