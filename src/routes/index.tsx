@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ServicesGrid } from "@/components/site/ServicesGrid";
+import heroCat from "@/assets/hero-cat.avif.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -22,20 +23,35 @@ function Index() {
         <div className="absolute top-96 -left-40 h-[360px] w-[360px] rounded-full bg-brand/10 blur-3xl" />
       </div>
 
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-16 md:pt-24 pb-24">
-        <div className="text-center max-w-4xl mx-auto">
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-[1.05] text-foreground">
-            Продвижение в <span className="brand-logo">социальных&nbsp;сетях</span>
-          </h1>
-          <p className="mt-5 text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
-            Повысьте активность и привлекательность вашего блога или личной страницы
-          </p>
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-12 md:pt-20 pb-24">
+        <div className="grid gap-10 md:grid-cols-2 md:items-center">
+          <div className="text-center md:text-left max-w-2xl mx-auto md:mx-0 order-2 md:order-1">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-[1.05] text-foreground">
+              Продвижение в <span className="brand-logo">социальных&nbsp;сетях</span>
+            </h1>
+            <p className="mt-5 text-muted-foreground text-base md:text-lg">
+              Повысьте активность и привлекательность вашего блога или личной страницы
+            </p>
+          </div>
+
+          <div className="order-1 md:order-2 flex justify-center md:justify-end">
+            <div className="relative">
+              <div aria-hidden className="absolute inset-0 -z-10 rounded-full bg-brand/20 blur-3xl scale-90" />
+              <img
+                src={heroCat.url}
+                alt="Милый кот-маскот Oz Top"
+                className="w-64 sm:w-80 md:w-[420px] lg:w-[500px] h-auto drop-shadow-2xl select-none"
+                draggable={false}
+              />
+            </div>
+          </div>
         </div>
 
-        <div className="mt-14">
+        <div className="mt-16">
           <ServicesGrid />
         </div>
       </section>
     </div>
   );
 }
+
