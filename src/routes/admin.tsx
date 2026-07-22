@@ -48,7 +48,15 @@ const STATUSES: { key: string; label: string; color: string }[] = [
   { key: "cancelled", label: "Отменён", color: "bg-red-500/15 text-red-400" },
 ];
 
-type Tab = "dashboard" | "orders" | "users" | "balance" | "prices" | "platforms" | "types" | "payments";
+type Tab = "dashboard" | "orders" | "users" | "balance" | "promos" | "prices" | "platforms" | "types" | "payments" | "actions" | "settings";
+
+async function logAction(adminId: string, action: string, targetType?: string, targetId?: string, details?: Record<string, unknown>) {
+  try {
+    await supabase.from("admin_actions").insert({
+      admin_id: adminId, action, target_type: targetType ?? null, target_id: targetId ?? null, details: details ?? null,
+    });
+  } catch { /* ignore */ }
+}
 
 const STATUS_MESSAGES: Record<string, string> = {
   payment_reported: "Спасибо! Мы получили информацию об оплате и проверяем её.",
