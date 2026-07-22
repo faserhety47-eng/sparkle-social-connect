@@ -4,6 +4,7 @@ import {
   Search, Link2, CreditCard, Rocket, ShieldCheck, KeyRound, RefreshCcw,
   MessageCircle, Send, Play, Star, Check, X, BookOpen,
 } from "lucide-react";
+import howToOrderVideo from "@/assets/how-to-order.mp4.asset.json";
 
 /* ============ How it works ============ */
 export function HowItWorks() {
@@ -183,14 +184,14 @@ export function VideoDemo() {
             <Link to="/order" className="btn-primary text-sm">Оформить заказ</Link>
           </div>
         </div>
-        <div className="relative aspect-video rounded-2xl overflow-hidden border border-border/60 bg-gradient-to-br from-brand/20 to-brand-2/20 flex items-center justify-center group cursor-pointer">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.08),transparent_60%)]" />
-          <div className="relative h-20 w-20 rounded-full bg-background/90 flex items-center justify-center shadow-xl group-hover:scale-110 transition">
-            <Play className="h-8 w-8 text-brand fill-current ml-1" />
-          </div>
-          <span className="absolute bottom-4 left-4 text-xs text-muted-foreground bg-background/70 px-2 py-1 rounded">
-            Демо · 1:12
-          </span>
+        <div className="relative aspect-video rounded-2xl overflow-hidden border border-border/60 bg-gradient-to-br from-brand/20 to-brand-2/20 shadow-xl">
+          <video
+            src={howToOrderVideo.url}
+            controls
+            playsInline
+            preload="metadata"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
         </div>
       </div>
     </section>
