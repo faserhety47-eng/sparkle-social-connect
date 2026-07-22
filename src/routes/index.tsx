@@ -1,6 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ServicesGrid } from "@/components/site/ServicesGrid";
 import { Faq, DEFAULT_FAQ } from "@/components/site/Faq";
+import {
+  HowItWorks, Reviews, Guarantees, LiveOrdersFeed,
+  VideoDemo, BlogPreview, Comparison, SupportBlock,
+} from "@/components/site/HomeSections";
 import heroCat from "@/assets/hero-cat-transparent.png.asset.json";
 import { LANDING_TYPES, LANDING_PLATFORMS } from "@/data/landing-matrix";
 
@@ -69,6 +73,14 @@ function Index() {
           <ServicesGrid />
         </div>
       </section>
+
+      <HowItWorks />
+      <LiveOrdersFeed />
+      <Guarantees />
+      <VideoDemo />
+      <Reviews />
+      <Comparison />
+      <BlogPreview />
 
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-16">
         <div className="rounded-3xl bg-card/70 border border-border/60 p-6 md:p-10">
