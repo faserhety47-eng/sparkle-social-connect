@@ -48,7 +48,15 @@ const STATUSES: { key: string; label: string; color: string }[] = [
   { key: "cancelled", label: "Отменён", color: "bg-red-500/15 text-red-400" },
 ];
 
-type Tab = "dashboard" | "orders" | "users" | "balance" | "prices" | "platforms" | "types" | "payments";
+type Tab = "dashboard" | "orders" | "users" | "balance" | "promos" | "prices" | "platforms" | "types" | "payments" | "actions" | "settings";
+
+async function logAction(adminId: string, action: string, targetType?: string, targetId?: string, details?: Record<string, unknown>) {
+  try {
+    await supabase.from("admin_actions").insert({
+      admin_id: adminId, action, target_type: targetType ?? null, target_id: targetId ?? null, details: (details ?? null) as never,
+    });
+  } catch { /* ignore */ }
+}
 
 const STATUS_MESSAGES: Record<string, string> = {
   payment_reported: "Спасибо! Мы получили информацию об оплате и проверяем её.",
@@ -91,10 +99,13 @@ function AdminPage() {
     { key: "orders", label: "Заказы" },
     { key: "users", label: "Пользователи" },
     { key: "balance", label: "Баланс" },
+    { key: "promos", label: "Промокоды" },
     { key: "prices", label: "Цены" },
     { key: "platforms", label: "Платформы" },
     { key: "types", label: "Типы услуг" },
     { key: "payments", label: "Способы оплаты" },
+    { key: "actions", label: "Лог действий" },
+    { key: "settings", label: "Настройки" },
   ];
 
   return (
@@ -116,10 +127,13 @@ function AdminPage() {
       {tab === "orders" && user && <OrdersTab adminId={user.id} />}
       {tab === "users" && user && <UsersTab currentUserId={user.id} />}
       {tab === "balance" && <BalanceTab />}
+      {tab === "promos" && user && <PromoCodesTab adminId={user.id} />}
       {tab === "prices" && <PricesManager />}
       {tab === "platforms" && <PlatformsManager />}
       {tab === "types" && <ServiceTypesManager />}
       {tab === "payments" && <PaymentMethodsManager />}
+      {tab === "actions" && <ActionsLogTab />}
+      {tab === "settings" && <SettingsTab />}
     </section>
   );
 }
@@ -156,6 +170,7 @@ function OrdersTab({ adminId }: { adminId: string }) {
   }, []);
 
   const updateStatus = async (id: string, status: string) => {
+    const prev = orders.find((o) => o.id === id)?.status;
     const { error } = await supabase.from("orders").update({ status }).eq("id", id);
     if (error) return toast.error(error.message);
     setOrders((os) => os.map((o) => (o.id === id ? { ...o, status } : o)));
@@ -165,14 +180,17 @@ function OrdersTab({ adminId }: { adminId: string }) {
         order_id: id, sender: "admin", author_id: adminId, body: autoMsg,
       });
     }
+    logAction(adminId, "order_status_change", "order", id, { from: prev, to: status });
     toast.success("Статус обновлён");
   };
 
   const updatePrice = async (id: string, price: number) => {
     if (!Number.isFinite(price) || price < 0) { toast.error("Некорректная цена"); return; }
+    const prev = orders.find((o) => o.id === id)?.price_rub;
     const { error } = await supabase.from("orders").update({ price_rub: price }).eq("id", id);
     if (error) { toast.error(error.message); return; }
     setOrders((os) => os.map((o) => (o.id === id ? { ...o, price_rub: price } : o)));
+    logAction(adminId, "order_price_change", "order", id, { from: prev, to: price });
     toast.success("Цена обновлена");
   };
 
@@ -768,11 +786,14 @@ function PaymentMethodsManager() {
   );
 }
 
+type DayPoint = { day: string; revenue: number; orders: number };
+
 function DashboardTab() {
   const [stats, setStats] = useState<{
     total: number; today: number; awaiting: number; processing: number; completed: number;
     revenueTotal: number; revenueToday: number; revenueMonth: number;
-    recent: Order[];
+    recent: Order[]; series: DayPoint[]; topServices: { key: string; count: number; revenue: number }[];
+    newUsers: number;
   } | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -786,6 +807,17 @@ function DashboardTab() {
       const paidStatuses = new Set(["paid", "processing", "completed"]);
       let revenueTotal = 0, revenueToday = 0, revenueMonth = 0;
       let today = 0, awaiting = 0, processing = 0, completed = 0;
+
+      const days: DayPoint[] = [];
+      const dayMap = new Map<string, DayPoint>();
+      for (let i = 13; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+        const key = d.toISOString().slice(0, 10);
+        const point = { day: d.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit" }), revenue: 0, orders: 0 };
+        days.push(point); dayMap.set(key, point);
+      }
+      const serviceMap = new Map<string, { count: number; revenue: number }>();
+
       for (const o of list) {
         const t = new Date(o.created_at).getTime();
         const price = Number(o.price_rub) || 0;
@@ -793,16 +825,31 @@ function DashboardTab() {
         if (o.status === "awaiting_payment" || o.status === "payment_reported") awaiting++;
         if (o.status === "processing") processing++;
         if (o.status === "completed") completed++;
+        const dayKey = new Date(o.created_at).toISOString().slice(0, 10);
+        const point = dayMap.get(dayKey);
+        if (point) point.orders += 1;
         if (paidStatuses.has(o.status)) {
           revenueTotal += price;
           if (t >= startDay) revenueToday += price;
           if (t >= startMonth) revenueMonth += price;
+          if (point) point.revenue += price;
+          const skey = `${o.platform} / ${o.service_type}`;
+          const cur = serviceMap.get(skey) ?? { count: 0, revenue: 0 };
+          cur.count += 1; cur.revenue += price; serviceMap.set(skey, cur);
         }
       }
+      const topServices = [...serviceMap.entries()]
+        .map(([key, v]) => ({ key, ...v }))
+        .sort((a, b) => b.revenue - a.revenue).slice(0, 5);
+
+      const { count: newUsers } = await supabase
+        .from("profiles").select("id", { count: "exact", head: true })
+        .gte("created_at", new Date(startMonth).toISOString());
+
       setStats({
         total: list.length, today, awaiting, processing, completed,
         revenueTotal, revenueToday, revenueMonth,
-        recent: list.slice(0, 5),
+        recent: list.slice(0, 5), series: days, topServices, newUsers: newUsers ?? 0,
       });
       setLoading(false);
     })();
@@ -826,6 +873,36 @@ function DashboardTab() {
         <Card label="В работе" value={stats.processing.toString()} hint={`Выполнено: ${stats.completed}`} />
         <Card label="Выручка (всё время)" value={`${stats.revenueTotal.toLocaleString("ru-RU")} ₽`} hint={`Сегодня: ${stats.revenueToday.toLocaleString("ru-RU")} ₽ · Месяц: ${stats.revenueMonth.toLocaleString("ru-RU")} ₽`} />
       </div>
+
+      <div className="rounded-3xl bg-card p-6 shadow-tile">
+        <div className="flex items-baseline justify-between">
+          <h2 className="text-lg font-bold">Выручка за 14 дней</h2>
+          <div className="text-xs text-muted-foreground">Новых клиентов в этом месяце: <b className="text-foreground">{stats.newUsers}</b></div>
+        </div>
+        <div className="mt-4 h-56 w-full">
+          <RevenueChart data={stats.series} />
+        </div>
+      </div>
+
+      <div className="rounded-3xl bg-card p-6 shadow-tile">
+        <h2 className="text-lg font-bold">Топ услуг</h2>
+        {stats.topServices.length === 0 ? (
+          <div className="mt-3 text-sm text-muted-foreground">Пока нет оплаченных заказов.</div>
+        ) : (
+          <div className="mt-4 space-y-2 text-sm">
+            {stats.topServices.map((s) => (
+              <div key={s.key} className="flex items-center justify-between border-b border-border/50 py-2 last:border-0">
+                <div className="font-semibold truncate">{s.key}</div>
+                <div className="text-right">
+                  <div className="font-bold">{s.revenue.toLocaleString("ru-RU")} ₽</div>
+                  <div className="text-xs text-muted-foreground">{s.count} шт.</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
 
       <div className="rounded-3xl bg-card p-6 shadow-tile">
         <h2 className="text-lg font-bold">Последние заказы</h2>
@@ -1113,3 +1190,326 @@ function BalanceTab() {
     </div>
   );
 }
+
+// ============ Chart ============
+function RevenueChart({ data }: { data: DayPoint[] }) {
+  const max = Math.max(1, ...data.map((d) => d.revenue));
+  const w = 100 / data.length;
+  return (
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="h-full w-full">
+      {data.map((d, i) => {
+        const h = (d.revenue / max) * 92;
+        return (
+          <g key={i}>
+            <rect x={i * w + 1} y={100 - h - 6} width={w - 2} height={Math.max(h, 0.5)}
+              rx="1" fill="hsl(var(--primary))" opacity={d.revenue > 0 ? 0.9 : 0.15}>
+              <title>{d.day}: {d.revenue.toLocaleString("ru-RU")} ₽ · {d.orders} заказ(ов)</title>
+            </rect>
+            <text x={i * w + w / 2} y={99} textAnchor="middle" fontSize="2.5" fill="hsl(var(--muted-foreground))">
+              {d.day}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+// ============ Promo codes ============
+type PromoRow = {
+  id: string; code: string; discount_type: "percent" | "fixed"; discount_value: number;
+  max_uses: number | null; uses: number; expires_at: string | null; active: boolean; note: string | null; created_at: string;
+};
+
+function PromoCodesTab({ adminId }: { adminId: string }) {
+  const [list, setList] = useState<PromoRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [form, setForm] = useState({ code: "", discount_type: "percent" as "percent" | "fixed", discount_value: "10", max_uses: "", expires_at: "", note: "" });
+
+  const load = async () => {
+    setLoading(true);
+    const { data, error } = await supabase.from("promo_codes").select("*").order("created_at", { ascending: false });
+    if (error) toast.error(error.message);
+    setList((data ?? []) as PromoRow[]);
+    setLoading(false);
+  };
+  useEffect(() => { load(); }, []);
+
+  const create = async () => {
+    const code = form.code.trim();
+    const value = parseFloat(form.discount_value);
+    if (!code || !Number.isFinite(value) || value <= 0) return toast.error("Заполните код и скидку");
+    const payload = {
+      code, discount_type: form.discount_type, discount_value: value,
+      max_uses: form.max_uses ? parseInt(form.max_uses, 10) : null,
+      expires_at: form.expires_at ? new Date(form.expires_at).toISOString() : null,
+      note: form.note || null, active: true,
+    };
+    const { error } = await supabase.from("promo_codes").insert(payload);
+    if (error) return toast.error(error.message);
+    logAction(adminId, "promo_create", "promo", code, { discount_type: form.discount_type, discount_value: value });
+    toast.success("Промокод создан");
+    setForm({ code: "", discount_type: "percent", discount_value: "10", max_uses: "", expires_at: "", note: "" });
+    load();
+  };
+
+  const toggle = async (p: PromoRow) => {
+    const { error } = await supabase.from("promo_codes").update({ active: !p.active }).eq("id", p.id);
+    if (error) return toast.error(error.message);
+    logAction(adminId, "promo_toggle", "promo", p.code, { active: !p.active });
+    load();
+  };
+  const remove = async (p: PromoRow) => {
+    if (!confirm(`Удалить промокод ${p.code}?`)) return;
+    const { error } = await supabase.from("promo_codes").delete().eq("id", p.id);
+    if (error) return toast.error(error.message);
+    logAction(adminId, "promo_delete", "promo", p.code);
+    load();
+  };
+
+  return (
+    <div className="mt-6 space-y-4">
+      <div className="rounded-3xl bg-card p-6 shadow-tile">
+        <h2 className="text-lg font-bold">Новый промокод</h2>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <input placeholder="Код (например, WELCOME10)" value={form.code}
+            onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })}
+            className="rounded-xl border border-border bg-background px-3 py-2 text-sm" />
+          <select value={form.discount_type} onChange={(e) => setForm({ ...form, discount_type: e.target.value as "percent" | "fixed" })}
+            className="rounded-xl border border-border bg-background px-3 py-2 text-sm">
+            <option value="percent">Скидка в %</option>
+            <option value="fixed">Фиксированная скидка ₽</option>
+          </select>
+          <input type="number" min="0" step="0.01" placeholder="Значение" value={form.discount_value}
+            onChange={(e) => setForm({ ...form, discount_value: e.target.value })}
+            className="rounded-xl border border-border bg-background px-3 py-2 text-sm" />
+          <input type="number" min="1" placeholder="Лимит использований (необязательно)" value={form.max_uses}
+            onChange={(e) => setForm({ ...form, max_uses: e.target.value })}
+            className="rounded-xl border border-border bg-background px-3 py-2 text-sm" />
+          <input type="datetime-local" placeholder="Срок действия" value={form.expires_at}
+            onChange={(e) => setForm({ ...form, expires_at: e.target.value })}
+            className="rounded-xl border border-border bg-background px-3 py-2 text-sm" />
+          <input placeholder="Комментарий" value={form.note}
+            onChange={(e) => setForm({ ...form, note: e.target.value })}
+            className="rounded-xl border border-border bg-background px-3 py-2 text-sm" />
+        </div>
+        <button onClick={create} className="mt-4 rounded-full bg-primary text-primary-foreground px-5 py-2 text-sm font-semibold">Создать</button>
+      </div>
+
+      {loading ? (
+        <div className="text-muted-foreground">Загрузка…</div>
+      ) : list.length === 0 ? (
+        <div className="rounded-3xl bg-card p-10 text-center shadow-tile text-muted-foreground">Промокодов пока нет</div>
+      ) : (
+        <div className="rounded-3xl bg-card shadow-tile overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-muted-foreground border-b border-border">
+                  <th className="py-3 px-4 font-semibold">Код</th>
+                  <th className="py-3 px-4 font-semibold">Скидка</th>
+                  <th className="py-3 px-4 font-semibold">Использовано</th>
+                  <th className="py-3 px-4 font-semibold">Срок</th>
+                  <th className="py-3 px-4 font-semibold">Статус</th>
+                  <th className="py-3 px-4 font-semibold text-right">Действия</th>
+                </tr>
+              </thead>
+              <tbody>
+                {list.map((p) => (
+                  <tr key={p.id} className="border-b border-border/40 last:border-0">
+                    <td className="py-2 px-4 font-mono font-bold">{p.code}</td>
+                    <td className="py-2 px-4">{p.discount_type === "percent" ? `${p.discount_value}%` : `${p.discount_value} ₽`}</td>
+                    <td className="py-2 px-4">{p.uses}{p.max_uses ? ` / ${p.max_uses}` : ""}</td>
+                    <td className="py-2 px-4 text-xs text-muted-foreground">{p.expires_at ? new Date(p.expires_at).toLocaleString("ru-RU") : "—"}</td>
+                    <td className="py-2 px-4">
+                      <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold ${p.active ? "bg-emerald-500/15 text-emerald-500" : "bg-muted text-muted-foreground"}`}>
+                        {p.active ? "Активен" : "Отключён"}
+                      </span>
+                    </td>
+                    <td className="py-2 px-4 text-right space-x-2">
+                      <button onClick={() => toggle(p)} className="rounded-full border border-border px-3 py-1 text-xs hover:border-primary/50">
+                        {p.active ? "Отключить" : "Включить"}
+                      </button>
+                      <button onClick={() => remove(p)} className="rounded-full border border-red-500/40 text-red-500 px-3 py-1 text-xs hover:bg-red-500/10">
+                        Удалить
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ============ Admin actions log ============
+type ActionRow = {
+  id: string; admin_id: string; action: string; target_type: string | null; target_id: string | null;
+  details: Record<string, unknown> | null; created_at: string;
+};
+
+const ACTION_LABEL: Record<string, string> = {
+  order_status_change: "Смена статуса заказа",
+  order_price_change: "Изменение цены заказа",
+  balance_topup: "Пополнение баланса",
+  promo_create: "Создание промокода",
+  promo_toggle: "Вкл/выкл промокода",
+  promo_delete: "Удаление промокода",
+  settings_update: "Обновление настроек",
+};
+
+function ActionsLogTab() {
+  const [rows, setRows] = useState<ActionRow[]>([]);
+  const [admins, setAdmins] = useState<Record<string, Profile>>({});
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<string>("all");
+
+  useEffect(() => {
+    (async () => {
+      const { data, error } = await supabase.from("admin_actions").select("*").order("created_at", { ascending: false }).limit(500);
+      if (error) toast.error(error.message);
+      const list = (data ?? []) as ActionRow[];
+      setRows(list);
+      const ids = [...new Set(list.map((r) => r.admin_id))];
+      if (ids.length) {
+        const { data: profs } = await supabase.from("profiles").select("id, email, name").in("id", ids);
+        const map: Record<string, Profile> = {};
+        (profs ?? []).forEach((p) => (map[p.id] = p as Profile));
+        setAdmins(map);
+      }
+      setLoading(false);
+    })();
+  }, []);
+
+  const actions = [...new Set(rows.map((r) => r.action))];
+  const filtered = filter === "all" ? rows : rows.filter((r) => r.action === filter);
+
+  return (
+    <div className="mt-6 space-y-4">
+      <div className="flex flex-wrap gap-2">
+        <button onClick={() => setFilter("all")}
+          className={`rounded-full px-3 py-1.5 text-xs font-semibold border ${filter === "all" ? "bg-primary text-primary-foreground border-primary" : "border-border"}`}>
+          Все ({rows.length})
+        </button>
+        {actions.map((a) => (
+          <button key={a} onClick={() => setFilter(a)}
+            className={`rounded-full px-3 py-1.5 text-xs font-semibold border ${filter === a ? "bg-primary text-primary-foreground border-primary" : "border-border"}`}>
+            {ACTION_LABEL[a] ?? a}
+          </button>
+        ))}
+      </div>
+
+      {loading ? (
+        <div className="text-muted-foreground">Загрузка…</div>
+      ) : filtered.length === 0 ? (
+        <div className="rounded-3xl bg-card p-10 text-center shadow-tile text-muted-foreground">Записей нет</div>
+      ) : (
+        <div className="rounded-3xl bg-card shadow-tile overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-muted-foreground border-b border-border">
+                  <th className="py-3 px-4 font-semibold">Дата</th>
+                  <th className="py-3 px-4 font-semibold">Админ</th>
+                  <th className="py-3 px-4 font-semibold">Действие</th>
+                  <th className="py-3 px-4 font-semibold">Объект</th>
+                  <th className="py-3 px-4 font-semibold">Детали</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((r) => {
+                  const a = admins[r.admin_id];
+                  return (
+                    <tr key={r.id} className="border-b border-border/40 last:border-0">
+                      <td className="py-2 px-4 text-xs text-muted-foreground whitespace-nowrap">{new Date(r.created_at).toLocaleString("ru-RU")}</td>
+                      <td className="py-2 px-4">{a?.name || a?.email || r.admin_id.slice(0, 8)}</td>
+                      <td className="py-2 px-4">{ACTION_LABEL[r.action] ?? r.action}</td>
+                      <td className="py-2 px-4 text-xs">
+                        {r.target_type ?? ""}{r.target_id ? ` · ${r.target_id.slice(0, 12)}` : ""}
+                      </td>
+                      <td className="py-2 px-4 text-xs text-muted-foreground font-mono">
+                        {r.details ? JSON.stringify(r.details) : ""}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ============ Site settings ============
+const SETTING_FIELDS: { key: string; label: string; placeholder?: string; multiline?: boolean }[] = [
+  { key: "site_name", label: "Название сайта", placeholder: "Oz Top" },
+  { key: "hero_title", label: "Заголовок Hero" },
+  { key: "hero_subtitle", label: "Подзаголовок Hero", multiline: true },
+  { key: "contact_email", label: "Контактный email" },
+  { key: "contact_telegram", label: "Telegram для связи", placeholder: "@yourbot" },
+  { key: "support_hours", label: "Время работы поддержки", placeholder: "24/7" },
+];
+
+function SettingsTab() {
+  const [values, setValues] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.from("site_settings").select("key, value");
+      const map: Record<string, string> = {};
+      (data ?? []).forEach((r: { key: string; value: string | null }) => { map[r.key] = r.value ?? ""; });
+      setValues(map);
+      setLoading(false);
+    })();
+  }, []);
+
+  const save = async () => {
+    setSaving(true);
+    const rows = SETTING_FIELDS.map((f) => ({ key: f.key, value: values[f.key] ?? "" }));
+    const { error } = await supabase.from("site_settings").upsert(rows, { onConflict: "key" });
+    setSaving(false);
+    if (error) return toast.error(error.message);
+    const { data: u } = await supabase.auth.getUser();
+    if (u.user) logAction(u.user.id, "settings_update", "settings", undefined, { keys: rows.map((r) => r.key) });
+    toast.success("Настройки сохранены");
+  };
+
+  if (loading) return <div className="mt-6 text-muted-foreground">Загрузка…</div>;
+
+  return (
+    <div className="mt-6 space-y-4">
+      <div className="rounded-3xl bg-card p-6 shadow-tile">
+        <h2 className="text-lg font-bold">Настройки сайта</h2>
+        <p className="mt-1 text-xs text-muted-foreground">Эти значения можно использовать в компонентах через таблицу site_settings.</p>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          {SETTING_FIELDS.map((f) => (
+            <label key={f.key} className="flex flex-col gap-1.5 text-sm">
+              <span className="font-semibold">{f.label}</span>
+              {f.multiline ? (
+                <textarea rows={3} value={values[f.key] ?? ""} placeholder={f.placeholder}
+                  onChange={(e) => setValues({ ...values, [f.key]: e.target.value })}
+                  className="rounded-xl border border-border bg-background px-3 py-2 text-sm" />
+              ) : (
+                <input value={values[f.key] ?? ""} placeholder={f.placeholder}
+                  onChange={(e) => setValues({ ...values, [f.key]: e.target.value })}
+                  className="rounded-xl border border-border bg-background px-3 py-2 text-sm" />
+              )}
+            </label>
+          ))}
+        </div>
+        <button onClick={save} disabled={saving}
+          className="mt-5 rounded-full bg-primary text-primary-foreground px-5 py-2 text-sm font-semibold disabled:opacity-60">
+          {saving ? "Сохраняем…" : "Сохранить"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
