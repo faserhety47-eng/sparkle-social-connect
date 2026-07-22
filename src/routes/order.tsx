@@ -47,6 +47,8 @@ function OrderPage() {
   const [type, setType] = useState("");
   const [link, setLink] = useState("");
   const [count, setCount] = useState(100);
+  const [guestEmail, setGuestEmail] = useState("");
+  const [guestContact, setGuestContact] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -61,28 +63,50 @@ function OrderPage() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) {
-      toast.info("Войдите или зарегистрируйтесь, чтобы оформить заказ");
-      navigate({ to: "/login" });
-      return;
-    }
     const result = schema.safeParse({ platform, type, link, count });
     if (!result.success) return toast.error(result.error.issues[0].message);
 
+    if (!user) {
+      const emailOk = z.string().trim().email().safeParse(guestEmail).success;
+      if (!emailOk && !guestContact.trim()) {
+        return toast.error("Укажите email или контакт для связи");
+      }
+    }
+
     setLoading(true);
-    const { data, error } = await supabase.from("orders").insert({
-      user_id: user.id,
+    const payload: Record<string, unknown> = {
       platform: result.data.platform,
       service_type: result.data.type,
       link: result.data.link,
       quantity: result.data.count,
       price_rub: price,
-    }).select("id").single();
+    };
+    if (user) {
+      payload.user_id = user.id;
+    } else {
+      payload.guest_email = guestEmail.trim() || null;
+      payload.guest_contact = guestContact.trim() || null;
+    }
+
+    const { data, error } = await supabase
+      .from("orders")
+      .insert(payload as never)
+      .select("id, guest_token")
+      .single();
     setLoading(false);
 
     if (error) return toast.error("Не удалось создать заказ: " + error.message);
     toast.success("Заказ создан. Осталось оплатить.");
-    navigate({ to: "/account", search: { order: data.id } as never });
+    if (user) {
+      navigate({ to: "/account", search: { order: data.id } as never });
+    } else {
+      try {
+        const saved = JSON.parse(localStorage.getItem("guest_orders") || "[]");
+        saved.unshift({ id: data.id, token: data.guest_token, at: Date.now() });
+        localStorage.setItem("guest_orders", JSON.stringify(saved.slice(0, 20)));
+      } catch {}
+      navigate({ to: "/guest-order/$token", params: { token: data.guest_token as string } });
+    }
   };
 
   return (
@@ -94,10 +118,13 @@ function OrderPage() {
 
       {!sessionLoading && !user && (
         <div className="mt-6 rounded-2xl border border-border bg-card/60 p-4 text-sm text-muted-foreground">
-          Чтобы оформить заказ, нужно <Link to="/login" className="text-primary font-semibold">войти</Link> или{" "}
-          <Link to="/register" className="text-primary font-semibold">зарегистрироваться</Link>.
+          Можно оформить заказ без регистрации — доступ к заказу сохранится по ссылке.
+          Или <Link to="/login" className="text-primary font-semibold">войдите</Link> /{" "}
+          <Link to="/register" className="text-primary font-semibold">зарегистрируйтесь</Link>,
+          чтобы видеть все заказы в личном кабинете.
         </div>
       )}
+
 
       <form onSubmit={submit} className="mt-8 rounded-3xl bg-card p-6 md:p-8 shadow-tile space-y-6">
         <div>
@@ -137,10 +164,31 @@ function OrderPage() {
             className="mt-2 w-full rounded-xl border border-input bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
         </div>
 
+        {!user && (
+          <div className="grid gap-4 sm:grid-cols-2 rounded-2xl border border-dashed border-border p-4">
+            <div className="sm:col-span-2 text-xs text-muted-foreground">
+              Контакты для связи по заказу (без регистрации). Достаточно одного поля.
+            </div>
+            <div>
+              <label className="text-sm font-semibold">Email</label>
+              <input type="email" value={guestEmail} onChange={(e) => setGuestEmail(e.target.value)}
+                placeholder="you@example.com" maxLength={255}
+                className="mt-2 w-full rounded-xl border border-input bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+            </div>
+            <div>
+              <label className="text-sm font-semibold">Telegram / телефон</label>
+              <input type="text" value={guestContact} onChange={(e) => setGuestContact(e.target.value)}
+                placeholder="@username или +7…" maxLength={100}
+                className="mt-2 w-full rounded-xl border border-input bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center justify-between rounded-2xl bg-muted p-4">
           <div className="text-sm text-muted-foreground">Итоговая стоимость</div>
           <div className="text-2xl font-extrabold text-primary">{price.toFixed(2)} ₽</div>
         </div>
+
 
         <button type="submit" disabled={loading} className="btn-primary w-full disabled:opacity-60">
           {loading ? "Создаём заказ…" : "Оформить и перейти к оплате"}

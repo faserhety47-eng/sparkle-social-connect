@@ -22,6 +22,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as NakrutkaIndexRouteImport } from './routes/nakrutka.index'
 import { Route as PSlugRouteImport } from './routes/p.$slug'
+import { Route as GuestOrderTokenRouteImport } from './routes/guest-order.$token'
 import { Route as NakrutkaTypePlatformRouteImport } from './routes/nakrutka.$type.$platform'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -89,6 +90,11 @@ const PSlugRoute = PSlugRouteImport.update({
   path: '/p/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuestOrderTokenRoute = GuestOrderTokenRouteImport.update({
+  id: '/guest-order/$token',
+  path: '/guest-order/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const NakrutkaTypePlatformRoute = NakrutkaTypePlatformRouteImport.update({
   id: '/nakrutka/$type/$platform',
   path: '/nakrutka/$type/$platform',
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/guest-order/$token': typeof GuestOrderTokenRoute
   '/p/$slug': typeof PSlugRoute
   '/nakrutka/': typeof NakrutkaIndexRoute
   '/nakrutka/$type/$platform': typeof NakrutkaTypePlatformRoute
@@ -123,6 +130,7 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/guest-order/$token': typeof GuestOrderTokenRoute
   '/p/$slug': typeof PSlugRoute
   '/nakrutka': typeof NakrutkaIndexRoute
   '/nakrutka/$type/$platform': typeof NakrutkaTypePlatformRoute
@@ -140,6 +148,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/guest-order/$token': typeof GuestOrderTokenRoute
   '/p/$slug': typeof PSlugRoute
   '/nakrutka/': typeof NakrutkaIndexRoute
   '/nakrutka/$type/$platform': typeof NakrutkaTypePlatformRoute
@@ -158,6 +167,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/services'
     | '/sitemap.xml'
+    | '/guest-order/$token'
     | '/p/$slug'
     | '/nakrutka/'
     | '/nakrutka/$type/$platform'
@@ -174,6 +184,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/services'
     | '/sitemap.xml'
+    | '/guest-order/$token'
     | '/p/$slug'
     | '/nakrutka'
     | '/nakrutka/$type/$platform'
@@ -190,6 +201,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/services'
     | '/sitemap.xml'
+    | '/guest-order/$token'
     | '/p/$slug'
     | '/nakrutka/'
     | '/nakrutka/$type/$platform'
@@ -207,6 +219,7 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   ServicesRoute: typeof ServicesRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  GuestOrderTokenRoute: typeof GuestOrderTokenRoute
   PSlugRoute: typeof PSlugRoute
   NakrutkaIndexRoute: typeof NakrutkaIndexRoute
   NakrutkaTypePlatformRoute: typeof NakrutkaTypePlatformRoute
@@ -305,6 +318,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guest-order/$token': {
+      id: '/guest-order/$token'
+      path: '/guest-order/$token'
+      fullPath: '/guest-order/$token'
+      preLoaderRoute: typeof GuestOrderTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/nakrutka/$type/$platform': {
       id: '/nakrutka/$type/$platform'
       path: '/nakrutka/$type/$platform'
@@ -327,6 +347,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   ServicesRoute: ServicesRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  GuestOrderTokenRoute: GuestOrderTokenRoute,
   PSlugRoute: PSlugRoute,
   NakrutkaIndexRoute: NakrutkaIndexRoute,
   NakrutkaTypePlatformRoute: NakrutkaTypePlatformRoute,
