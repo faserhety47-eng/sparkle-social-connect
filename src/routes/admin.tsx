@@ -11,6 +11,7 @@ import { usePaymentMethods, type PaymentMethod } from "@/hooks/usePaymentMethods
 import { OrderMessages } from "@/components/site/OrderMessages";
 import { IconPicker } from "@/components/site/IconPicker";
 import { parseBuiltinIcon } from "@/data/icon-library";
+import { useAdminNotifier } from "@/hooks/useAdminNotifier";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin")({
