@@ -527,6 +527,7 @@ export type Database = {
         Args: { _amount: number; _note?: string; _user_id: string }
         Returns: undefined
       }
+      client_guest_token: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

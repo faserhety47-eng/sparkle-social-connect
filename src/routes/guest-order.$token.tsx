@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useMemo, useState } from "react";
+import { createGuestClient } from "@/lib/guest-client";
 import { usePaymentMethods } from "@/hooks/usePaymentMethods";
 import { toast } from "sonner";
 
@@ -41,6 +41,7 @@ type Message = { id: string; sender: string; body: string; created_at: string };
 
 function GuestOrderPage() {
   const { token } = Route.useParams();
+  const guestClient = useMemo(() => createGuestClient(token), [token]);
   const { methods } = usePaymentMethods();
   const [order, setOrder] = useState<Order | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -49,7 +50,7 @@ function GuestOrderPage() {
   const [sending, setSending] = useState(false);
 
   const load = async () => {
-    const { data, error } = await supabase
+    const { data, error } = await guestClient
       .from("orders")
       .select("id, status, platform, service_type, link, quantity, price_rub, created_at, guest_email, guest_contact")
       .eq("guest_token", token)
@@ -58,7 +59,7 @@ function GuestOrderPage() {
       setOrder(null);
     } else {
       setOrder(data as Order);
-      const { data: msgs } = await supabase
+      const { data: msgs } = await guestClient
         .from("order_messages")
         .select("id, sender, body, created_at")
         .eq("order_id", (data as Order).id)
@@ -68,11 +69,11 @@ function GuestOrderPage() {
     setLoading(false);
   };
 
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [token]);
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [token, guestClient]);
 
   const reportPayment = async () => {
     if (!order) return;
-    const { error } = await supabase
+    const { error } = await guestClient
       .from("orders")
       .update({ status: "payment_reported" })
       .eq("guest_token", token);
@@ -85,7 +86,7 @@ function GuestOrderPage() {
     e.preventDefault();
     if (!order || !reply.trim()) return;
     setSending(true);
-    const { error } = await supabase.from("order_messages").insert({
+    const { error } = await guestClient.from("order_messages").insert({
       order_id: order.id,
       sender: "client",
       body: reply.trim().slice(0, 2000),
