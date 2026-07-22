@@ -47,7 +47,6 @@ export const Route = createFileRoute("/nakrutka/$type/$platform")({
             offers: {
               "@type": "Offer",
               priceCurrency: "RUB",
-              price: priceHint(params.type, params.platform) ?? undefined,
               availability: "https://schema.org/InStock",
               url,
             },
