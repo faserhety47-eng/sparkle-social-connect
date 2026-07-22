@@ -442,7 +442,9 @@ function PlatformsManager() {
     return (
       <div className="h-12 w-12 shrink-0 rounded-xl flex items-center justify-center overflow-hidden ring-1 ring-white/5"
         style={{ backgroundColor: p.color || "#7B4FFF" }}>
-        {builtin ? (
+        {builtin?.imageUrl ? (
+          <img src={builtin.imageUrl} alt="" className="h-7 w-7 object-contain" />
+        ) : builtin?.Icon ? (
           <builtin.Icon width={26} height={26} color="#ffffff" />
         ) : p.icon_url ? (
           <img src={p.icon_url} alt="" className="h-7 w-7 object-contain" />
