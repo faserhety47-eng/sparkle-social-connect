@@ -9,9 +9,12 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermsOfServiceRouteImport } from './routes/terms-of-service'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as PublicOfferRouteImport } from './routes/public-offer'
+import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
 import { Route as OrderRouteImport } from './routes/order'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FaqRouteImport } from './routes/faq'
@@ -25,6 +28,11 @@ import { Route as PSlugRouteImport } from './routes/p.$slug'
 import { Route as GuestOrderTokenRouteImport } from './routes/guest-order.$token'
 import { Route as NakrutkaTypePlatformRouteImport } from './routes/nakrutka.$type.$platform'
 
+const TermsOfServiceRoute = TermsOfServiceRouteImport.update({
+  id: '/terms-of-service',
+  path: '/terms-of-service',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
@@ -38,6 +46,16 @@ const ServicesRoute = ServicesRouteImport.update({
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PublicOfferRoute = PublicOfferRouteImport.update({
+  id: '/public-offer',
+  path: '/public-offer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
+  id: '/privacy-policy',
+  path: '/privacy-policy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OrderRoute = OrderRouteImport.update({
@@ -110,9 +128,12 @@ export interface FileRoutesByFullPath {
   '/faq': typeof FaqRoute
   '/login': typeof LoginRoute
   '/order': typeof OrderRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
+  '/public-offer': typeof PublicOfferRoute
   '/register': typeof RegisterRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/terms-of-service': typeof TermsOfServiceRoute
   '/guest-order/$token': typeof GuestOrderTokenRoute
   '/p/$slug': typeof PSlugRoute
   '/nakrutka/': typeof NakrutkaIndexRoute
@@ -127,9 +148,12 @@ export interface FileRoutesByTo {
   '/faq': typeof FaqRoute
   '/login': typeof LoginRoute
   '/order': typeof OrderRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
+  '/public-offer': typeof PublicOfferRoute
   '/register': typeof RegisterRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/terms-of-service': typeof TermsOfServiceRoute
   '/guest-order/$token': typeof GuestOrderTokenRoute
   '/p/$slug': typeof PSlugRoute
   '/nakrutka': typeof NakrutkaIndexRoute
@@ -145,9 +169,12 @@ export interface FileRoutesById {
   '/faq': typeof FaqRoute
   '/login': typeof LoginRoute
   '/order': typeof OrderRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
+  '/public-offer': typeof PublicOfferRoute
   '/register': typeof RegisterRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/terms-of-service': typeof TermsOfServiceRoute
   '/guest-order/$token': typeof GuestOrderTokenRoute
   '/p/$slug': typeof PSlugRoute
   '/nakrutka/': typeof NakrutkaIndexRoute
@@ -164,9 +191,12 @@ export interface FileRouteTypes {
     | '/faq'
     | '/login'
     | '/order'
+    | '/privacy-policy'
+    | '/public-offer'
     | '/register'
     | '/services'
     | '/sitemap.xml'
+    | '/terms-of-service'
     | '/guest-order/$token'
     | '/p/$slug'
     | '/nakrutka/'
@@ -181,9 +211,12 @@ export interface FileRouteTypes {
     | '/faq'
     | '/login'
     | '/order'
+    | '/privacy-policy'
+    | '/public-offer'
     | '/register'
     | '/services'
     | '/sitemap.xml'
+    | '/terms-of-service'
     | '/guest-order/$token'
     | '/p/$slug'
     | '/nakrutka'
@@ -198,9 +231,12 @@ export interface FileRouteTypes {
     | '/faq'
     | '/login'
     | '/order'
+    | '/privacy-policy'
+    | '/public-offer'
     | '/register'
     | '/services'
     | '/sitemap.xml'
+    | '/terms-of-service'
     | '/guest-order/$token'
     | '/p/$slug'
     | '/nakrutka/'
@@ -216,9 +252,12 @@ export interface RootRouteChildren {
   FaqRoute: typeof FaqRoute
   LoginRoute: typeof LoginRoute
   OrderRoute: typeof OrderRoute
+  PrivacyPolicyRoute: typeof PrivacyPolicyRoute
+  PublicOfferRoute: typeof PublicOfferRoute
   RegisterRoute: typeof RegisterRoute
   ServicesRoute: typeof ServicesRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  TermsOfServiceRoute: typeof TermsOfServiceRoute
   GuestOrderTokenRoute: typeof GuestOrderTokenRoute
   PSlugRoute: typeof PSlugRoute
   NakrutkaIndexRoute: typeof NakrutkaIndexRoute
@@ -227,6 +266,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/terms-of-service': {
+      id: '/terms-of-service'
+      path: '/terms-of-service'
+      fullPath: '/terms-of-service'
+      preLoaderRoute: typeof TermsOfServiceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
@@ -246,6 +292,20 @@ declare module '@tanstack/react-router' {
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/public-offer': {
+      id: '/public-offer'
+      path: '/public-offer'
+      fullPath: '/public-offer'
+      preLoaderRoute: typeof PublicOfferRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy-policy': {
+      id: '/privacy-policy'
+      path: '/privacy-policy'
+      fullPath: '/privacy-policy'
+      preLoaderRoute: typeof PrivacyPolicyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/order': {
@@ -344,9 +404,12 @@ const rootRouteChildren: RootRouteChildren = {
   FaqRoute: FaqRoute,
   LoginRoute: LoginRoute,
   OrderRoute: OrderRoute,
+  PrivacyPolicyRoute: PrivacyPolicyRoute,
+  PublicOfferRoute: PublicOfferRoute,
   RegisterRoute: RegisterRoute,
   ServicesRoute: ServicesRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  TermsOfServiceRoute: TermsOfServiceRoute,
   GuestOrderTokenRoute: GuestOrderTokenRoute,
   PSlugRoute: PSlugRoute,
   NakrutkaIndexRoute: NakrutkaIndexRoute,
