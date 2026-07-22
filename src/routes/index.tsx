@@ -1,6 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { ServicesGrid } from "@/components/site/ServicesGrid";
 import heroCat from "@/assets/hero-cat-transparent.png.asset.json";
+import { LANDING_TYPES, LANDING_PLATFORMS } from "@/data/landing-matrix";
 
 export const Route = createFileRoute("/")({
   head: () => ({
