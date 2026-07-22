@@ -78,7 +78,7 @@ export const syncSmmCatalog = createServerFn({ method: "POST" })
             _api_platform: apiKey,
             _category: catKey,
             _name: svc.name,
-            _description: svc.description ?? null,
+            _description: svc.description ?? "",
             _price_api: svc.price,
             _price_rub: priceRub,
             _min: svc.min,
