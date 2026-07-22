@@ -807,6 +807,17 @@ function DashboardTab() {
       const paidStatuses = new Set(["paid", "processing", "completed"]);
       let revenueTotal = 0, revenueToday = 0, revenueMonth = 0;
       let today = 0, awaiting = 0, processing = 0, completed = 0;
+
+      const days: DayPoint[] = [];
+      const dayMap = new Map<string, DayPoint>();
+      for (let i = 13; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+        const key = d.toISOString().slice(0, 10);
+        const point = { day: d.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit" }), revenue: 0, orders: 0 };
+        days.push(point); dayMap.set(key, point);
+      }
+      const serviceMap = new Map<string, { count: number; revenue: number }>();
+
       for (const o of list) {
         const t = new Date(o.created_at).getTime();
         const price = Number(o.price_rub) || 0;
@@ -814,16 +825,31 @@ function DashboardTab() {
         if (o.status === "awaiting_payment" || o.status === "payment_reported") awaiting++;
         if (o.status === "processing") processing++;
         if (o.status === "completed") completed++;
+        const dayKey = new Date(o.created_at).toISOString().slice(0, 10);
+        const point = dayMap.get(dayKey);
+        if (point) point.orders += 1;
         if (paidStatuses.has(o.status)) {
           revenueTotal += price;
           if (t >= startDay) revenueToday += price;
           if (t >= startMonth) revenueMonth += price;
+          if (point) point.revenue += price;
+          const skey = `${o.platform} / ${o.service_type}`;
+          const cur = serviceMap.get(skey) ?? { count: 0, revenue: 0 };
+          cur.count += 1; cur.revenue += price; serviceMap.set(skey, cur);
         }
       }
+      const topServices = [...serviceMap.entries()]
+        .map(([key, v]) => ({ key, ...v }))
+        .sort((a, b) => b.revenue - a.revenue).slice(0, 5);
+
+      const { count: newUsers } = await supabase
+        .from("profiles").select("id", { count: "exact", head: true })
+        .gte("created_at", new Date(startMonth).toISOString());
+
       setStats({
         total: list.length, today, awaiting, processing, completed,
         revenueTotal, revenueToday, revenueMonth,
-        recent: list.slice(0, 5),
+        recent: list.slice(0, 5), series: days, topServices, newUsers: newUsers ?? 0,
       });
       setLoading(false);
     })();
