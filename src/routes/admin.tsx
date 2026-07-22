@@ -48,7 +48,7 @@ const STATUSES: { key: string; label: string; color: string }[] = [
   { key: "cancelled", label: "Отменён", color: "bg-red-500/15 text-red-400" },
 ];
 
-type Tab = "dashboard" | "orders" | "users" | "prices" | "platforms" | "types" | "payments";
+type Tab = "dashboard" | "orders" | "users" | "balance" | "prices" | "platforms" | "types" | "payments";
 
 const STATUS_MESSAGES: Record<string, string> = {
   payment_reported: "Спасибо! Мы получили информацию об оплате и проверяем её.",
