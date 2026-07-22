@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { useNavLinks } from "@/hooks/useNavLinks";
 import { Send } from "lucide-react";
 
@@ -5,7 +6,7 @@ export function Footer() {
   const links = useNavLinks("footer");
   return (
     <footer className="mt-24 border-t border-border/60 bg-card/50">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 grid gap-8 md:grid-cols-3">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 grid gap-8 md:grid-cols-4">
         <div>
           <div className="text-xl font-extrabold brand-logo">smm-cat.site</div>
           <p className="mt-3 text-sm text-muted-foreground max-w-xs">
@@ -16,15 +17,25 @@ export function Footer() {
           <h4 className="text-sm font-semibold mb-3">Сервис</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
             {links.map((l) => (
-              <li key={l.url + l.label}><a href={l.url} className="hover:text-primary">{l.label}</a></li>
+              <li key={l.url + l.label}>
+                <Link to={l.url} className="hover:text-primary">{l.label}</Link>
+              </li>
             ))}
           </ul>
         </div>
         <div>
           <h4 className="text-sm font-semibold mb-3">Аккаунт</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><a href="/login" className="hover:text-primary">Вход</a></li>
-            <li><a href="/register" className="hover:text-primary">Регистрация</a></li>
+            <li><Link to="/login" className="hover:text-primary">Вход</Link></li>
+            <li><Link to="/register" className="hover:text-primary">Регистрация</Link></li>
+          </ul>
+        </div>
+        <div>
+          <h4 className="text-sm font-semibold mb-3">Правовые документы</h4>
+          <ul className="space-y-2 text-sm text-muted-foreground">
+            <li><Link to="/privacy-policy" className="hover:text-primary">Политика конфиденциальности</Link></li>
+            <li><Link to="/terms-of-service" className="hover:text-primary">Пользовательское соглашение</Link></li>
+            <li><Link to="/public-offer" className="hover:text-primary">Договор оферты</Link></li>
           </ul>
         </div>
         <div>
