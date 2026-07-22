@@ -159,6 +159,9 @@ export type Database = {
       orders: {
         Row: {
           created_at: string
+          guest_contact: string | null
+          guest_email: string | null
+          guest_token: string | null
           id: string
           link: string
           payment_note: string | null
@@ -168,10 +171,13 @@ export type Database = {
           service_type: string
           status: string
           updated_at: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
+          guest_contact?: string | null
+          guest_email?: string | null
+          guest_token?: string | null
           id?: string
           link: string
           payment_note?: string | null
@@ -181,10 +187,13 @@ export type Database = {
           service_type: string
           status?: string
           updated_at?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
+          guest_contact?: string | null
+          guest_email?: string | null
+          guest_token?: string | null
           id?: string
           link?: string
           payment_note?: string | null
@@ -194,7 +203,7 @@ export type Database = {
           service_type?: string
           status?: string
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: []
       }
