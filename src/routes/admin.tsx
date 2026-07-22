@@ -146,7 +146,7 @@ function OrdersTab({ adminId }: { adminId: string }) {
       setOrders(list);
       const ids = [...new Set(list.map((o) => o.user_id))];
       if (ids.length) {
-        const { data: profs } = await supabase.from("profiles").select("id, email, name").in("id", ids);
+        const { data: profs } = await supabase.from("profiles").select("id, email, name, balance_rub").in("id", ids);
         const map: Record<string, Profile> = {};
         (profs ?? []).forEach((p) => (map[p.id] = p as Profile));
         setProfiles(map);
