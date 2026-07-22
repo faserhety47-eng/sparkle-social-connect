@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SERVICES } from "@/data/services";
 import { BRAND_ICONS } from "@/data/service-icons";
+import { parseBuiltinIcon } from "@/data/icon-library";
 
 export const Route = createFileRoute("/services")({
   head: () => ({
@@ -23,6 +24,7 @@ function ServicesPage() {
       <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {SERVICES.map((s) => {
           const Icon = BRAND_ICONS[s.id];
+          const builtin = parseBuiltinIcon(s.icon_url);
           return (
             <Link
               key={s.id}
@@ -31,10 +33,18 @@ function ServicesPage() {
               className="rounded-2xl bg-card p-5 shadow-tile flex items-center gap-4 hover:-translate-y-0.5 transition"
             >
               <div
-                className="h-14 w-14 rounded-2xl flex items-center justify-center text-white font-bold text-xl shrink-0"
+                className="h-14 w-14 rounded-2xl flex items-center justify-center text-white font-bold text-xl shrink-0 overflow-hidden"
                 style={{ backgroundColor: s.color }}
               >
-                {Icon ? <Icon width={28} height={28} color="#ffffff" /> : s.letter}
+                {builtin?.imageUrl ? (
+                  <img src={builtin.imageUrl} alt="" className="h-8 w-8 object-contain" />
+                ) : builtin?.Icon ? (
+                  <builtin.Icon width={28} height={28} color="#ffffff" />
+                ) : Icon ? (
+                  <Icon width={28} height={28} color="#ffffff" />
+                ) : (
+                  s.letter
+                )}
               </div>
               <div className="min-w-0">
                 <div className="font-semibold">{s.name}</div>

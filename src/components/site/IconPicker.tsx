@@ -27,10 +27,14 @@ export function IconPicker({ value, onChange }: Props) {
         {current ? (
           <>
             <span
-              className="h-7 w-7 rounded-md flex items-center justify-center shrink-0"
+              className="h-7 w-7 rounded-md flex items-center justify-center shrink-0 overflow-hidden"
               style={{ backgroundColor: current.color }}
             >
-              <current.Icon width={16} height={16} color="#ffffff" />
+              {current.imageUrl ? (
+                <img src={current.imageUrl} alt="" className="h-5 w-5 object-contain" />
+              ) : current.Icon ? (
+                <current.Icon width={16} height={16} color="#ffffff" />
+              ) : null}
             </span>
             <span className="flex-1 truncate">{current.label}</span>
             <span
@@ -73,10 +77,14 @@ export function IconPicker({ value, onChange }: Props) {
                   title={i.label}
                 >
                   <span
-                    className="h-9 w-9 rounded-md flex items-center justify-center"
+                    className="h-9 w-9 rounded-md flex items-center justify-center overflow-hidden"
                     style={{ backgroundColor: i.color }}
                   >
-                    <i.Icon width={20} height={20} color="#ffffff" />
+                    {i.imageUrl ? (
+                      <img src={i.imageUrl} alt="" className="h-6 w-6 object-contain" />
+                    ) : i.Icon ? (
+                      <i.Icon width={20} height={20} color="#ffffff" />
+                    ) : null}
                   </span>
                   <span className="truncate w-full text-center">{i.label}</span>
                 </button>

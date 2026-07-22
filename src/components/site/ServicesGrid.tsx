@@ -1,11 +1,12 @@
 import { Link } from "@tanstack/react-router";
-import { BRAND_ICONS } from "@/data/service-icons";
+import { BRAND_ICONS, BRAND_IMAGE_ICONS } from "@/data/service-icons";
 import { parseBuiltinIcon } from "@/data/icon-library";
 import { usePlatforms, type Platform } from "@/hooks/usePlatforms";
 
 function Tile({ svc }: { svc: Platform }) {
   const builtin = parseBuiltinIcon(svc.icon_url);
   const Icon = BRAND_ICONS[svc.id];
+  const imageIcon = BRAND_IMAGE_ICONS[svc.id];
   const hasImg = !builtin && !!svc.icon_url;
   return (
     <Link
@@ -18,12 +19,16 @@ function Tile({ svc }: { svc: Platform }) {
         className="h-14 w-14 rounded-2xl flex items-center justify-center shadow-md ring-1 ring-white/5 overflow-hidden"
         style={{ backgroundColor: svc.color || "#7B4FFF" }}
       >
-        {builtin ? (
+        {builtin?.imageUrl ? (
+          <img src={builtin.imageUrl} alt="" className="h-8 w-8 object-contain" />
+        ) : builtin?.Icon ? (
           <builtin.Icon width={28} height={28} color="#ffffff" />
         ) : hasImg ? (
           <img src={svc.icon_url!} alt="" className="h-8 w-8 object-contain" />
         ) : svc.icon_emoji ? (
           <span className="text-2xl">{svc.icon_emoji}</span>
+        ) : imageIcon ? (
+          <img src={imageIcon} alt="" className="h-8 w-8 object-contain" />
         ) : Icon ? (
           <Icon width={28} height={28} color="#ffffff" />
         ) : (

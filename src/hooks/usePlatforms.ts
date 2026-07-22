@@ -18,14 +18,21 @@ export function usePlatforms(opts: { onlyActive?: boolean } = { onlyActive: true
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
-    let q = supabase
-      .from("platforms")
-      .select("id, name, is_active, sort_order, description, color, icon_url, icon_emoji, letter")
-      .order("sort_order");
-    if (opts.onlyActive) q = q.eq("is_active", true);
-    const { data } = await q;
-    setPlatforms((data ?? []) as Platform[]);
-    setLoading(false);
+    try {
+      let q = supabase
+        .from("platforms")
+        .select("id, name, is_active, sort_order, description, color, icon_url, icon_emoji, letter")
+        .order("sort_order");
+      if (opts.onlyActive) q = q.eq("is_active", true);
+      const { data, error } = await q;
+      if (error) throw error;
+      setPlatforms((data ?? []) as Platform[]);
+    } catch (e) {
+      console.error("usePlatforms error:", e);
+      setPlatforms([]);
+    } finally {
+      setLoading(false);
+    }
   }, [opts.onlyActive]);
 
   useEffect(() => { load(); }, [load]);

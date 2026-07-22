@@ -1,0 +1,1 @@
+UPDATE public.platforms SET icon_url = 'builtin:max-app', color = '#3B6BFF' WHERE id = 'max';
