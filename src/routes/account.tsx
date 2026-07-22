@@ -48,14 +48,50 @@ const TYPE_LABEL: Record<string, string> = {
   followers: "Подписчики", likes: "Лайки", views: "Просмотры", comments: "Комментарии",
 };
 
+type Txn = {
+  id: string;
+  amount_rub: number;
+  kind: string;
+  note: string | null;
+  order_id: string | null;
+  created_at: string;
+};
+
+const KIND_LABEL: Record<string, string> = {
+  topup: "Пополнение",
+  spend: "Оплата заказа",
+  refund: "Возврат",
+  adjust: "Корректировка",
+};
+
 function AccountPage() {
   const { order: highlightId } = Route.useSearch();
   const { user, loading: sessionLoading } = useSession();
   const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
+  const [balance, setBalance] = useState<number>(0);
+  const [txns, setTxns] = useState<Txn[]>([]);
+  const [showTxns, setShowTxns] = useState(false);
   const [loading, setLoading] = useState(true);
   const [openChat, setOpenChat] = useState<Record<string, boolean>>({});
   const { methods } = usePaymentMethods();
+
+  const loadAll = async () => {
+    const [ordersRes, profRes, txnRes] = await Promise.all([
+      supabase.from("orders")
+        .select("id, platform, service_type, link, quantity, price_rub, status, created_at")
+        .order("created_at", { ascending: false }),
+      supabase.from("profiles").select("balance_rub").eq("id", user!.id).maybeSingle(),
+      supabase.from("balance_transactions")
+        .select("id, amount_rub, kind, note, order_id, created_at")
+        .order("created_at", { ascending: false })
+        .limit(50),
+    ]);
+    if (ordersRes.error) toast.error(ordersRes.error.message);
+    setOrders((ordersRes.data ?? []) as Order[]);
+    setBalance(Number((profRes.data as { balance_rub?: number } | null)?.balance_rub ?? 0));
+    setTxns((txnRes.data ?? []) as Txn[]);
+  };
 
   useEffect(() => {
     if (sessionLoading) return;
@@ -64,14 +100,10 @@ function AccountPage() {
       return;
     }
     (async () => {
-      const { data, error } = await supabase
-        .from("orders")
-        .select("id, platform, service_type, link, quantity, price_rub, status, created_at")
-        .order("created_at", { ascending: false });
-      if (error) toast.error(error.message);
-      setOrders((data ?? []) as Order[]);
+      await loadAll();
       setLoading(false);
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, sessionLoading, navigate]);
 
   const markPaid = async (id: string) => {
@@ -79,6 +111,14 @@ function AccountPage() {
     if (error) return toast.error(error.message);
     setOrders((o) => o.map((x) => (x.id === id ? { ...x, status: "payment_reported" } : x)));
     toast.success("Спасибо! Проверим оплату в течение 15 минут.");
+  };
+
+  const payFromBalance = async (id: string, price: number) => {
+    if (balance < price) return toast.error("Недостаточно средств на балансе");
+    const { error } = await supabase.rpc("pay_order_from_balance", { _order_id: id });
+    if (error) return toast.error(error.message);
+    toast.success("Заказ оплачен с баланса");
+    await loadAll();
   };
 
   const logout = async () => {
@@ -89,6 +129,7 @@ function AccountPage() {
   if (sessionLoading || loading) {
     return <section className="mx-auto max-w-4xl px-4 py-14 text-muted-foreground">Загрузка…</section>;
   }
+
 
   return (
     <section className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-14">
