@@ -53,7 +53,7 @@ type Tab = "dashboard" | "orders" | "users" | "balance" | "promos" | "prices" | 
 async function logAction(adminId: string, action: string, targetType?: string, targetId?: string, details?: Record<string, unknown>) {
   try {
     await supabase.from("admin_actions").insert({
-      admin_id: adminId, action, target_type: targetType ?? null, target_id: targetId ?? null, details: details ?? null,
+      admin_id: adminId, action, target_type: targetType ?? null, target_id: targetId ?? null, details: (details ?? null) as never,
     });
   } catch { /* ignore */ }
 }
