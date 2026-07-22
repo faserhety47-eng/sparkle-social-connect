@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Search, Link2, CreditCard, Rocket, ShieldCheck, KeyRound, RefreshCcw,
   MessageCircle, Send, Play, Star, Check, X, BookOpen,
@@ -167,6 +167,18 @@ export function LiveOrdersFeed() {
 
 /* ============ Video demo ============ */
 export function VideoDemo() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const handlePlay = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.play();
+    setIsPlaying(true);
+  };
+
+  const handlePause = () => setIsPlaying(false);
+
   return (
     <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
       <div className="grid gap-8 md:grid-cols-2 md:items-center">
@@ -184,14 +196,31 @@ export function VideoDemo() {
             <Link to="/order" className="btn-primary text-sm">Оформить заказ</Link>
           </div>
         </div>
-        <div className="relative aspect-video rounded-2xl overflow-hidden border border-border/60 bg-gradient-to-br from-brand/20 to-brand-2/20 shadow-xl">
+        <div className="relative aspect-video rounded-2xl overflow-hidden border border-border/60 bg-gradient-to-br from-brand/20 to-brand-2/20 shadow-xl group">
           <video
+            ref={videoRef}
             src={howToOrderVideo.url}
-            controls
+            controls={isPlaying}
             playsInline
             preload="metadata"
+            onPause={handlePause}
             className="absolute inset-0 h-full w-full object-cover"
           />
+          {!isPlaying && (
+            <button
+              type="button"
+              onClick={handlePlay}
+              aria-label="Смотреть видео"
+              className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/30 backdrop-blur-sm transition hover:bg-black/40 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+            >
+              <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-brand shadow-lg transition-transform group-hover:scale-110">
+                <Play className="h-7 w-7 fill-current ml-1" />
+              </span>
+              <span className="mt-3 inline-flex items-center rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-brand shadow">
+                Смотреть
+              </span>
+            </button>
+          )}
         </div>
       </div>
     </section>
