@@ -2,11 +2,8 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import {
   findType,
   findPlatform,
-  priceHint,
   landingTitle,
   landingDescription,
-  type LandingType,
-  type LandingPlatform,
 } from "@/data/landing-matrix";
 import { BRAND_ICONS, BRAND_IMAGE_ICONS } from "@/data/service-icons";
 import { parseBuiltinIcon } from "@/data/icon-library";
@@ -50,7 +47,6 @@ export const Route = createFileRoute("/nakrutka/$type/$platform")({
             offers: {
               "@type": "Offer",
               priceCurrency: "RUB",
-              price: priceHint(params.type, params.platform) ?? undefined,
               availability: "https://schema.org/InStock",
               url,
             },
@@ -74,7 +70,7 @@ function LandingPage() {
   const { platform: platformSlug } = Route.useParams();
   const { platforms } = usePlatforms({ onlyActive: true });
   const platformRow = platforms.find((x) => x.id === p.slug);
-  const price = priceHint(t.slug, p.slug);
+  
 
   return (
     <div className="relative overflow-hidden">
@@ -97,11 +93,6 @@ function LandingPage() {
             <h1 className="text-3xl md:text-5xl font-extrabold leading-tight">
               {t.action} {p.namePrepositional}
             </h1>
-            {price && (
-              <div className="mt-2 text-muted-foreground">
-                От <span className="font-semibold text-foreground">{price} ₽</span> за {t.metric}
-              </div>
-            )}
           </div>
         </div>
 
