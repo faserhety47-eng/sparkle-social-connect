@@ -850,7 +850,7 @@ function DashboardTab() {
   );
 }
 
-type UserRow = { id: string; email: string | null; name: string | null; isAdmin: boolean; ordersCount: number; totalSpent: number };
+type UserRow = { id: string; email: string | null; name: string | null; isAdmin: boolean; ordersCount: number; totalSpent: number; balance: number };
 
 function UsersTab({ currentUserId }: { currentUserId: string }) {
   const [users, setUsers] = useState<UserRow[]>([]);
