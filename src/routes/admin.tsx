@@ -48,7 +48,7 @@ const STATUSES: { key: string; label: string; color: string }[] = [
   { key: "cancelled", label: "Отменён", color: "bg-red-500/15 text-red-400" },
 ];
 
-type Tab = "dashboard" | "orders" | "users" | "prices" | "platforms" | "types" | "payments";
+type Tab = "dashboard" | "orders" | "users" | "balance" | "prices" | "platforms" | "types" | "payments";
 
 const STATUS_MESSAGES: Record<string, string> = {
   payment_reported: "Спасибо! Мы получили информацию об оплате и проверяем её.",
@@ -90,6 +90,7 @@ function AdminPage() {
     { key: "dashboard", label: "Дашборд" },
     { key: "orders", label: "Заказы" },
     { key: "users", label: "Пользователи" },
+    { key: "balance", label: "Баланс" },
     { key: "prices", label: "Цены" },
     { key: "platforms", label: "Платформы" },
     { key: "types", label: "Типы услуг" },
@@ -114,6 +115,7 @@ function AdminPage() {
       {tab === "dashboard" && <DashboardTab />}
       {tab === "orders" && user && <OrdersTab adminId={user.id} />}
       {tab === "users" && user && <UsersTab currentUserId={user.id} />}
+      {tab === "balance" && <BalanceTab />}
       {tab === "prices" && <PricesManager />}
       {tab === "platforms" && <PlatformsManager />}
       {tab === "types" && <ServiceTypesManager />}
@@ -848,7 +850,7 @@ function DashboardTab() {
   );
 }
 
-type UserRow = { id: string; email: string | null; name: string | null; isAdmin: boolean; ordersCount: number; totalSpent: number };
+type UserRow = { id: string; email: string | null; name: string | null; isAdmin: boolean; ordersCount: number; totalSpent: number; balance: number };
 
 function UsersTab({ currentUserId }: { currentUserId: string }) {
   const [users, setUsers] = useState<UserRow[]>([]);
@@ -858,7 +860,7 @@ function UsersTab({ currentUserId }: { currentUserId: string }) {
   const load = async () => {
     setLoading(true);
     const [{ data: profs }, { data: roles }, { data: ords }] = await Promise.all([
-      supabase.from("profiles").select("id, email, name"),
+      supabase.from("profiles").select("id, email, name, balance_rub"),
       supabase.from("user_roles").select("user_id, role"),
       supabase.from("orders").select("user_id, price_rub, status"),
     ]);
@@ -876,6 +878,7 @@ function UsersTab({ currentUserId }: { currentUserId: string }) {
       isAdmin: adminIds.has(p.id),
       ordersCount: stats.get(p.id)?.count ?? 0,
       totalSpent: stats.get(p.id)?.total ?? 0,
+      balance: Number(p.balance_rub ?? 0),
     })).sort((a, b) => b.totalSpent - a.totalSpent));
     setLoading(false);
   };
@@ -920,6 +923,7 @@ function UsersTab({ currentUserId }: { currentUserId: string }) {
                   <th className="py-3 px-4 font-semibold">Клиент</th>
                   <th className="py-3 px-4 font-semibold">Заказы</th>
                   <th className="py-3 px-4 font-semibold">Потрачено</th>
+                  <th className="py-3 px-4 font-semibold">Баланс</th>
                   <th className="py-3 px-4 font-semibold">Роль</th>
                   <th className="py-3 px-4"></th>
                 </tr>
@@ -935,6 +939,27 @@ function UsersTab({ currentUserId }: { currentUserId: string }) {
                     <td className="py-3 px-4">{u.ordersCount}</td>
                     <td className="py-3 px-4 font-semibold">{u.totalSpent.toLocaleString("ru-RU")} ₽</td>
                     <td className="py-3 px-4">
+                      <div className="font-extrabold text-primary">{u.balance.toFixed(2)} ₽</div>
+                      <button
+                        onClick={async () => {
+                          const raw = prompt(`Пополнить баланс ${u.email ?? u.id}\nВведите сумму в ₽ (можно отрицательную для списания):`) ?? "";
+                          if (!raw) return;
+                          const amount = parseFloat(raw.replace(",", "."));
+                          if (!Number.isFinite(amount) || amount === 0) { toast.error("Неверная сумма"); return; }
+                          const note = prompt("Комментарий (необязательно):") || "";
+                          const { error } = await supabase.rpc("admin_topup_balance", {
+                            _user_id: u.id, _amount: amount, _note: note,
+                          });
+                          if (error) { toast.error(error.message); return; }
+                          toast.success("Баланс обновлён");
+                          load();
+                        }}
+                        className="mt-1 text-[11px] font-semibold text-primary hover:underline"
+                      >
+                        Пополнить
+                      </button>
+                    </td>
+                    <td className="py-3 px-4">
                       {u.isAdmin ? (
                         <span className="inline-block rounded-full bg-primary/15 text-primary px-2.5 py-0.5 text-xs font-semibold">Админ</span>
                       ) : (
@@ -949,6 +974,132 @@ function UsersTab({ currentUserId }: { currentUserId: string }) {
                     </td>
                   </tr>
                 ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+type AdminTxn = {
+  id: string;
+  user_id: string;
+  amount_rub: number;
+  kind: string;
+  note: string | null;
+  order_id: string | null;
+  created_at: string;
+};
+
+const KIND_LABEL_ADMIN: Record<string, string> = {
+  topup: "Пополнение",
+  spend: "Оплата заказа",
+  refund: "Возврат",
+  adjust: "Корректировка",
+};
+
+function BalanceTab() {
+  const [txns, setTxns] = useState<AdminTxn[]>([]);
+  const [profiles, setProfiles] = useState<Record<string, Profile>>({});
+  const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState("");
+
+  useEffect(() => {
+    (async () => {
+      const { data, error } = await supabase
+        .from("balance_transactions")
+        .select("id, user_id, amount_rub, kind, note, order_id, created_at")
+        .order("created_at", { ascending: false })
+        .limit(500);
+      if (error) { toast.error(error.message); setLoading(false); return; }
+      const list = (data ?? []) as AdminTxn[];
+      setTxns(list);
+      const ids = [...new Set(list.map((t) => t.user_id))];
+      if (ids.length) {
+        const { data: profs } = await supabase.from("profiles").select("id, email, name").in("id", ids);
+        const map: Record<string, Profile> = {};
+        (profs ?? []).forEach((p) => (map[p.id] = p as Profile));
+        setProfiles(map);
+      }
+      setLoading(false);
+    })();
+  }, []);
+
+  const q = query.trim().toLowerCase();
+  const filtered = q
+    ? txns.filter((t) => {
+        const p = profiles[t.user_id];
+        return (p?.email ?? "").toLowerCase().includes(q) ||
+               (p?.name ?? "").toLowerCase().includes(q) ||
+               (t.note ?? "").toLowerCase().includes(q) ||
+               t.user_id.includes(q);
+      })
+    : txns;
+
+  const totalTopup = filtered.filter((t) => Number(t.amount_rub) > 0).reduce((s, t) => s + Number(t.amount_rub), 0);
+  const totalSpend = filtered.filter((t) => Number(t.amount_rub) < 0).reduce((s, t) => s + Number(t.amount_rub), 0);
+
+  return (
+    <div className="mt-6 space-y-4">
+      <div className="grid gap-3 sm:grid-cols-3">
+        <div className="rounded-2xl bg-card p-4 shadow-tile">
+          <div className="text-xs text-muted-foreground">Всего операций</div>
+          <div className="mt-1 text-2xl font-extrabold">{filtered.length}</div>
+        </div>
+        <div className="rounded-2xl bg-card p-4 shadow-tile">
+          <div className="text-xs text-muted-foreground">Пополнения</div>
+          <div className="mt-1 text-2xl font-extrabold text-emerald-500">+{totalTopup.toFixed(2)} ₽</div>
+        </div>
+        <div className="rounded-2xl bg-card p-4 shadow-tile">
+          <div className="text-xs text-muted-foreground">Списания</div>
+          <div className="mt-1 text-2xl font-extrabold text-red-500">{totalSpend.toFixed(2)} ₽</div>
+        </div>
+      </div>
+
+      <input value={query} onChange={(e) => setQuery(e.target.value)}
+        placeholder="Поиск: email, имя, ID, комментарий…"
+        className="w-full rounded-full border border-border bg-background px-4 py-2 text-sm" />
+
+      {loading ? (
+        <div className="text-muted-foreground">Загрузка…</div>
+      ) : filtered.length === 0 ? (
+        <div className="rounded-3xl bg-card p-10 text-center shadow-tile text-muted-foreground">Операций нет</div>
+      ) : (
+        <div className="rounded-3xl bg-card shadow-tile overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-muted-foreground border-b border-border">
+                  <th className="py-3 px-4 font-semibold">Дата</th>
+                  <th className="py-3 px-4 font-semibold">Клиент</th>
+                  <th className="py-3 px-4 font-semibold">Тип</th>
+                  <th className="py-3 px-4 font-semibold">Комментарий</th>
+                  <th className="py-3 px-4 font-semibold text-right">Сумма</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((t) => {
+                  const p = profiles[t.user_id];
+                  const amt = Number(t.amount_rub);
+                  return (
+                    <tr key={t.id} className="border-b border-border/40 last:border-0">
+                      <td className="py-2 px-4 text-xs text-muted-foreground">{new Date(t.created_at).toLocaleString("ru-RU")}</td>
+                      <td className="py-2 px-4">
+                        <div className="font-semibold">{p?.name || p?.email || t.user_id.slice(0, 8)}</div>
+                        <div className="text-xs text-muted-foreground">{p?.email}</div>
+                      </td>
+                      <td className="py-2 px-4">{KIND_LABEL_ADMIN[t.kind] ?? t.kind}</td>
+                      <td className="py-2 px-4 text-xs text-muted-foreground">
+                        {t.note ?? ""}{t.order_id ? ` · #${t.order_id.slice(0, 8)}` : ""}
+                      </td>
+                      <td className={`py-2 px-4 text-right font-extrabold ${amt >= 0 ? "text-emerald-500" : "text-red-500"}`}>
+                        {amt >= 0 ? "+" : ""}{amt.toFixed(2)} ₽
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

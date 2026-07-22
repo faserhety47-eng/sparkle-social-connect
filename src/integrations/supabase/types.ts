@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      balance_transactions: {
+        Row: {
+          amount_rub: number
+          created_at: string
+          created_by: string | null
+          id: string
+          kind: string
+          note: string | null
+          order_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_rub: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind: string
+          note?: string | null
+          order_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_rub?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind?: string
+          note?: string | null
+          order_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "balance_transactions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_messages: {
         Row: {
           author_id: string
@@ -171,18 +212,21 @@ export type Database = {
       }
       profiles: {
         Row: {
+          balance_rub: number
           created_at: string
           email: string | null
           id: string
           name: string | null
         }
         Insert: {
+          balance_rub?: number
           created_at?: string
           email?: string | null
           id: string
           name?: string | null
         }
         Update: {
+          balance_rub?: number
           created_at?: string
           email?: string | null
           id?: string
@@ -273,12 +317,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_topup_balance: {
+        Args: { _amount: number; _note?: string; _user_id: string }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      pay_order_from_balance: {
+        Args: { _order_id: string }
+        Returns: undefined
       }
     }
     Enums: {
