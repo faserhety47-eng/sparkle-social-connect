@@ -16,7 +16,7 @@ export function Footer() {
             <li><Link to="/" className="hover:text-primary">Главная</Link></li>
             <li><Link to="/order" className="hover:text-primary">Оформить заказ</Link></li>
             <li><Link to="/services" className="hover:text-primary">Услуги</Link></li>
-            <li><Link to="/api" className="hover:text-primary">API</Link></li>
+            
           </ul>
         </div>
         <div>
