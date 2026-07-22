@@ -875,6 +875,36 @@ function DashboardTab() {
       </div>
 
       <div className="rounded-3xl bg-card p-6 shadow-tile">
+        <div className="flex items-baseline justify-between">
+          <h2 className="text-lg font-bold">Выручка за 14 дней</h2>
+          <div className="text-xs text-muted-foreground">Новых клиентов в этом месяце: <b className="text-foreground">{stats.newUsers}</b></div>
+        </div>
+        <div className="mt-4 h-56 w-full">
+          <RevenueChart data={stats.series} />
+        </div>
+      </div>
+
+      <div className="rounded-3xl bg-card p-6 shadow-tile">
+        <h2 className="text-lg font-bold">Топ услуг</h2>
+        {stats.topServices.length === 0 ? (
+          <div className="mt-3 text-sm text-muted-foreground">Пока нет оплаченных заказов.</div>
+        ) : (
+          <div className="mt-4 space-y-2 text-sm">
+            {stats.topServices.map((s) => (
+              <div key={s.key} className="flex items-center justify-between border-b border-border/50 py-2 last:border-0">
+                <div className="font-semibold truncate">{s.key}</div>
+                <div className="text-right">
+                  <div className="font-bold">{s.revenue.toLocaleString("ru-RU")} ₽</div>
+                  <div className="text-xs text-muted-foreground">{s.count} шт.</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+
+      <div className="rounded-3xl bg-card p-6 shadow-tile">
         <h2 className="text-lg font-bold">Последние заказы</h2>
         {stats.recent.length === 0 ? (
           <div className="mt-3 text-sm text-muted-foreground">Заказов пока нет.</div>
