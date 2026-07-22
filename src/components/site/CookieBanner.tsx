@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "@tanstack/react-router";
+
 
 const STORAGE_KEY = "smmcat_cookie_consent_v1";
 
@@ -35,11 +35,7 @@ export function CookieBanner() {
               <div className="font-semibold text-foreground">Мы используем cookies</div>
               <p className="mt-1 text-sm text-muted-foreground">
                 Файлы cookie помогают улучшать работу сайта и анализировать трафик. Продолжая
-                использовать сайт, вы соглашаетесь с{" "}
-                <Link to="/privacy" className="text-primary underline underline-offset-2">
-                  политикой конфиденциальности
-                </Link>
-                .
+                использовать сайт, вы соглашаетесь с политикой конфиденциальности.
               </p>
             </div>
           </div>
