@@ -1,4 +1,5 @@
 import { useNavLinks } from "@/hooks/useNavLinks";
+import { Send } from "lucide-react";
 
 export function Footer() {
   const links = useNavLinks("footer");
@@ -24,6 +25,17 @@ export function Footer() {
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li><a href="/login" className="hover:text-primary">Вход</a></li>
             <li><a href="/register" className="hover:text-primary">Регистрация</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 className="text-sm font-semibold mb-3">Контакты</h4>
+          <ul className="space-y-2 text-sm text-muted-foreground">
+            <li>
+              <a href="https://t.me/serh465" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 hover:text-primary">
+                <Send className="h-4 w-4" />
+                Telegram
+              </a>
+            </li>
           </ul>
         </div>
       </div>
