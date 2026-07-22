@@ -129,7 +129,7 @@ export function LiveOrdersFeed() {
   useEffect(() => {
     const t = setInterval(() => {
       setOrders((prev) => [randOrder(), ...prev].slice(0, 5));
-    }, 8000);
+    }, 15000);
     return () => clearInterval(t);
   }, []);
   return (
