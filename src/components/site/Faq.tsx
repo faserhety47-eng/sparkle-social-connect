@@ -24,6 +24,38 @@ export const DEFAULT_FAQ: FaqItem[] = [
     q: "Нужна ли регистрация для заказа?",
     a: "Нет. Регистрация не требуется — вы можете оформить заказ\u00a0 сразу с главной страницы.",
   },
+  {
+    q: "Как отследить статус заказа?",
+    a: "После оформления вы получаете ссылку с уникальным номером заказа — по ней можно в любой момент посмотреть текущий статус выполнения.",
+  },
+  {
+    q: "Можно ли заказывать несколько услуг одновременно?",
+    a: "Да, можно оформлять сразу несколько заказов на разные соцсети и категории — они выполняются параллельно.",
+  },
+  {
+    q: "Почему некоторые услуги дороже других?",
+    a: "Цена зависит от качества аудитории, скорости выполнения и наличия гарантии. Премиальные пакеты с живыми пользователями стоят дороже базовых.",
+  },
+  {
+    q: "Какие есть ограничения по объёму?",
+    a: "Минимальные и максимальные объёмы указаны в карточке каждой услуги. Для больших объёмов рекомендуем дробить заказ на несколько частей.",
+  },
+  {
+    q: "Есть ли гарантии на услуги?",
+    a: "На большинство пакетов действует гарантия компенсации отписок в течение 30 дней. Условия указаны в описании конкретной услуги.",
+  },
+  {
+    q: "Как выбрать оптимальную услугу?",
+    a: "Начните с недорогого пакета, оцените качество и скорость, затем масштабируйте. Если сомневаетесь — напишите в поддержку, поможем подобрать.",
+  },
+  {
+    q: "Как защитить аккаунт от блокировки?",
+    a: "Не заказывайте гигантские объёмы за один раз, распределяйте активность и используйте пакеты «безопасная скорость».",
+  },
+  {
+    q: "Почему некоторые подписчики могут исчезнуть?",
+    a: "Соцсети периодически чистят неактивные профили. Мы предлагаем пакеты с компенсацией — в случае отписок доливаем бесплатно.",
+  },
 ];
 
 export function Faq({ items = DEFAULT_FAQ }: { items?: FaqItem[] }) {
@@ -36,23 +68,28 @@ export function Faq({ items = DEFAULT_FAQ }: { items?: FaqItem[] }) {
         <p className="mt-3 text-muted-foreground">Ответы на вопросы, которые пользователи задают чаще всего</p>
       </div>
 
-      <div className="mt-10 mx-auto max-w-3xl space-y-3">
+      <div className="mt-10 mx-auto max-w-6xl grid gap-3 md:grid-cols-2">
         {items.map((it, i) => {
           const isOpen = open === i;
           return (
-            <div key={i} className="rounded-2xl bg-card shadow-tile overflow-hidden">
+            <div
+              key={i}
+              className={`rounded-2xl bg-card shadow-tile overflow-hidden transition ${isOpen ? "ring-1 ring-primary/40" : ""}`}
+            >
               <button
                 onClick={() => setOpen(isOpen ? null : i)}
-                className="w-full flex items-center justify-between gap-4 p-5 text-left"
+                className="w-full flex items-center justify-between gap-4 p-4 md:p-5 text-left"
                 aria-expanded={isOpen}
               >
-                <span className="font-semibold">{it.q}</span>
+                <span className="font-semibold text-sm md:text-base">{it.q}</span>
                 <ChevronDown
-                  className={`h-5 w-5 shrink-0 text-muted-foreground transition-transform ${isOpen ? "rotate-180 text-primary" : ""}`}
+                  className={`h-5 w-5 shrink-0 text-primary transition-transform ${isOpen ? "rotate-180" : ""}`}
                 />
               </button>
               {isOpen && (
-                <div className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed">{it.a}</div>
+                <div className="px-4 md:px-5 pb-5 text-sm text-muted-foreground leading-relaxed">
+                  {it.a}
+                </div>
               )}
             </div>
           );

@@ -14,6 +14,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
+import { CookieBanner } from "@/components/site/CookieBanner";
 
 const YANDEX_METRIKA_ID = 110945277;
 
@@ -137,6 +138,7 @@ function RootComponent() {
         </main>
         <Footer />
       </div>
+      <CookieBanner />
       <Toaster position="top-right" richColors />
     </QueryClientProvider>
   );
