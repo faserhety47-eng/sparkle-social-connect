@@ -1477,7 +1477,7 @@ function SettingsTab() {
     setSaving(false);
     if (error) return toast.error(error.message);
     const { data: u } = await supabase.auth.getUser();
-    if (u.user) logAction(u.user.id, "settings_update", "settings", null, { keys: rows.map((r) => r.key) });
+    if (u.user) logAction(u.user.id, "settings_update", "settings", undefined, { keys: rows.map((r) => r.key) });
     toast.success("Настройки сохранены");
   };
 
