@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Moon, User, Shield } from "lucide-react";
+import { User, Shield } from "lucide-react";
 import { useSession } from "@/hooks/useSession";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,16 +26,9 @@ export function Header() {
           <Link to="/" className="hover:text-foreground transition-colors" activeProps={{ className: "text-foreground" }}>Главная</Link>
           <Link to="/order" className="hover:text-foreground transition-colors">Заказать</Link>
           <Link to="/services" className="hover:text-foreground transition-colors">Услуги</Link>
-          <Link to="/api" className="hover:text-foreground transition-colors">API</Link>
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          <button
-            aria-label="Сменить тему"
-            className="h-10 w-10 rounded-xl border border-border bg-card/70 hover:bg-card grid place-items-center transition-colors"
-          >
-            <Moon className="h-4 w-4" />
-          </button>
           {loading ? null : user ? (
             <>
               {isAdmin && (
