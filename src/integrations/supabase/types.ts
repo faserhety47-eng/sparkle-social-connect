@@ -85,6 +85,39 @@ export type Database = {
           },
         ]
       }
+      nav_links: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          label: string
+          location: string
+          sort_order: number
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label: string
+          location: string
+          sort_order?: number
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          location?: string
+          sort_order?: number
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
       order_messages: {
         Row: {
           author_id: string
@@ -394,6 +427,45 @@ export type Database = {
           is_active?: boolean
           label?: string
           sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      site_pages: {
+        Row: {
+          content_md: string
+          created_at: string
+          description: string | null
+          id: string
+          published: boolean
+          seo_description: string | null
+          seo_title: string | null
+          slug: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content_md?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          published?: boolean
+          seo_description?: string | null
+          seo_title?: string | null
+          slug: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content_md?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          published?: boolean
+          seo_description?: string | null
+          seo_title?: string | null
+          slug?: string
+          title?: string
           updated_at?: string
         }
         Relationships: []
