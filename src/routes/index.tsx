@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ServicesGrid } from "@/components/site/ServicesGrid";
-import heroCat from "@/assets/hero-cat.avif.asset.json";
+import heroCat from "@/assets/hero-cat-transparent.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
