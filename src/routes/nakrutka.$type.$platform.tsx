@@ -249,6 +249,3 @@ function PlatformBadge({
     </div>
   );
 }
-
-// Прячем неиспользуемый Outlet-импорт от типизации (route без детей).
-export const _outlet = Outlet;
