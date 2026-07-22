@@ -574,16 +574,19 @@ function PlatformsManager() {
 
 function ServiceTypesManager() {
   const { types, loading, reload } = useServiceTypes({ onlyActive: false });
-  const [form, setForm] = useState({ id: "", label: "", sort_order: 100 });
+  const [form, setForm] = useState({ id: "", label: "", description: "", sort_order: 100 });
 
   const add = async () => {
     if (!form.id.trim() || !form.label.trim()) return toast.error("Заполните поля");
     const { error } = await supabase.from("service_types").insert({
-      id: form.id.trim().toLowerCase(), label: form.label.trim(), sort_order: Number(form.sort_order) || 100,
+      id: form.id.trim().toLowerCase(),
+      label: form.label.trim(),
+      description: form.description.trim() || null,
+      sort_order: Number(form.sort_order) || 100,
     });
     if (error) return toast.error(error.message);
     toast.success("Тип добавлен");
-    setForm({ id: "", label: "", sort_order: 100 });
+    setForm({ id: "", label: "", description: "", sort_order: 100 });
     reload();
   };
   const update = async (t: ServiceType, patch: Partial<ServiceType>) => {
@@ -595,6 +598,7 @@ function ServiceTypesManager() {
     if (!confirm("Удалить тип услуги?")) return;
     const { error } = await supabase.from("service_types").delete().eq("id", id);
     if (error) return toast.error(error.message);
+    toast.success("Тип удалён");
     reload();
   };
 
@@ -614,6 +618,13 @@ function ServiceTypesManager() {
             className="rounded-xl border border-input bg-background px-3 py-2 text-sm" />
           <button onClick={add} className="btn-primary text-sm">Добавить</button>
         </div>
+        <textarea
+          placeholder="Описание (необязательно) — короткая подсказка для клиента"
+          value={form.description}
+          onChange={(e) => setForm({ ...form, description: e.target.value })}
+          rows={2}
+          className="mt-3 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm"
+        />
       </div>
 
       <div className="rounded-3xl bg-card p-6 shadow-tile">
@@ -621,20 +632,33 @@ function ServiceTypesManager() {
         {loading ? (
           <div className="mt-4 text-muted-foreground">Загрузка…</div>
         ) : (
-          <div className="mt-4 space-y-2">
+          <div className="mt-4 space-y-3">
             {types.map((t) => (
-              <div key={t.id} className="flex items-center gap-3 flex-wrap rounded-2xl border border-border p-3">
-                <div className="text-xs text-muted-foreground w-20">{t.id}</div>
-                <input defaultValue={t.label} onBlur={(e) => e.target.value !== t.label && update(t, { label: e.target.value })}
-                  className="flex-1 min-w-40 rounded-lg border border-input bg-background px-3 py-1.5 text-sm" />
-                <input type="number" defaultValue={t.sort_order}
-                  onBlur={(e) => Number(e.target.value) !== t.sort_order && update(t, { sort_order: Number(e.target.value) })}
-                  className="w-20 rounded-lg border border-input bg-background px-2 py-1.5 text-sm text-right" />
-                <label className="flex items-center gap-1.5 text-xs">
-                  <input type="checkbox" checked={t.is_active} onChange={(e) => update(t, { is_active: e.target.checked })} />
-                  Активен
-                </label>
-                <button onClick={() => remove(t.id)} className="text-xs text-red-400 hover:underline">Удалить</button>
+              <div key={t.id} className="rounded-2xl border border-border p-3 space-y-2">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <div className="text-xs text-muted-foreground w-20">{t.id}</div>
+                  <input defaultValue={t.label} onBlur={(e) => e.target.value !== t.label && update(t, { label: e.target.value })}
+                    className="flex-1 min-w-40 rounded-lg border border-input bg-background px-3 py-1.5 text-sm" />
+                  <input type="number" defaultValue={t.sort_order}
+                    onBlur={(e) => Number(e.target.value) !== t.sort_order && update(t, { sort_order: Number(e.target.value) })}
+                    className="w-20 rounded-lg border border-input bg-background px-2 py-1.5 text-sm text-right" />
+                  <label className="flex items-center gap-1.5 text-xs">
+                    <input type="checkbox" checked={t.is_active} onChange={(e) => update(t, { is_active: e.target.checked })} />
+                    Активен
+                  </label>
+                  <button onClick={() => remove(t.id)} className="text-xs text-red-400 hover:underline">Удалить</button>
+                </div>
+                <textarea
+                  defaultValue={t.description ?? ""}
+                  placeholder="Описание для клиента"
+                  rows={2}
+                  onBlur={(e) => {
+                    const val = e.target.value.trim();
+                    const next = val === "" ? null : val;
+                    if (next !== (t.description ?? null)) update(t, { description: next });
+                  }}
+                  className="w-full rounded-lg border border-input bg-background px-3 py-1.5 text-sm"
+                />
               </div>
             ))}
           </div>
