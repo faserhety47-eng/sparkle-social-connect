@@ -12,6 +12,7 @@ export type ServiceCategory = {
 export const SERVICES: ServiceCategory[] = [
   { id: "max", name: "Max", color: "#3B6BFF", letter: "M", icon_url: "builtin:max-app", description: "Новый мессенджер" },
   { id: "vk", name: "ВКонтакте", color: "#0077FF", letter: "В", description: "Российская социальная сеть" },
+  { id: "tiktok", name: "TikTok", color: "#000000", letter: "T", icon_url: "builtin:tiktok", description: "Короткие вертикальные видео" },
   { id: "telegram", name: "Телеграм", color: "#229ED9", letter: "T", description: "Каналы, группы и боты" },
   { id: "ok", name: "Одноклассники", color: "#EE8208", letter: "О", description: "Друзья и семья" },
   { id: "instagram", name: "Инстаграм", color: "#E4405F", letter: "I", description: "Фото, Stories, Reels и IGTV" },

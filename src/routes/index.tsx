@@ -1,6 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { ServicesGrid } from "@/components/site/ServicesGrid";
 import heroCat from "@/assets/hero-cat-transparent.png.asset.json";
+import { LANDING_TYPES, LANDING_PLATFORMS } from "@/data/landing-matrix";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -49,6 +50,47 @@ function Index() {
 
         <div className="mt-16">
           <ServicesGrid />
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-16">
+        <div className="rounded-3xl bg-card/70 border border-border/60 p-6 md:p-10">
+          <h2 className="text-2xl md:text-3xl font-extrabold">Популярные услуги накрутки</h2>
+          <p className="mt-2 text-muted-foreground max-w-2xl">
+            Подписчики, лайки и просмотры на 8 площадках — выберите комбинацию, и мы всё сделаем за вас.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-2">
+            {LANDING_TYPES.flatMap((t) =>
+              LANDING_PLATFORMS.slice(0, 6).map((p) => (
+                <Link
+                  key={`${t.slug}-${p.slug}`}
+                  to="/nakrutka/$type/$platform"
+                  params={{ type: t.slug, platform: p.slug }}
+                  className="text-xs md:text-sm rounded-full border border-border/70 bg-background/40 px-3 py-1.5 hover:border-primary hover:text-primary transition"
+                >
+                  {t.action} {p.namePrepositional}
+                </Link>
+              ))
+            )}
+          </div>
+          <div className="mt-6">
+            <Link to="/nakrutka" className="btn-primary text-sm">Открыть весь каталог</Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 pb-24">
+        <h2 className="text-2xl md:text-3xl font-extrabold">Почему выбирают smm-cat.site</h2>
+        <div className="mt-4 space-y-4 text-muted-foreground">
+          <p>
+            smm-cat.site — это SMM-сервис для быстрой и безопасной накрутки в соцсетях. Мы не запрашиваем пароль от аккаунта, работаем только по ссылке и запускаем заказ в течение 1–5 минут после оплаты.
+          </p>
+          <p>
+            В каталоге — самые востребованные услуги: накрутка подписчиков, лайков и просмотров в TikTok, Instagram, Telegram, YouTube, ВКонтакте, Одноклассниках, RuTube и мессенджере Max. Для каждой платформы подобрана стабильная база живых аккаунтов и оптимальная скорость доставки.
+          </p>
+          <p>
+            Оплата принимается через СБП, банковские карты и внутренний баланс. Промокоды, скидки постоянным клиентам и понятный личный кабинет с историей заказов — всё, чтобы продвижение было прозрачным и предсказуемым.
+          </p>
         </div>
       </section>
     </div>

@@ -26,6 +26,7 @@ export function Header() {
           <Link to="/" className="hover:text-foreground transition-colors" activeProps={{ className: "text-foreground" }}>Главная</Link>
           <Link to="/order" className="hover:text-foreground transition-colors">Заказать</Link>
           <Link to="/services" className="hover:text-foreground transition-colors">Услуги</Link>
+          <Link to="/nakrutka" className="hover:text-foreground transition-colors">Накрутка</Link>
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">

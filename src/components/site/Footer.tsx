@@ -16,8 +16,8 @@ export function Footer() {
             <li><Link to="/" className="hover:text-primary">Главная</Link></li>
             <li><Link to="/order" className="hover:text-primary">Оформить заказ</Link></li>
             <li><Link to="/services" className="hover:text-primary">Услуги</Link></li>
-            
-          </ul>
+            <li><Link to="/nakrutka" className="hover:text-primary">Каталог накрутки</Link></li>
+            </ul>
         </div>
         <div>
           <h4 className="text-sm font-semibold mb-3">Аккаунт</h4>
