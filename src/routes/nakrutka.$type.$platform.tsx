@@ -2,11 +2,8 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import {
   findType,
   findPlatform,
-  priceHint,
   landingTitle,
   landingDescription,
-  type LandingType,
-  type LandingPlatform,
 } from "@/data/landing-matrix";
 import { BRAND_ICONS, BRAND_IMAGE_ICONS } from "@/data/service-icons";
 import { parseBuiltinIcon } from "@/data/icon-library";
