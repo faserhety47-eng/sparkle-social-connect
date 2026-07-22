@@ -37,7 +37,7 @@ type Order = {
   payment_note: string | null;
 };
 
-type Profile = { id: string; email: string | null; name: string | null };
+type Profile = { id: string; email: string | null; name: string | null; balance_rub?: number | null };
 
 const STATUSES: { key: string; label: string; color: string }[] = [
   { key: "awaiting_payment", label: "Ожидает оплаты", color: "bg-amber-500/15 text-amber-400" },
@@ -146,7 +146,7 @@ function OrdersTab({ adminId }: { adminId: string }) {
       setOrders(list);
       const ids = [...new Set(list.map((o) => o.user_id))];
       if (ids.length) {
-        const { data: profs } = await supabase.from("profiles").select("id, email, name").in("id", ids);
+        const { data: profs } = await supabase.from("profiles").select("id, email, name, balance_rub").in("id", ids);
         const map: Record<string, Profile> = {};
         (profs ?? []).forEach((p) => (map[p.id] = p as Profile));
         setProfiles(map);
@@ -255,6 +255,11 @@ function OrdersTab({ adminId }: { adminId: string }) {
                     <div className="mt-2 text-sm">Количество: <span className="font-semibold">{o.quantity.toLocaleString("ru-RU")}</span></div>
                     <div className="mt-2 text-xs text-muted-foreground">
                       Клиент: {prof?.email ?? o.user_id}{prof?.name ? ` · ${prof.name}` : ""}
+                      {prof?.balance_rub !== undefined && (
+                        <span className="ml-2 inline-block rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                          Баланс: {Number(prof.balance_rub).toFixed(2)} ₽
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div className="text-right">
