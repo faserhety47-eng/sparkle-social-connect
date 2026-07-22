@@ -34,6 +34,20 @@ const schema = z.object({
   count: z.number().int().min(10, "Минимум 10").max(1000000, "Слишком большое количество"),
 });
 
+function linkPlaceholder(platformId: string) {
+  switch (platformId) {
+    case "vk": return "https://vk.com/username";
+    case "telegram": return "https://t.me/channelname";
+    case "tiktok": return "https://tiktok.com/@username";
+    case "ok": return "https://ok.ru/profile/username";
+    case "instagram": return "https://instagram.com/username";
+    case "rutube": return "https://rutube.ru/video/video_id";
+    case "youtube": return "https://youtube.com/@username";
+    case "max": return "https://max.ru/username";
+    default: return "https://example.com/username";
+  }
+}
+
 function OrderPage() {
   const { platform: initial } = Route.useSearch();
   const { user, loading: sessionLoading } = useSession();
@@ -153,7 +167,7 @@ function OrderPage() {
         <div>
           <label className="text-sm font-semibold">Ссылка на объект накрутки</label>
           <input type="url" value={link} onChange={(e) => setLink(e.target.value)}
-            placeholder="https://instagram.com/username" required maxLength={500}
+            placeholder={linkPlaceholder(platform)} required maxLength={500}
             className="mt-2 w-full rounded-xl border border-input bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
         </div>
 
