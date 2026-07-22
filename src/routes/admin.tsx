@@ -170,6 +170,7 @@ function OrdersTab({ adminId }: { adminId: string }) {
   }, []);
 
   const updateStatus = async (id: string, status: string) => {
+    const prev = orders.find((o) => o.id === id)?.status;
     const { error } = await supabase.from("orders").update({ status }).eq("id", id);
     if (error) return toast.error(error.message);
     setOrders((os) => os.map((o) => (o.id === id ? { ...o, status } : o)));
@@ -179,14 +180,17 @@ function OrdersTab({ adminId }: { adminId: string }) {
         order_id: id, sender: "admin", author_id: adminId, body: autoMsg,
       });
     }
+    logAction(adminId, "order_status_change", "order", id, { from: prev, to: status });
     toast.success("Статус обновлён");
   };
 
   const updatePrice = async (id: string, price: number) => {
     if (!Number.isFinite(price) || price < 0) { toast.error("Некорректная цена"); return; }
+    const prev = orders.find((o) => o.id === id)?.price_rub;
     const { error } = await supabase.from("orders").update({ price_rub: price }).eq("id", id);
     if (error) { toast.error(error.message); return; }
     setOrders((os) => os.map((o) => (o.id === id ? { ...o, price_rub: price } : o)));
+    logAction(adminId, "order_price_change", "order", id, { from: prev, to: price });
     toast.success("Цена обновлена");
   };
 
