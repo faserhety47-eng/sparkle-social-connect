@@ -164,10 +164,31 @@ function OrderPage() {
             className="mt-2 w-full rounded-xl border border-input bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
         </div>
 
+        {!user && (
+          <div className="grid gap-4 sm:grid-cols-2 rounded-2xl border border-dashed border-border p-4">
+            <div className="sm:col-span-2 text-xs text-muted-foreground">
+              Контакты для связи по заказу (без регистрации). Достаточно одного поля.
+            </div>
+            <div>
+              <label className="text-sm font-semibold">Email</label>
+              <input type="email" value={guestEmail} onChange={(e) => setGuestEmail(e.target.value)}
+                placeholder="you@example.com" maxLength={255}
+                className="mt-2 w-full rounded-xl border border-input bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+            </div>
+            <div>
+              <label className="text-sm font-semibold">Telegram / телефон</label>
+              <input type="text" value={guestContact} onChange={(e) => setGuestContact(e.target.value)}
+                placeholder="@username или +7…" maxLength={100}
+                className="mt-2 w-full rounded-xl border border-input bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center justify-between rounded-2xl bg-muted p-4">
           <div className="text-sm text-muted-foreground">Итоговая стоимость</div>
           <div className="text-2xl font-extrabold text-primary">{price.toFixed(2)} ₽</div>
         </div>
+
 
         <button type="submit" disabled={loading} className="btn-primary w-full disabled:opacity-60">
           {loading ? "Создаём заказ…" : "Оформить и перейти к оплате"}
