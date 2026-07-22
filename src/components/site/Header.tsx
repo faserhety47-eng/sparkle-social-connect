@@ -18,8 +18,8 @@ export function Header() {
     <header className="sticky top-0 z-40 w-full bg-background/80 backdrop-blur-md border-b border-border/60">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         <Link to="/" className="flex items-baseline gap-1.5 shrink-0">
-          <span className="text-xl md:text-2xl font-extrabold tracking-tight brand-logo">Oz</span>
-          <span className="text-lg md:text-xl font-semibold text-foreground/90">Top</span>
+          <span className="text-xl md:text-2xl font-extrabold tracking-tight brand-logo">smm-cat</span>
+          <span className="text-lg md:text-xl font-semibold text-foreground/90">.site</span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-8 text-[15px] font-medium text-foreground/85">
