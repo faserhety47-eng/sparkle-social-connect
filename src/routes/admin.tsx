@@ -255,6 +255,11 @@ function OrdersTab({ adminId }: { adminId: string }) {
                     <div className="mt-2 text-sm">Количество: <span className="font-semibold">{o.quantity.toLocaleString("ru-RU")}</span></div>
                     <div className="mt-2 text-xs text-muted-foreground">
                       Клиент: {prof?.email ?? o.user_id}{prof?.name ? ` · ${prof.name}` : ""}
+                      {prof?.balance_rub !== undefined && (
+                        <span className="ml-2 inline-block rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                          Баланс: {Number(prof.balance_rub).toFixed(2)} ₽
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div className="text-right">
