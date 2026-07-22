@@ -3,11 +3,15 @@ import { User, Shield } from "lucide-react";
 import { useSession } from "@/hooks/useSession";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavLinks } from "@/hooks/useNavLinks";
+
 
 export function Header() {
   const { user, loading } = useSession();
   const { isAdmin } = useIsAdmin();
   const navigate = useNavigate();
+  const links = useNavLinks("header");
+
 
   const logout = async () => {
     await supabase.auth.signOut();
@@ -23,11 +27,11 @@ export function Header() {
         </Link>
 
         <nav className="hidden md:flex items-center gap-8 text-[15px] font-medium text-foreground/85">
-          <Link to="/" className="hover:text-foreground transition-colors" activeProps={{ className: "text-foreground" }}>Главная</Link>
-          <Link to="/order" className="hover:text-foreground transition-colors">Заказать</Link>
-          <Link to="/services" className="hover:text-foreground transition-colors">Услуги</Link>
-          <Link to="/nakrutka" className="hover:text-foreground transition-colors">Накрутка</Link>
+          {links.map((l) => (
+            <a key={l.url + l.label} href={l.url} className="hover:text-foreground transition-colors">{l.label}</a>
+          ))}
         </nav>
+
 
         <div className="flex items-center gap-2 sm:gap-3">
           {loading ? null : user ? (

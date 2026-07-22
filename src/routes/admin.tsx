@@ -12,6 +12,9 @@ import { OrderMessages } from "@/components/site/OrderMessages";
 import { IconPicker } from "@/components/site/IconPicker";
 import { parseBuiltinIcon } from "@/data/icon-library";
 import { useAdminNotifier } from "@/hooks/useAdminNotifier";
+import { PagesManager } from "@/components/site/PagesManager";
+import { NavManager } from "@/components/site/NavManager";
+import { ImagesManager } from "@/components/site/ImagesManager";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin")({
@@ -48,7 +51,7 @@ const STATUSES: { key: string; label: string; color: string }[] = [
   { key: "cancelled", label: "Отменён", color: "bg-red-500/15 text-red-400" },
 ];
 
-type Tab = "dashboard" | "orders" | "users" | "balance" | "promos" | "prices" | "platforms" | "types" | "payments" | "actions" | "settings";
+type Tab = "dashboard" | "orders" | "users" | "balance" | "promos" | "prices" | "platforms" | "types" | "payments" | "pages" | "nav" | "images" | "actions" | "settings";
 
 async function logAction(adminId: string, action: string, targetType?: string, targetId?: string, details?: Record<string, unknown>) {
   try {
@@ -104,6 +107,9 @@ function AdminPage() {
     { key: "platforms", label: "Платформы" },
     { key: "types", label: "Типы услуг" },
     { key: "payments", label: "Способы оплаты" },
+    { key: "pages", label: "Страницы" },
+    { key: "nav", label: "Меню" },
+    { key: "images", label: "Изображения" },
     { key: "actions", label: "Лог действий" },
     { key: "settings", label: "Настройки" },
   ];
@@ -132,6 +138,9 @@ function AdminPage() {
       {tab === "platforms" && <PlatformsManager />}
       {tab === "types" && <ServiceTypesManager />}
       {tab === "payments" && <PaymentMethodsManager />}
+      {tab === "pages" && <PagesManager />}
+      {tab === "nav" && <NavManager />}
+      {tab === "images" && <ImagesManager />}
       {tab === "actions" && <ActionsLogTab />}
       {tab === "settings" && <SettingsTab />}
     </section>
