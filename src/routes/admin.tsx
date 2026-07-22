@@ -786,6 +786,8 @@ function PaymentMethodsManager() {
   );
 }
 
+type DayPoint = { day: string; revenue: number; orders: number };
+
 function DashboardTab() {
   const [stats, setStats] = useState<{
     total: number; today: number; awaiting: number; processing: number; completed: number;
