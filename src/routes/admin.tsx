@@ -942,11 +942,11 @@ function UsersTab({ currentUserId }: { currentUserId: string }) {
                       <div className="font-extrabold text-primary">{u.balance.toFixed(2)} ₽</div>
                       <button
                         onClick={async () => {
-                          const raw = prompt(`Пополнить баланс ${u.email ?? u.id}\nВведите сумму в ₽ (можно отрицательную для списания):`);
-                          if (raw === null) return;
+                          const raw = prompt(`Пополнить баланс ${u.email ?? u.id}\nВведите сумму в ₽ (можно отрицательную для списания):`) ?? "";
+                          if (!raw) return;
                           const amount = parseFloat(raw.replace(",", "."));
                           if (!Number.isFinite(amount) || amount === 0) { toast.error("Неверная сумма"); return; }
-                          const note = prompt("Комментарий (необязательно):") ?? null;
+                          const note = prompt("Комментарий (необязательно):") || null;
                           const { error } = await supabase.rpc("admin_topup_balance", {
                             _user_id: u.id, _amount: amount, _note: note || null,
                           });
