@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ServicesGrid } from "@/components/site/ServicesGrid";
 import { Faq, DEFAULT_FAQ } from "@/components/site/Faq";
+import { SeoBlocks } from "@/components/site/SeoBlocks";
 import {
   HowItWorks, Reviews, Guarantees, LiveOrdersFeed,
   VideoDemo, BlogPreview, Comparison, SupportBlock,
