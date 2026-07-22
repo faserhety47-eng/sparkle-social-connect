@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Moon, User, Shield } from "lucide-react";
+import { User, Shield } from "lucide-react";
 import { useSession } from "@/hooks/useSession";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { supabase } from "@/integrations/supabase/client";
