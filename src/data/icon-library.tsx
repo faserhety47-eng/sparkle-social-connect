@@ -1,4 +1,4 @@
-import maxIcon from "@/assets/max-icon.png.asset.json";
+const MAX_ICON = "/max-icon.webp";
 import {
   SiTelegram,
   SiVk,
@@ -50,7 +50,7 @@ export type BrandIcon = {
 // Curated set of popular platforms. Add more here — они автоматически
 // появятся в выборе иконок в админ-панели.
 export const ICON_LIBRARY: BrandIcon[] = [
-  { key: "max-app", label: "Max (приложение)", color: "#3B6BFF", imageUrl: maxIcon.url },
+  { key: "max-app", label: "Max (приложение)", color: "#3B6BFF", imageUrl: MAX_ICON },
   { key: "max", label: "Max", color: "#7B4FFF", Icon: MessageCircle },
   { key: "vk", label: "ВКонтакте", color: "#0077FF", Icon: SiVk },
   { key: "telegram", label: "Telegram", color: "#229ED9", Icon: SiTelegram },
