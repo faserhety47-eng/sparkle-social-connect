@@ -10,7 +10,7 @@ export function Team() {
     <section className="mt-24">
       <div className="text-center">
         <h2 className="text-3xl md:text-4xl font-extrabold">Наша команда</h2>
-        <p className="mt-3 text-muted-foreground">Руководители подразделений OzTop Media</p>
+        <p className="mt-3 text-muted-foreground">Руководители подразделений smm-cat.site</p>
       </div>
       <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {TEAM.map((m) => (

@@ -4,10 +4,10 @@ import { Faq } from "@/components/site/Faq";
 export const Route = createFileRoute("/faq")({
   head: () => ({
     meta: [
-      { title: "F.A.Q. — OzTop Media" },
-      { name: "description", content: "Ответы на частые вопросы про накрутку, оплату, безопасность и сроки выполнения заказов OzTop Media." },
-      { property: "og:title", content: "F.A.Q. — OzTop Media" },
-      { property: "og:description", content: "Частые вопросы о работе SMM-сервиса OzTop Media." },
+      { title: "F.A.Q. — smm-cat.site" },
+      { name: "description", content: "Ответы на частые вопросы про накрутку, оплату, безопасность и сроки выполнения заказов smm-cat.site." },
+      { property: "og:title", content: "F.A.Q. — smm-cat.site" },
+      { property: "og:description", content: "Частые вопросы о работе SMM-сервиса smm-cat.site." },
     ],
   }),
   component: FaqPage,

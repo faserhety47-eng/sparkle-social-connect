@@ -6,9 +6,9 @@ import { parseBuiltinIcon } from "@/data/icon-library";
 export const Route = createFileRoute("/services")({
   head: () => ({
     meta: [
-      { title: "Услуги Oz Top — 7 платформ для накрутки" },
-      { name: "description", content: "Каталог услуг накрутки Oz Top: Max, VK, Telegram, Одноклассники, Instagram, RuTube и YouTube." },
-      { property: "og:title", content: "Услуги Oz Top" },
+      { title: "Услуги smm-cat.site — 7 платформ для накрутки" },
+      { name: "description", content: "Каталог услуг накрутки smm-cat.site: Max, VK, Telegram, Одноклассники, Instagram, RuTube и YouTube." },
+      { property: "og:title", content: "Услуги smm-cat.site" },
       { property: "og:description", content: "Каталог из 7 платформ с прозрачными ценами." },
     ],
   }),

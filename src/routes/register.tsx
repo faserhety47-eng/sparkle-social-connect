@@ -7,10 +7,10 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/register")({
   head: () => ({
     meta: [
-      { title: "Регистрация — Oz Top" },
-      { name: "description", content: "Создайте аккаунт Oz Top, чтобы оформлять и оплачивать заказы на продвижение." },
-      { property: "og:title", content: "Регистрация — Oz Top" },
-      { property: "og:description", content: "Создание аккаунта в Oz Top." },
+      { title: "Регистрация — smm-cat.site" },
+      { name: "description", content: "Создайте аккаунт smm-cat.site, чтобы оформлять и оплачивать заказы на продвижение." },
+      { property: "og:title", content: "Регистрация — smm-cat.site" },
+      { property: "og:description", content: "Создание аккаунта в smm-cat.site." },
     ],
   }),
   component: RegisterPage,

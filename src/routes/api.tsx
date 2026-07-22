@@ -3,16 +3,16 @@ import { createFileRoute } from "@tanstack/react-router";
 export const Route = createFileRoute("/api")({
   head: () => ({
     meta: [
-      { title: "API OzTop Media — документация для реселлеров" },
-      { name: "description", content: "Документация REST API OzTop Media: список услуг, создание заказа, статус, баланс." },
-      { property: "og:title", content: "API OzTop Media" },
+      { title: "API smm-cat.site — документация для реселлеров" },
+      { name: "description", content: "Документация REST API smm-cat.site: список услуг, создание заказа, статус, баланс." },
+      { property: "og:title", content: "API smm-cat.site" },
       { property: "og:description", content: "REST API для реселлеров: создание заказов, статусы, баланс." },
     ],
   }),
   component: ApiDocs,
 });
 
-const BASE = "https://oztop.media/api/reseller";
+const BASE = "https://smm-cat.site/api/reseller";
 
 const endpoints = [
   {
