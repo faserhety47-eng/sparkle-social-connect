@@ -156,7 +156,7 @@ function OrderPage() {
             {svcLoading && <option>Загружаем…</option>}
             {!svcLoading && !categories.length && <option>Нет доступных услуг — админ должен обновить каталог</option>}
             {categories.map(([c, n]) => (
-              <option key={c} value={c}>{humanizeCategory(c)} ({n})</option>
+              <option key={c} value={c}>{humanizeCategory(c)}</option>
             ))}
           </select>
         </div>
