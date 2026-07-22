@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Search, Link2, CreditCard, Rocket, ShieldCheck, KeyRound, RefreshCcw,
   MessageCircle, Send, Play, Star, Check, X, BookOpen,
