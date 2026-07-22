@@ -5,9 +5,9 @@ import heroCat from "@/assets/hero-cat-transparent.png.asset.json";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Oz Top — Продвижение в социальных сетях" },
+      { title: "smm-cat.site — Продвижение в социальных сетях" },
       { name: "description", content: "Быстрая и качественная накрутка подписчиков, лайков и просмотров в Max, VK, Telegram, Одноклассники, Instagram, RuTube и YouTube." },
-      { property: "og:title", content: "Oz Top — Продвижение в социальных сетях" },
+      { property: "og:title", content: "smm-cat.site — Продвижение в социальных сетях" },
       { property: "og:description", content: "Быстрая и качественная накрутка подписчиков, лайков и просмотров в Max, VK, Telegram, Одноклассники, Instagram, RuTube и YouTube." },
     ],
   }),
@@ -39,7 +39,7 @@ function Index() {
               <div aria-hidden className="absolute inset-0 -z-10 rounded-full bg-brand/20 blur-3xl scale-90" />
               <img
                 src={heroCat.url}
-                alt="Милый кот-маскот Oz Top"
+                alt="Милый кот-маскот smm-cat.site"
                 className="w-64 sm:w-80 md:w-[420px] lg:w-[500px] h-auto drop-shadow-2xl select-none"
                 draggable={false}
               />

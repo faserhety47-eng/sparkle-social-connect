@@ -7,9 +7,9 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
-      { title: "Вход — Oz Top" },
-      { name: "description", content: "Вход в личный кабинет Oz Top." },
-      { property: "og:title", content: "Вход — Oz Top" },
+      { title: "Вход — smm-cat.site" },
+      { name: "description", content: "Вход в личный кабинет smm-cat.site." },
+      { property: "og:title", content: "Вход — smm-cat.site" },
       { property: "og:description", content: "Вход в личный кабинет." },
     ],
   }),
@@ -43,7 +43,7 @@ function LoginPage() {
     <section className="mx-auto max-w-md px-4 py-16">
       <div className="rounded-3xl bg-card p-8 shadow-tile">
         <h1 className="text-2xl font-extrabold">Вход в аккаунт</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Продолжите работу с Oz Top.</p>
+        <p className="mt-1 text-sm text-muted-foreground">Продолжите работу с smm-cat.site.</p>
 
         <form onSubmit={submit} className="mt-6 space-y-4">
           <div>

@@ -15,10 +15,10 @@ export const Route = createFileRoute("/account")({
   }),
   head: () => ({
     meta: [
-      { title: "Личный кабинет — Oz Top" },
-      { name: "description", content: "История заказов и оплата в Oz Top." },
-      { property: "og:title", content: "Личный кабинет — Oz Top" },
-      { property: "og:description", content: "Управление заказами Oz Top." },
+      { title: "Личный кабинет — smm-cat.site" },
+      { name: "description", content: "История заказов и оплата в smm-cat.site." },
+      { property: "og:title", content: "Личный кабинет — smm-cat.site" },
+      { property: "og:description", content: "Управление заказами smm-cat.site." },
     ],
   }),
   component: AccountPage,

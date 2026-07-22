@@ -18,9 +18,9 @@ export const Route = createFileRoute("/order")({
   }),
   head: () => ({
     meta: [
-      { title: "Оформить заказ — Oz Top" },
+      { title: "Оформить заказ — smm-cat.site" },
       { name: "description", content: "Оформите заказ на накрутку подписчиков, лайков или просмотров в Max, VK, Telegram, Одноклассники, Instagram, RuTube и YouTube." },
-      { property: "og:title", content: "Оформить заказ — Oz Top" },
+      { property: "og:title", content: "Оформить заказ — smm-cat.site" },
       { property: "og:description", content: "Быстрое оформление SMM-заказа." },
     ],
   }),

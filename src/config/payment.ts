@@ -5,5 +5,5 @@ export const PAYMENT = {
   bank: "Т-Банк (Тинькофф)",
   recipient: "Иван И.",
   note: "После оплаты нажмите «Я оплатил» — мы проверим платёж и запустим заказ в течение 15 минут.",
-  contact: "@oztop_support",
+  contact: "@smmcat_support",
 };

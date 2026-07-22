@@ -17,8 +17,8 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
-      { title: "Админ — Oz Top" },
-      { name: "description", content: "Управление заказами Oz Top." },
+      { title: "Админ — smm-cat.site" },
+      { name: "description", content: "Управление заказами smm-cat.site." },
     ],
   }),
   component: AdminPage,
@@ -1447,7 +1447,7 @@ function ActionsLogTab() {
 
 // ============ Site settings ============
 const SETTING_FIELDS: { key: string; label: string; placeholder?: string; multiline?: boolean }[] = [
-  { key: "site_name", label: "Название сайта", placeholder: "Oz Top" },
+  { key: "site_name", label: "Название сайта", placeholder: "smm-cat.site" },
   { key: "hero_title", label: "Заголовок Hero" },
   { key: "hero_subtitle", label: "Подзаголовок Hero", multiline: true },
   { key: "contact_email", label: "Контактный email" },

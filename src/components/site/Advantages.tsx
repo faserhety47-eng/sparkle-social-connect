@@ -28,7 +28,7 @@ export function Advantages() {
     <section className="mt-24">
       <div className="text-center">
         <h2 className="text-3xl md:text-4xl font-extrabold">Что мы предлагаем</h2>
-        <p className="mt-3 text-muted-foreground">Почему пользователи выбирают OzTop Media</p>
+        <p className="mt-3 text-muted-foreground">Почему пользователи выбирают smm-cat.site</p>
       </div>
       <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {ITEMS.map((i) => (
