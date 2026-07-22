@@ -164,7 +164,7 @@
 }
 
 @utility brand-logo {
-  background: linear-gradient(135deg, oklch(0.72 0.18 275), oklch(0.7 0.25 330));
+  background: linear-gradient(135deg, oklch(0.62 0.19 256), oklch(0.7 0.16 220));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
