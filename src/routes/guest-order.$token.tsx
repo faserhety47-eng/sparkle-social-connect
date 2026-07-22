@@ -73,7 +73,7 @@ function GuestOrderPage() {
 
   const reportPayment = async () => {
     if (!order) return;
-    const { error } = await supabase
+    const { error } = await guestClient
       .from("orders")
       .update({ status: "payment_reported" })
       .eq("guest_token", token);
