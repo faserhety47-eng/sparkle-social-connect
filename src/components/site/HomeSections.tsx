@@ -4,7 +4,7 @@ import {
   Search, Link2, CreditCard, Rocket, ShieldCheck, KeyRound, RefreshCcw,
   MessageCircle, Send, Play, Star, Check, X, BookOpen,
 } from "lucide-react";
-import howToOrderVideo from "@/assets/how-to-order.mp4.asset.json";
+import howToOrderVideo from "/how-to-order.mp4";
 
 /* ============ How it works ============ */
 export function HowItWorks() {
@@ -199,7 +199,7 @@ export function VideoDemo() {
         <div className="relative aspect-video rounded-2xl overflow-hidden border border-border/60 bg-gradient-to-br from-brand/20 to-brand-2/20 shadow-xl group">
           <video
             ref={videoRef}
-            src={howToOrderVideo.url}
+            src={howToOrderVideo}
             controls={isPlaying}
             playsInline
             preload="metadata"

@@ -1,4 +1,4 @@
-import maxIcon from "@/assets/max-icon.png.asset.json";
+import maxIcon from "/max-icon.webp";
 import {
   SiTelegram,
   SiVk,
@@ -22,5 +22,5 @@ export const BRAND_ICONS: Record<string, IconCmp> = {
 
 // Fallback image icons for platforms without a simple-icon SVG.
 export const BRAND_IMAGE_ICONS: Record<string, string> = {
-  max: maxIcon.url,
+  max: maxIcon,
 };
