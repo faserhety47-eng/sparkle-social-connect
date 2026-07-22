@@ -181,6 +181,8 @@ function Index() {
           <Faq />
         </div>
       </section>
+
+      <SupportBlock />
     </div>
   );
 }
