@@ -64,6 +64,8 @@ function AdminPage() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("orders");
 
+  useAdminNotifier(!sessionLoading && !adminLoading && !!user, user?.id);
+
   useEffect(() => {
     if (sessionLoading || adminLoading) return;
     if (!user) navigate({ to: "/login" });
