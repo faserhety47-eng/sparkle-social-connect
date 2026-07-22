@@ -93,11 +93,6 @@ function LandingPage() {
             <h1 className="text-3xl md:text-5xl font-extrabold leading-tight">
               {t.action} {p.namePrepositional}
             </h1>
-            {price && (
-              <div className="mt-2 text-muted-foreground">
-                От <span className="font-semibold text-foreground">{price} ₽</span> за {t.metric}
-              </div>
-            )}
           </div>
         </div>
 
