@@ -99,10 +99,13 @@ function AdminPage() {
     { key: "orders", label: "Заказы" },
     { key: "users", label: "Пользователи" },
     { key: "balance", label: "Баланс" },
+    { key: "promos", label: "Промокоды" },
     { key: "prices", label: "Цены" },
     { key: "platforms", label: "Платформы" },
     { key: "types", label: "Типы услуг" },
     { key: "payments", label: "Способы оплаты" },
+    { key: "actions", label: "Лог действий" },
+    { key: "settings", label: "Настройки" },
   ];
 
   return (
@@ -124,10 +127,13 @@ function AdminPage() {
       {tab === "orders" && user && <OrdersTab adminId={user.id} />}
       {tab === "users" && user && <UsersTab currentUserId={user.id} />}
       {tab === "balance" && <BalanceTab />}
+      {tab === "promos" && user && <PromoCodesTab adminId={user.id} />}
       {tab === "prices" && <PricesManager />}
       {tab === "platforms" && <PlatformsManager />}
       {tab === "types" && <ServiceTypesManager />}
       {tab === "payments" && <PaymentMethodsManager />}
+      {tab === "actions" && <ActionsLogTab />}
+      {tab === "settings" && <SettingsTab />}
     </section>
   );
 }
