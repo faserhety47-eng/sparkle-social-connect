@@ -106,6 +106,7 @@ function AdminPage() {
     { key: "balance", label: "Баланс" },
     { key: "promos", label: "Промокоды" },
     { key: "prices", label: "Цены" },
+    { key: "smm", label: "SMM API" },
     { key: "platforms", label: "Платформы" },
     { key: "types", label: "Типы услуг" },
     { key: "payments", label: "Способы оплаты" },
