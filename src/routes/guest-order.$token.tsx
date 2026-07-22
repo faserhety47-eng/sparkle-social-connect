@@ -86,7 +86,7 @@ function GuestOrderPage() {
     e.preventDefault();
     if (!order || !reply.trim()) return;
     setSending(true);
-    const { error } = await supabase.from("order_messages").insert({
+    const { error } = await guestClient.from("order_messages").insert({
       order_id: order.id,
       sender: "client",
       body: reply.trim().slice(0, 2000),
