@@ -25,6 +25,7 @@ import { Route as AccountRouteImport } from './routes/account'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as NakrutkaIndexRouteImport } from './routes/nakrutka.index'
+import { Route as SupportIdRouteImport } from './routes/support.$id'
 import { Route as PSlugRouteImport } from './routes/p.$slug'
 import { Route as GuestOrderTokenRouteImport } from './routes/guest-order.$token'
 import { Route as NakrutkaTypePlatformRouteImport } from './routes/nakrutka.$type.$platform'
@@ -109,6 +110,11 @@ const NakrutkaIndexRoute = NakrutkaIndexRouteImport.update({
   path: '/nakrutka/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SupportIdRoute = SupportIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => SupportRoute,
+} as any)
 const PSlugRoute = PSlugRouteImport.update({
   id: '/p/$slug',
   path: '/p/$slug',
@@ -139,10 +145,11 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/support': typeof SupportRoute
+  '/support': typeof SupportRouteWithChildren
   '/terms-of-service': typeof TermsOfServiceRoute
   '/guest-order/$token': typeof GuestOrderTokenRoute
   '/p/$slug': typeof PSlugRoute
+  '/support/$id': typeof SupportIdRoute
   '/nakrutka/': typeof NakrutkaIndexRoute
   '/nakrutka/$type/$platform': typeof NakrutkaTypePlatformRoute
 }
@@ -160,10 +167,11 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/support': typeof SupportRoute
+  '/support': typeof SupportRouteWithChildren
   '/terms-of-service': typeof TermsOfServiceRoute
   '/guest-order/$token': typeof GuestOrderTokenRoute
   '/p/$slug': typeof PSlugRoute
+  '/support/$id': typeof SupportIdRoute
   '/nakrutka': typeof NakrutkaIndexRoute
   '/nakrutka/$type/$platform': typeof NakrutkaTypePlatformRoute
 }
@@ -182,10 +190,11 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/support': typeof SupportRoute
+  '/support': typeof SupportRouteWithChildren
   '/terms-of-service': typeof TermsOfServiceRoute
   '/guest-order/$token': typeof GuestOrderTokenRoute
   '/p/$slug': typeof PSlugRoute
+  '/support/$id': typeof SupportIdRoute
   '/nakrutka/': typeof NakrutkaIndexRoute
   '/nakrutka/$type/$platform': typeof NakrutkaTypePlatformRoute
 }
@@ -209,6 +218,7 @@ export interface FileRouteTypes {
     | '/terms-of-service'
     | '/guest-order/$token'
     | '/p/$slug'
+    | '/support/$id'
     | '/nakrutka/'
     | '/nakrutka/$type/$platform'
   fileRoutesByTo: FileRoutesByTo
@@ -230,6 +240,7 @@ export interface FileRouteTypes {
     | '/terms-of-service'
     | '/guest-order/$token'
     | '/p/$slug'
+    | '/support/$id'
     | '/nakrutka'
     | '/nakrutka/$type/$platform'
   id:
@@ -251,6 +262,7 @@ export interface FileRouteTypes {
     | '/terms-of-service'
     | '/guest-order/$token'
     | '/p/$slug'
+    | '/support/$id'
     | '/nakrutka/'
     | '/nakrutka/$type/$platform'
   fileRoutesById: FileRoutesById
@@ -269,7 +281,7 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   ServicesRoute: typeof ServicesRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
-  SupportRoute: typeof SupportRoute
+  SupportRoute: typeof SupportRouteWithChildren
   TermsOfServiceRoute: typeof TermsOfServiceRoute
   GuestOrderTokenRoute: typeof GuestOrderTokenRoute
   PSlugRoute: typeof PSlugRoute
@@ -391,6 +403,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NakrutkaIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/support/$id': {
+      id: '/support/$id'
+      path: '/$id'
+      fullPath: '/support/$id'
+      preLoaderRoute: typeof SupportIdRouteImport
+      parentRoute: typeof SupportRoute
+    }
     '/p/$slug': {
       id: '/p/$slug'
       path: '/p/$slug'
@@ -415,6 +434,17 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface SupportRouteChildren {
+  SupportIdRoute: typeof SupportIdRoute
+}
+
+const SupportRouteChildren: SupportRouteChildren = {
+  SupportIdRoute: SupportIdRoute,
+}
+
+const SupportRouteWithChildren =
+  SupportRoute._addFileChildren(SupportRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
@@ -429,7 +459,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   ServicesRoute: ServicesRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
-  SupportRoute: SupportRoute,
+  SupportRoute: SupportRouteWithChildren,
   TermsOfServiceRoute: TermsOfServiceRoute,
   GuestOrderTokenRoute: GuestOrderTokenRoute,
   PSlugRoute: PSlugRoute,
