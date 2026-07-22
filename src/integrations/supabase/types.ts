@@ -159,6 +159,9 @@ export type Database = {
       orders: {
         Row: {
           created_at: string
+          external_order_id: number | null
+          external_service_id: number | null
+          external_status: string | null
           guest_contact: string | null
           guest_email: string | null
           guest_token: string | null
@@ -168,6 +171,7 @@ export type Database = {
           platform: string
           price_rub: number
           quantity: number
+          refunded: boolean
           service_type: string
           status: string
           updated_at: string
@@ -175,6 +179,9 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          external_order_id?: number | null
+          external_service_id?: number | null
+          external_status?: string | null
           guest_contact?: string | null
           guest_email?: string | null
           guest_token?: string | null
@@ -184,6 +191,7 @@ export type Database = {
           platform: string
           price_rub: number
           quantity: number
+          refunded?: boolean
           service_type: string
           status?: string
           updated_at?: string
@@ -191,6 +199,9 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          external_order_id?: number | null
+          external_service_id?: number | null
+          external_status?: string | null
           guest_contact?: string | null
           guest_email?: string | null
           guest_token?: string | null
@@ -200,6 +211,7 @@ export type Database = {
           platform?: string
           price_rub?: number
           quantity?: number
+          refunded?: boolean
           service_type?: string
           status?: string
           updated_at?: string
@@ -497,6 +509,54 @@ export type Database = {
         }
         Relationships: []
       }
+      smm_services: {
+        Row: {
+          active: boolean
+          api_platform: string
+          category: string
+          created_at: string
+          description: string | null
+          id: number
+          max_qty: number
+          min_qty: number
+          name: string
+          platform: string
+          price_api: number
+          price_rub: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          api_platform: string
+          category: string
+          created_at?: string
+          description?: string | null
+          id: number
+          max_qty?: number
+          min_qty?: number
+          name: string
+          platform: string
+          price_api: number
+          price_rub: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          api_platform?: string
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: number
+          max_qty?: number
+          min_qty?: number
+          name?: string
+          platform?: string
+          price_api?: number
+          price_rub?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -527,6 +587,25 @@ export type Database = {
         Args: { _amount: number; _note?: string; _user_id: string }
         Returns: undefined
       }
+      admin_upsert_smm_service: {
+        Args: {
+          _api_platform: string
+          _category: string
+          _description: string
+          _id: number
+          _max: number
+          _min: number
+          _name: string
+          _platform: string
+          _price_api: number
+          _price_rub: number
+        }
+        Returns: undefined
+      }
+      charge_and_create_smm_order: {
+        Args: { _link: string; _quantity: number; _service_id: number }
+        Returns: string
+      }
       client_guest_token: { Args: never; Returns: string }
       has_role: {
         Args: {
@@ -542,6 +621,10 @@ export type Database = {
       redeem_promo: {
         Args: { _code: string; _order_price: number }
         Returns: Json
+      }
+      refund_smm_order: {
+        Args: { _order_id: string; _reason: string }
+        Returns: undefined
       }
     }
     Enums: {

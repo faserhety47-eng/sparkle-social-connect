@@ -1,4 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { syncSmmCatalog, getSmmBalance, syncSmmOrderStatus } from "@/lib/smm.functions";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/useSession";
@@ -51,7 +53,7 @@ const STATUSES: { key: string; label: string; color: string }[] = [
   { key: "cancelled", label: "Отменён", color: "bg-red-500/15 text-red-400" },
 ];
 
-type Tab = "dashboard" | "orders" | "users" | "balance" | "promos" | "prices" | "platforms" | "types" | "payments" | "pages" | "nav" | "images" | "actions" | "settings";
+type Tab = "dashboard" | "orders" | "users" | "balance" | "promos" | "prices" | "smm" | "platforms" | "types" | "payments" | "pages" | "nav" | "images" | "actions" | "settings";
 
 async function logAction(adminId: string, action: string, targetType?: string, targetId?: string, details?: Record<string, unknown>) {
   try {
@@ -104,6 +106,7 @@ function AdminPage() {
     { key: "balance", label: "Баланс" },
     { key: "promos", label: "Промокоды" },
     { key: "prices", label: "Цены" },
+    { key: "smm", label: "SMM API" },
     { key: "platforms", label: "Платформы" },
     { key: "types", label: "Типы услуг" },
     { key: "payments", label: "Способы оплаты" },
@@ -135,6 +138,7 @@ function AdminPage() {
       {tab === "balance" && <BalanceTab />}
       {tab === "promos" && user && <PromoCodesTab adminId={user.id} />}
       {tab === "prices" && <PricesManager />}
+      {tab === "smm" && <SmmApiManager />}
       {tab === "platforms" && <PlatformsManager />}
       {tab === "types" && <ServiceTypesManager />}
       {tab === "payments" && <PaymentMethodsManager />}
@@ -1522,3 +1526,138 @@ function SettingsTab() {
   );
 }
 
+
+function SmmApiManager() {
+  const sync = useServerFn(syncSmmCatalog);
+  const balance = useServerFn(getSmmBalance);
+  const [syncing, setSyncing] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [bal, setBal] = useState<number | null>(null);
+  const [stats, setStats] = useState<Record<string, number> | null>(null);
+  const [totalActive, setTotalActive] = useState<number | null>(null);
+
+  const loadCount = async () => {
+    const { count } = await supabase.from("smm_services").select("id", { count: "exact", head: true }).eq("active", true);
+    setTotalActive(count ?? 0);
+  };
+  useEffect(() => { loadCount(); }, []);
+
+  const doSync = async () => {
+    setSyncing(true);
+    try {
+      const res = await sync({});
+      setStats(res.platforms);
+      toast.success(`Каталог синхронизирован: ${res.imported} услуг`);
+      loadCount();
+    } catch (e) {
+      toast.error("Ошибка синхронизации: " + (e instanceof Error ? e.message : String(e)));
+    } finally { setSyncing(false); }
+  };
+
+  const doBalance = async () => {
+    setChecking(true);
+    try {
+      const res = await balance({});
+      setBal(res.balance);
+    } catch (e) {
+      toast.error("Не удалось получить баланс: " + (e instanceof Error ? e.message : String(e)));
+    } finally { setChecking(false); }
+  };
+
+  return (
+    <div className="mt-6 space-y-6">
+      <div className="rounded-3xl bg-card p-6 shadow-tile">
+        <h2 className="text-xl font-bold">Интеграция smm.media</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Каталог услуг подтягивается из API smm.media. К каждой цене автоматически добавляется наценка <b>+0.50 ₽</b> за 1 единицу.
+          При заказе средства списываются с баланса пользователя, а задание моментально уходит в работу.
+        </p>
+        <div className="mt-4 flex flex-wrap gap-3">
+          <button onClick={doSync} disabled={syncing}
+            className="rounded-full bg-primary text-primary-foreground px-5 py-2 text-sm font-semibold disabled:opacity-60">
+            {syncing ? "Синхронизация…" : "Синхронизировать каталог"}
+          </button>
+          <button onClick={doBalance} disabled={checking}
+            className="rounded-full border border-border px-5 py-2 text-sm font-semibold disabled:opacity-60">
+            {checking ? "Проверяем…" : "Проверить баланс smm.media"}
+          </button>
+        </div>
+        <div className="mt-4 grid gap-3 sm:grid-cols-3 text-sm">
+          <div className="rounded-2xl bg-muted p-4">
+            <div className="text-muted-foreground text-xs">Активных услуг в базе</div>
+            <div className="text-2xl font-extrabold">{totalActive ?? "—"}</div>
+          </div>
+          <div className="rounded-2xl bg-muted p-4">
+            <div className="text-muted-foreground text-xs">Баланс smm.media</div>
+            <div className="text-2xl font-extrabold text-primary">{bal !== null ? bal.toFixed(2) + " ₽" : "—"}</div>
+          </div>
+          <div className="rounded-2xl bg-muted p-4">
+            <div className="text-muted-foreground text-xs">Наценка</div>
+            <div className="text-2xl font-extrabold">+0.50 ₽ / шт</div>
+          </div>
+        </div>
+        {stats && (
+          <div className="mt-4 text-xs text-muted-foreground">
+            По платформам: {Object.entries(stats).map(([k, v]) => `${k}: ${v}`).join(", ")}
+          </div>
+        )}
+      </div>
+
+      <SmmOrdersPanel />
+    </div>
+  );
+}
+
+function SmmOrdersPanel() {
+  const syncStatus = useServerFn(syncSmmOrderStatus);
+  const [orders, setOrders] = useState<Array<{ id: string; external_order_id: number | null; external_status: string | null; status: string; platform: string; quantity: number; price_rub: number; created_at: string; link: string }>>([]);
+  const [busy, setBusy] = useState<string | null>(null);
+
+  const load = async () => {
+    const { data } = await supabase
+      .from("orders")
+      .select("id, external_order_id, external_status, status, platform, quantity, price_rub, created_at, link")
+      .not("external_service_id", "is", null)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    setOrders((data ?? []) as never);
+  };
+  useEffect(() => { load(); }, []);
+
+  const refresh = async (id: string) => {
+    setBusy(id);
+    try {
+      await syncStatus({ data: { order_id: id } });
+      toast.success("Статус обновлён");
+      load();
+    } catch (e) {
+      toast.error("Ошибка: " + (e instanceof Error ? e.message : String(e)));
+    } finally { setBusy(null); }
+  };
+
+  return (
+    <div className="rounded-3xl bg-card p-6 shadow-tile">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-bold">Заказы через smm.media</h3>
+        <button onClick={load} className="text-sm text-primary hover:underline">Обновить</button>
+      </div>
+      {!orders.length && <p className="mt-3 text-sm text-muted-foreground">Пока нет заказов через API.</p>}
+      <div className="mt-4 space-y-2">
+        {orders.map((o) => (
+          <div key={o.id} className="flex flex-wrap items-center gap-3 rounded-2xl bg-muted p-3 text-sm">
+            <span className="font-mono text-xs text-muted-foreground">#{o.external_order_id ?? "—"}</span>
+            <span className="font-semibold">{o.platform}</span>
+            <span className="text-muted-foreground">{o.quantity} шт · {Number(o.price_rub).toFixed(2)} ₽</span>
+            <span className="ml-auto rounded-full bg-primary/10 text-primary px-2 py-0.5 text-xs font-semibold">
+              {o.external_status ?? o.status}
+            </span>
+            <button onClick={() => refresh(o.id)} disabled={busy === o.id || !o.external_order_id}
+              className="rounded-full border border-border px-3 py-1 text-xs font-semibold disabled:opacity-50">
+              {busy === o.id ? "…" : "Синхронизировать"}
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
