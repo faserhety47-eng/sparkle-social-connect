@@ -90,6 +90,7 @@ function AdminPage() {
     { key: "dashboard", label: "Дашборд" },
     { key: "orders", label: "Заказы" },
     { key: "users", label: "Пользователи" },
+    { key: "balance", label: "Баланс" },
     { key: "prices", label: "Цены" },
     { key: "platforms", label: "Платформы" },
     { key: "types", label: "Типы услуг" },
@@ -114,6 +115,7 @@ function AdminPage() {
       {tab === "dashboard" && <DashboardTab />}
       {tab === "orders" && user && <OrdersTab adminId={user.id} />}
       {tab === "users" && user && <UsersTab currentUserId={user.id} />}
+      {tab === "balance" && <BalanceTab />}
       {tab === "prices" && <PricesManager />}
       {tab === "platforms" && <PlatformsManager />}
       {tab === "types" && <ServiceTypesManager />}
