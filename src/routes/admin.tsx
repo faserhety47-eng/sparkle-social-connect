@@ -860,7 +860,7 @@ function UsersTab({ currentUserId }: { currentUserId: string }) {
   const load = async () => {
     setLoading(true);
     const [{ data: profs }, { data: roles }, { data: ords }] = await Promise.all([
-      supabase.from("profiles").select("id, email, name"),
+      supabase.from("profiles").select("id, email, name, balance_rub"),
       supabase.from("user_roles").select("user_id, role"),
       supabase.from("orders").select("user_id, price_rub, status"),
     ]);
@@ -878,6 +878,7 @@ function UsersTab({ currentUserId }: { currentUserId: string }) {
       isAdmin: adminIds.has(p.id),
       ordersCount: stats.get(p.id)?.count ?? 0,
       totalSpent: stats.get(p.id)?.total ?? 0,
+      balance: Number(p.balance_rub ?? 0),
     })).sort((a, b) => b.totalSpent - a.totalSpent));
     setLoading(false);
   };
