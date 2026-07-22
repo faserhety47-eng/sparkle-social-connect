@@ -63,12 +63,12 @@ export function Faq({ items = DEFAULT_FAQ }: { items?: FaqItem[] }) {
 
   return (
     <section className="mt-24">
-      <div className="text-center max-w-2xl mx-auto px-4">
+      <div className="text-center max-w-3xl mx-auto px-4">
         <h2 className="text-3xl md:text-4xl font-extrabold">F.A.Q. — частые вопросы</h2>
         <p className="mt-4 text-muted-foreground text-base md:text-lg">Ответы на вопросы, которые пользователи задают чаще всего</p>
       </div>
 
-      <div className="mt-14 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 grid gap-5 md:grid-cols-2">
+      <div className="mt-14 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid gap-5 md:grid-cols-2">
         {items.map((it, i) => {
           const isOpen = open === i;
           return (
