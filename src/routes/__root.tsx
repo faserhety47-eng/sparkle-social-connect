@@ -131,6 +131,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         type: "text/javascript",
         children: YANDEX_METRIKA_SCRIPT,
       },
+      {
+        type: "application/ld+json",
+        children: ORGANIZATION_JSONLD,
+      },
     ],
   }),
   shellComponent: RootShell,
