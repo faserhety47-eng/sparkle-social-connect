@@ -47,6 +47,7 @@ function RegisterPage() {
     });
     setLoading(false);
     if (error) return toast.error(error.message);
+    reachGoal("registration", { email: r.data.email });
     toast.success("Аккаунт создан", { description: `Добро пожаловать, ${name}` });
     navigate({ to: "/account" });
   };
