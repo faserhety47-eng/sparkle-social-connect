@@ -8,6 +8,7 @@ import { usePaymentMethods } from "@/hooks/usePaymentMethods";
 import { OrderMessages } from "@/components/site/OrderMessages";
 import { createYookassaTopup } from "@/lib/yookassa.functions";
 import { toast } from "sonner";
+import { reachGoal } from "@/lib/metrika";
 
 type Search = { order?: string };
 
