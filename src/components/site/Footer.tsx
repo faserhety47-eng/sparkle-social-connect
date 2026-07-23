@@ -56,7 +56,6 @@ export function Footer() {
       </div>
       <div className="border-t border-border/60 py-5 text-center text-xs text-muted-foreground">
         <p>© {new Date().getFullYear()} smm-cat.site. Все права защищены.</p>
-        <p className="mt-1">ИНН владельца: 245712479721</p>
       </div>
     </footer>
   );

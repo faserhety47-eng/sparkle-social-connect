@@ -134,7 +134,7 @@ function PrivacyPolicy() {
               </a>.
             </li>
           </ul>
-          <p className="mt-2">Оператор: ИНН 245712479721. Сайт: https://smm-cat.site</p>
+          <p className="mt-2">Сайт: https://smm-cat.site</p>
         </div>
       </section>
 
