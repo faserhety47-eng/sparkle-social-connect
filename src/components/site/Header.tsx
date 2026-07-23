@@ -49,7 +49,8 @@ export function Header() {
                 {balance.toFixed(2)} ₽
               </Link>
               <Link
-                to="/support"
+                to="/account"
+                hash="topup"
                 className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-sky-500 to-blue-600 text-white px-3 py-1.5 text-sm font-semibold shadow-md hover:opacity-95"
                 title="Пополнить баланс"
               >
