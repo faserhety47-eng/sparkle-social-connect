@@ -78,6 +78,20 @@ function GuestOrderPage() {
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [token, guestClient]);
 
+  const goalFiredRef = useRef(false);
+  useEffect(() => {
+    if (!order || goalFiredRef.current) return;
+    const paidStatuses = ["paid", "processing", "in_progress", "partial", "completed"];
+    if (paidStatuses.includes(order.status)) {
+      goalFiredRef.current = true;
+      reachGoal("paid_order", {
+        order_id: order.id,
+        amount: Number(order.price_rub),
+        source: "guest",
+      });
+    }
+  }, [order]);
+
   // Автообновление статуса из SMM.media (пока заказ активен)
   useEffect(() => {
     if (!order) return;
