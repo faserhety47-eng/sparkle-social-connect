@@ -40,6 +40,22 @@ export function Header() {
         <div className="flex items-center gap-2 sm:gap-3">
           {loading ? null : user ? (
             <>
+              <Link
+                to="/account"
+                className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-primary/10 text-primary px-3 py-1.5 text-sm font-semibold hover:bg-primary/15"
+                title="Ваш баланс"
+              >
+                <Wallet className="h-4 w-4" />
+                {balance.toFixed(2)} ₽
+              </Link>
+              <Link
+                to="/support"
+                className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-sky-500 to-blue-600 text-white px-3 py-1.5 text-sm font-semibold shadow-md hover:opacity-95"
+                title="Пополнить баланс"
+              >
+                <Plus className="h-4 w-4" />
+                <span className="hidden sm:inline">Пополнить</span>
+              </Link>
               {isAdmin && (
                 <Link to="/admin" className="btn-ghost text-sm inline-flex items-center gap-1.5">
                   <Shield className="h-4 w-4" /> Админ
@@ -50,6 +66,7 @@ export function Header() {
               </Link>
               <button onClick={logout} className="btn-ghost text-sm">Выйти</button>
             </>
+
           ) : (
             <>
               <Link to="/login" className="btn-ghost text-sm">Войти</Link>
