@@ -231,14 +231,41 @@ function OrderPage() {
             className="mt-2 w-full rounded-xl border border-input bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
         </div>
 
+        {!user && (
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="text-sm font-semibold">Email для чека</label>
+              <input type="email" value={guestEmail} onChange={(e) => setGuestEmail(e.target.value)}
+                required maxLength={200} placeholder="you@example.com"
+                className="mt-2 w-full rounded-xl border border-input bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+            </div>
+            <div>
+              <label className="text-sm font-semibold">Контакт для связи <span className="text-xs font-normal text-muted-foreground">(необязательно)</span></label>
+              <input type="text" value={guestContact} onChange={(e) => setGuestContact(e.target.value)}
+                maxLength={200} placeholder="Telegram, WhatsApp, телефон"
+                className="mt-2 w-full rounded-xl border border-input bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center justify-between rounded-2xl bg-muted p-4">
-          <div className="text-sm text-muted-foreground">Спишется с баланса</div>
+          <div className="text-sm text-muted-foreground">{user ? "Спишется с баланса" : "К оплате через ЮKassa"}</div>
           <div className="text-2xl font-extrabold text-primary">{price.toFixed(2)} ₽</div>
         </div>
 
-        <button type="submit" disabled={loading || !user || !selected}
+        {!user && price > 0 && price < 100 && (
+          <p className="text-xs text-amber-600">
+            Минимальная сумма гостевой оплаты — 100 ₽. Увеличьте количество или войдите в аккаунт.
+          </p>
+        )}
+
+        <button type="submit" disabled={loading || !selected}
           className="btn-primary w-full disabled:opacity-60">
-          {loading ? "Отправляем…" : user ? "Оплатить с баланса и отправить в работу" : "Войдите для оформления"}
+          {loading
+            ? (user ? "Отправляем…" : "Открываем ЮKassa…")
+            : user
+              ? "Оплатить с баланса и отправить в работу"
+              : "Перейти к оплате через ЮKassa"}
         </button>
       </form>
     </section>
