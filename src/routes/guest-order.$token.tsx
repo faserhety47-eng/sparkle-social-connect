@@ -163,6 +163,18 @@ function GuestOrderPage() {
           <div className="text-sm text-muted-foreground">Статус</div>
           <div className="font-semibold text-primary">{STATUS_LABEL[order.status] ?? order.status}</div>
         </div>
+        {order.external_status && (
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-muted-foreground">Статус в системе накрутки</div>
+            <div className="text-sm font-medium">{order.external_status}</div>
+          </div>
+        )}
+        {order.external_order_id && (
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-muted-foreground">Номер задания</div>
+            <div className="font-mono text-xs">#{order.external_order_id}</div>
+          </div>
+        )}
         <div className="flex items-center justify-between">
           <div className="text-sm text-muted-foreground">Ссылка</div>
           <div className="font-mono text-xs break-all text-right max-w-[70%]">{order.link}</div>
