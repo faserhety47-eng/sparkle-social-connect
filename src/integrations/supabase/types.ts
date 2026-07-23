@@ -643,9 +643,11 @@ export type Database = {
           created_at: string
           credited: boolean
           id: string
+          kind: string
+          order_id: string | null
           status: string
           updated_at: string
-          user_id: string
+          user_id: string | null
           yookassa_payment_id: string | null
         }
         Insert: {
@@ -653,9 +655,11 @@ export type Database = {
           created_at?: string
           credited?: boolean
           id?: string
+          kind?: string
+          order_id?: string | null
           status?: string
           updated_at?: string
-          user_id: string
+          user_id?: string | null
           yookassa_payment_id?: string | null
         }
         Update: {
@@ -663,12 +667,22 @@ export type Database = {
           created_at?: string
           credited?: boolean
           id?: string
+          kind?: string
+          order_id?: string | null
           status?: string
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
           yookassa_payment_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "topup_payments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -720,6 +734,20 @@ export type Database = {
         Returns: string
       }
       client_guest_token: { Args: never; Returns: string }
+      create_guest_smm_order: {
+        Args: {
+          _contact: string
+          _email: string
+          _link: string
+          _quantity: number
+          _service_id: number
+        }
+        Returns: {
+          amount: number
+          guest_token: string
+          order_id: string
+        }[]
+      }
       credit_yookassa_topup: {
         Args: { _payment_id: string }
         Returns: undefined

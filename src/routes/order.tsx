@@ -7,6 +7,7 @@ import { useSession } from "@/hooks/useSession";
 import { usePlatforms } from "@/hooks/usePlatforms";
 import { useSmmServices, humanizeCategory, type SmmService } from "@/hooks/useSmmServices";
 import { submitSmmOrder } from "@/lib/smm.functions";
+import { createGuestOrderPayment } from "@/lib/yookassa.functions";
 
 type Search = { platform?: string };
 
@@ -48,12 +49,15 @@ function OrderPage() {
   const navigate = useNavigate();
   const { platforms } = usePlatforms();
   const submit = useServerFn(submitSmmOrder);
+  const createGuest = useServerFn(createGuestOrderPayment);
 
   const [platform, setPlatform] = useState(initial ?? "");
   const [category, setCategory] = useState("");
   const [serviceId, setServiceId] = useState<number | "">("");
   const [link, setLink] = useState("");
   const [count, setCount] = useState(100);
+  const [guestEmail, setGuestEmail] = useState("");
+  const [guestContact, setGuestContact] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -100,12 +104,36 @@ function OrderPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return toast.error("Войдите, чтобы оформить заказ");
     if (!selected) return toast.error("Выберите услугу");
     const linkOk = z.string().trim().url().max(500).safeParse(link).success;
     if (!linkOk) return toast.error("Введите корректную ссылку");
     if (count < selected.min_qty || count > selected.max_qty) {
       return toast.error(`Количество должно быть от ${selected.min_qty} до ${selected.max_qty}`);
+    }
+
+    // Гостевой заказ → оплата через ЮKassa
+    if (!user) {
+      const emailOk = z.string().trim().email().safeParse(guestEmail).success;
+      if (!emailOk) return toast.error("Укажите корректный email для чека и связи");
+      if (price < 100) return toast.error("Минимальная сумма гостевого заказа — 100 ₽. Увеличьте количество или войдите в аккаунт.");
+      setLoading(true);
+      try {
+        const res = await createGuest({
+          data: {
+            service_id: selected.id,
+            link: link.trim(),
+            quantity: count,
+            email: guestEmail.trim(),
+            contact: guestContact.trim(),
+            return_url: `${window.location.origin}/order`,
+          },
+        });
+        window.location.href = res.confirmation_url;
+      } catch (err) {
+        toast.error("Не удалось создать оплату: " + (err instanceof Error ? err.message : String(err)));
+        setLoading(false);
+      }
+      return;
     }
 
     setLoading(true);
@@ -131,12 +159,14 @@ function OrderPage() {
     <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-14">
       <h1 className="text-3xl md:text-4xl font-extrabold">Оформить заказ</h1>
       <p className="mt-2 text-muted-foreground">
-        Выберите услугу — стоимость спишется с баланса и заказ моментально уйдёт в работу.
+        {user
+          ? "Выберите услугу — стоимость спишется с баланса и заказ моментально уйдёт в работу."
+          : "Оформите заказ без регистрации — оплата картой, СБП или ЮMoney через ЮKassa. После оплаты заказ уйдёт в работу автоматически."}
       </p>
 
       {!sessionLoading && !user && (
         <div className="mt-6 rounded-2xl border border-border bg-card/60 p-4 text-sm text-muted-foreground">
-          Для оформления заказа нужен аккаунт с балансом.{" "}
+          Есть аккаунт с балансом?{" "}
           <Link to="/login" className="text-primary font-semibold">Войти</Link>
           {" "}или{" "}
           <Link to="/register" className="text-primary font-semibold">зарегистрироваться</Link>.
@@ -201,14 +231,41 @@ function OrderPage() {
             className="mt-2 w-full rounded-xl border border-input bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
         </div>
 
+        {!user && (
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="text-sm font-semibold">Email для чека</label>
+              <input type="email" value={guestEmail} onChange={(e) => setGuestEmail(e.target.value)}
+                required maxLength={200} placeholder="you@example.com"
+                className="mt-2 w-full rounded-xl border border-input bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+            </div>
+            <div>
+              <label className="text-sm font-semibold">Контакт для связи <span className="text-xs font-normal text-muted-foreground">(необязательно)</span></label>
+              <input type="text" value={guestContact} onChange={(e) => setGuestContact(e.target.value)}
+                maxLength={200} placeholder="Telegram, WhatsApp, телефон"
+                className="mt-2 w-full rounded-xl border border-input bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center justify-between rounded-2xl bg-muted p-4">
-          <div className="text-sm text-muted-foreground">Спишется с баланса</div>
+          <div className="text-sm text-muted-foreground">{user ? "Спишется с баланса" : "К оплате через ЮKassa"}</div>
           <div className="text-2xl font-extrabold text-primary">{price.toFixed(2)} ₽</div>
         </div>
 
-        <button type="submit" disabled={loading || !user || !selected}
+        {!user && price > 0 && price < 100 && (
+          <p className="text-xs text-amber-600">
+            Минимальная сумма гостевой оплаты — 100 ₽. Увеличьте количество или войдите в аккаунт.
+          </p>
+        )}
+
+        <button type="submit" disabled={loading || !selected}
           className="btn-primary w-full disabled:opacity-60">
-          {loading ? "Отправляем…" : user ? "Оплатить с баланса и отправить в работу" : "Войдите для оформления"}
+          {loading
+            ? (user ? "Отправляем…" : "Открываем ЮKassa…")
+            : user
+              ? "Оплатить с баланса и отправить в работу"
+              : "Перейти к оплате через ЮKassa"}
         </button>
       </form>
     </section>
