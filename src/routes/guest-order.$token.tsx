@@ -77,6 +77,34 @@ function GuestOrderPage() {
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [token, guestClient]);
 
+  // Автообновление статуса из SMM.media (пока заказ активен)
+  useEffect(() => {
+    if (!order) return;
+    const done = ["completed", "cancelled", "refunded", "error"];
+    if (done.includes(order.status)) return;
+    let cancelled = false;
+    const sync = async () => {
+      try {
+        const res = await fetch("/api/public/guest-order-status", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ guest_token: token }),
+        });
+        if (!res.ok || cancelled) return;
+        const data = await res.json() as { status: string; external_status: string | null; external_order_id: string | null };
+        setOrder((prev) => prev ? {
+          ...prev,
+          status: data.status,
+          external_status: data.external_status,
+          external_order_id: data.external_order_id ? Number(data.external_order_id) : prev.external_order_id,
+        } : prev);
+      } catch { /* игнорируем сетевые сбои */ }
+    };
+    sync();
+    const id = setInterval(sync, 15000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, [order?.id, order?.status, token]);
+
   const reportPayment = async () => {
     if (!order) return;
     const { error } = await guestClient
