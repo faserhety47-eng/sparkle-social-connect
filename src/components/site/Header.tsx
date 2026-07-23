@@ -1,9 +1,11 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { User, Shield } from "lucide-react";
+import { User, Shield, Wallet, Plus } from "lucide-react";
 import { useSession } from "@/hooks/useSession";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { useBalance } from "@/hooks/useBalance";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavLinks } from "@/hooks/useNavLinks";
+
 
 
 export function Header() {
