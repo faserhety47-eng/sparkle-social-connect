@@ -1,12 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useServicePrices, SERVICE_TYPE_LIST } from "@/hooks/useServicePrices";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { SERVICES } from "@/data/services";
 
 export const Route = createFileRoute("/tariffs")({
   head: () => ({
     meta: [
       { title: "Тарифы и цены — smm-cat.site" },
-      { name: "description", content: "Актуальные тарифы smm-cat.site: стоимость подписчиков, лайков, просмотров и комментариев по всем платформам." },
+      { name: "description", content: "Актуальные тарифы smm-cat.site: минимальная стоимость подписчиков, лайков, просмотров и комментариев по всем платформам." },
       { property: "og:title", content: "Тарифы и цены — smm-cat.site" },
       { property: "og:description", content: "Прозрачные тарифы за подписчиков, лайки, просмотры и комментарии на всех поддерживаемых платформах." },
       { property: "og:type", content: "website" },
@@ -16,23 +17,55 @@ export const Route = createFileRoute("/tariffs")({
   component: TariffsPage,
 });
 
+const TYPES = [
+  { id: "followers", label: "Подписчики", re: /podpisc|druze/ },
+  { id: "likes",     label: "Лайки",      re: /laik|klass|reakci/ },
+  { id: "views",     label: "Просмотры",  re: /prosmotr|pokaz|oxvat/ },
+  { id: "comments",  label: "Комментарии", re: /komment/ },
+] as const;
+
+function classify(category: string): string | null {
+  for (const t of TYPES) if (t.re.test(category)) return t.id;
+  return null;
+}
+
 function TariffsPage() {
-  const { prices, loading, getPrice } = useServicePrices();
+  const [matrix, setMatrix] = useState<Record<string, Record<string, number>>>({});
+  const [loading, setLoading] = useState(true);
 
-  const platforms = SERVICES;
-  const types = SERVICE_TYPE_LIST;
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("smm_services")
+        .select("platform, category, price_rub");
+      const m: Record<string, Record<string, number>> = {};
+      for (const row of data ?? []) {
+        const type = classify(row.category);
+        if (!type) continue;
+        const price = Number(row.price_rub);
+        if (!isFinite(price) || price <= 0) continue;
+        m[row.platform] ??= {};
+        const cur = m[row.platform][type];
+        if (cur === undefined || price < cur) m[row.platform][type] = price;
+      }
+      setMatrix(m);
+      setLoading(false);
+    })();
+  }, []);
 
-  const fmt = (n: number) =>
-    n > 0 ? `${n.toFixed(2).replace(/\.00$/, "")} ₽` : "—";
+  const fmt = (n: number | undefined) => {
+    if (!n || n <= 0) return "—";
+    return `от ${n.toFixed(2).replace(/\.?0+$/, "")} ₽`;
+  };
 
   return (
     <article className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-14">
       <h1 className="text-3xl md:text-5xl font-extrabold leading-tight">Тарифы и цены</h1>
-      <p className="mt-3 text-sm text-muted-foreground">Редакция от 23 июля 2026 г.</p>
+      <p className="mt-3 text-sm text-muted-foreground">Актуально на момент просмотра страницы.</p>
       <p className="mt-4 text-muted-foreground max-w-3xl">
-        Ниже указаны актуальные цены на услуги smm-cat.site. Стоимость приведена за 1 единицу
-        (1 подписчик / 1 лайк / 1 просмотр / 1 комментарий). Итоговая сумма заказа зависит от выбранного
-        объёма и рассчитывается автоматически перед оплатой на странице оформления заказа.
+        В таблице указана минимальная цена за 1 единицу услуги (1 подписчик / 1 лайк / 1 просмотр / 1 комментарий)
+        по каждой платформе. Внутри каждой категории доступно несколько тарифов с разной скоростью и качеством —
+        полный список и точная стоимость отображаются на странице оформления заказа.
       </p>
 
       <div className="mt-8 rounded-2xl border border-border bg-card p-4 md:p-6 overflow-x-auto">
@@ -43,18 +76,18 @@ function TariffsPage() {
             <thead>
               <tr className="text-left border-b border-border">
                 <th className="py-3 pr-4 font-semibold">Платформа</th>
-                {types.map((t) => (
+                {TYPES.map((t) => (
                   <th key={t.id} className="py-3 px-3 font-semibold whitespace-nowrap">{t.label}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {platforms.map((p) => (
+              {SERVICES.map((p) => (
                 <tr key={p.id} className="border-b border-border/50 last:border-0">
                   <td className="py-3 pr-4 font-medium">{p.name}</td>
-                  {types.map((t) => (
-                    <td key={t.id} className="py-3 px-3 tabular-nums">
-                      {fmt(getPrice(p.id, t.id))}
+                  {TYPES.map((t) => (
+                    <td key={t.id} className="py-3 px-3 tabular-nums whitespace-nowrap">
+                      {fmt(matrix[p.id]?.[t.id])}
                     </td>
                   ))}
                 </tr>
@@ -62,20 +95,15 @@ function TariffsPage() {
             </tbody>
           </table>
         )}
-        {!loading && prices.length === 0 && (
-          <p className="mt-4 text-sm text-muted-foreground">
-            Тарифы обновляются. Актуальную стоимость можно увидеть на странице оформления заказа.
-          </p>
-        )}
       </div>
 
       <section className="mt-10 space-y-4 text-foreground">
         <h2 className="text-xl font-bold">Как формируется цена</h2>
         <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
-          <li>Цена в таблице указана за 1 единицу выбранной услуги.</li>
-          <li>Минимальный и максимальный объём заказа отображаются в форме оформления заказа.</li>
+          <li>В таблице показана минимальная цена за 1 единицу — реальные тарифы внутри категории могут быть выше в зависимости от качества и скорости.</li>
+          <li>Минимальный и максимальный объём заказа отображаются в форме оформления.</li>
           <li>Итоговая сумма = цена за единицу × количество единиц.</li>
-          <li>Оплата принимается через СБП и другие доступные способы, указанные при оформлении заказа.</li>
+          <li>Оплата принимается через доступные способы, указанные при оформлении заказа.</li>
         </ul>
 
         <h2 className="text-xl font-bold mt-6">Порядок оплаты</h2>
@@ -97,3 +125,4 @@ function TariffsPage() {
     </article>
   );
 }
+
