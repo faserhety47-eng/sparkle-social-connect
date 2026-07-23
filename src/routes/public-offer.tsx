@@ -35,7 +35,7 @@ function PublicOffer() {
         <div>
           <h2 className="text-xl font-bold mb-2">2. Стороны договора</h2>
           <p>
-            <strong>Исполнитель:</strong> владелец сайта smm-cat.site (ИНН 245712479721).
+            <strong>Исполнитель:</strong> владелец сайта smm-cat.site.
           </p>
           <p>
             <strong>Пользователь:</strong> любое физическое или юридическое лицо, оплатившее услуги на сайте.
