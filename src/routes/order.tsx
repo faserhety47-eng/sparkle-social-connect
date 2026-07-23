@@ -90,10 +90,11 @@ function OrderPage() {
   }, [filtered, serviceId]);
 
   const selected: SmmService | undefined = filtered.find((s) => s.id === serviceId);
-  const price = useMemo(
-    () => selected ? +(selected.price_rub * count).toFixed(2) : 0,
-    [selected, count],
-  );
+  const price = useMemo(() => {
+    const unitPrice = Number(selected?.price_rub ?? 0);
+    const quantity = Number.isFinite(count) ? count : 0;
+    return +(unitPrice * quantity).toFixed(2);
+  }, [selected, count]);
 
   useEffect(() => {
     if (!selected) return;
@@ -228,7 +229,10 @@ function OrderPage() {
           </label>
           <input type="number"
             min={selected?.min_qty ?? 10} max={selected?.max_qty ?? 1000000}
-            value={count} onChange={(e) => setCount(Number(e.target.value))}
+            value={Number.isFinite(count) ? count : ""} onChange={(e) => {
+              const next = e.target.valueAsNumber;
+              setCount(Number.isFinite(next) ? next : 0);
+            }}
             className="mt-2 w-full rounded-xl border border-input bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
         </div>
 
