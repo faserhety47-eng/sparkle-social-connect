@@ -11,8 +11,10 @@ import { useNavLinks } from "@/hooks/useNavLinks";
 export function Header() {
   const { user, loading } = useSession();
   const { isAdmin } = useIsAdmin();
+  const { balance } = useBalance();
   const navigate = useNavigate();
   const links = useNavLinks("header");
+
 
 
   const logout = async () => {
