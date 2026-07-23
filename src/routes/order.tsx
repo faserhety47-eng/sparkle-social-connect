@@ -19,7 +19,7 @@ export const Route = createFileRoute("/order")({
   head: () => ({
     meta: [
       { title: "Оформить заказ — smm-cat.site" },
-      { name: "description", content: "Оформите заказ на накрутку. Оплата с баланса и мгновенная отправка в работу." },
+      { name: "description", content: "Оформите заказ на накрутку подписчиков, лайков и просмотров: оплата с баланса или картой/СБП через ЮKassa, мгновенная отправка в работу и гарантия качества." },
       { property: "og:title", content: "Оформить заказ — smm-cat.site" },
       { property: "og:description", content: "Быстрое оформление SMM-заказа с автосписанием." },
       { property: "og:url", content: "https://smm-cat.site/order" },

@@ -24,7 +24,7 @@ export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
       { title: "Админ — smm-cat.site" },
-      { name: "description", content: "Управление заказами smm-cat.site." },
+      { name: "description", content: "Панель администратора smm-cat.site: управление заказами, ценами, платформами, страницами, платёжными реквизитами и обращениями клиентов в одном интерфейсе." },
     ],
   }),
   component: AdminPage,

@@ -9,7 +9,7 @@ export const Route = createFileRoute("/support")({
   head: () => ({
     meta: [
       { title: "Поддержка — smm-cat.site" },
-      { name: "description", content: "Отправьте обращение в службу поддержки smm-cat.site. Мы отвечаем быстро." },
+      { name: "description", content: "Служба поддержки smm-cat.site: задайте вопрос по заказу, оплате или списанию — мы отвечаем в течение 15 минут в рабочее время и помогаем с любой ситуацией." },
       { property: "og:title", content: "Поддержка — smm-cat.site" },
       { property: "og:description", content: "Свяжитесь со службой поддержки smm-cat.site." },
       { property: "og:url", content: "https://smm-cat.site/support" },

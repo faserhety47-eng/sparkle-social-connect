@@ -9,7 +9,7 @@ export const Route = createFileRoute("/register")({
   head: () => ({
     meta: [
       { title: "Регистрация — smm-cat.site" },
-      { name: "description", content: "Создайте аккаунт smm-cat.site, чтобы оформлять и оплачивать заказы на продвижение." },
+      { name: "description", content: "Регистрация на smm-cat.site: создайте аккаунт за минуту, пополняйте баланс через ЮKassa и оформляйте заказы на накрутку в Max, VK, Telegram, YouTube и TikTok." },
       { property: "og:title", content: "Регистрация — smm-cat.site" },
       { property: "og:description", content: "Создание аккаунта в smm-cat.site." },
       { property: "og:url", content: "https://smm-cat.site/register" },

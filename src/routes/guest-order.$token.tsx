@@ -9,7 +9,7 @@ export const Route = createFileRoute("/guest-order/$token")({
   head: () => ({
     meta: [
       { title: "Ваш заказ — smm-cat.site" },
-      { name: "description", content: "Статус и оплата заказа на smm-cat.site без регистрации." },
+      { name: "description", content: "Проверьте статус гостевого заказа на smm-cat.site: оплата через ЮKassa, автоматическая отправка в работу и живое обновление хода выполнения без регистрации." },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
