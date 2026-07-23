@@ -26,6 +26,13 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Быстрая и качественная накрутка подписчиков, лайков и просмотров в Max, VK, Telegram, Одноклассники, Instagram, RuTube и YouTube." },
       { property: "og:title", content: "smm-cat.site — Продвижение в социальных сетях" },
       { property: "og:description", content: "Быстрая и качественная накрутка подписчиков, лайков и просмотров в Max, VK, Telegram, Одноклассники, Instagram, RuTube и YouTube." },
+      { property: "og:image", content: "https://smm-cat.site/og-cover.jpg" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://smm-cat.site/" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: "https://smm-cat.site/og-cover.jpg" },
     ],
     scripts: [
       {
