@@ -3,11 +3,34 @@ services:
     build: .
     container_name: smm-cat
     restart: unless-stopped
-    ports:
-      - "80:3000"
     env_file:
       - .env
     environment:
       NODE_ENV: production
       PORT: 3000
       HOST: 0.0.0.0
+    networks:
+      - smm-cat-net
+
+  caddy:
+    image: caddy:2
+    container_name: smm-cat-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - smm-cat-net
+    depends_on:
+      - web
+
+volumes:
+  caddy_data:
+  caddy_config:
+
+networks:
+  smm-cat-net:
