@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createGuestClient } from "@/lib/guest-client";
 import { usePaymentMethods } from "@/hooks/usePaymentMethods";
 import { toast } from "sonner";
+import { reachGoal } from "@/lib/metrika";
 
 export const Route = createFileRoute("/guest-order/$token")({
   head: () => ({
@@ -76,6 +77,20 @@ function GuestOrderPage() {
   };
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [token, guestClient]);
+
+  const goalFiredRef = useRef(false);
+  useEffect(() => {
+    if (!order || goalFiredRef.current) return;
+    const paidStatuses = ["paid", "processing", "in_progress", "partial", "completed"];
+    if (paidStatuses.includes(order.status)) {
+      goalFiredRef.current = true;
+      reachGoal("paid_order", {
+        order_id: order.id,
+        amount: Number(order.price_rub),
+        source: "guest",
+      });
+    }
+  }, [order]);
 
   // Автообновление статуса из SMM.media (пока заказ активен)
   useEffect(() => {

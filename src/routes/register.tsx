@@ -3,6 +3,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
+import { reachGoal } from "@/lib/metrika";
 
 export const Route = createFileRoute("/register")({
   head: () => ({
@@ -47,6 +48,7 @@ function RegisterPage() {
     });
     setLoading(false);
     if (error) return toast.error(error.message);
+    reachGoal("registration", { email: r.data.email });
     toast.success("Аккаунт создан", { description: `Добро пожаловать, ${name}` });
     navigate({ to: "/account" });
   };
