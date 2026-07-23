@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createGuestClient } from "@/lib/guest-client";
 import { usePaymentMethods } from "@/hooks/usePaymentMethods";
 import { toast } from "sonner";
+import { reachGoal } from "@/lib/metrika";
 
 export const Route = createFileRoute("/guest-order/$token")({
   head: () => ({

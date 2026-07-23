@@ -141,6 +141,7 @@ function OrderPage() {
     setLoading(true);
     try {
       const res = await submit({ data: { service_id: selected.id, link: link.trim(), quantity: count } });
+      reachGoal("paid_order", { order_id: res.order_id, external_id: res.external_order_id, source: "balance" });
       toast.success(`Заказ #${res.external_order_id} отправлен в работу`);
       navigate({ to: "/account", search: { order: res.order_id } as never });
     } catch (err) {

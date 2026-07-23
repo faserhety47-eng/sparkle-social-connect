@@ -139,6 +139,7 @@ function AccountPage() {
     const { error } = await supabase.rpc("pay_order_from_balance", { _order_id: id });
     if (error) return toast.error(error.message);
     toast.success("Заказ оплачен с баланса");
+    reachGoal("paid_order", { order_id: id, amount: price, source: "balance" });
     await loadAll();
   };
 
