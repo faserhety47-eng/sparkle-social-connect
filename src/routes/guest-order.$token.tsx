@@ -18,10 +18,14 @@ export const Route = createFileRoute("/guest-order/$token")({
 const STATUS_LABEL: Record<string, string> = {
   awaiting_payment: "Ожидает оплаты",
   payment_reported: "Оплата на проверке",
-  paid: "Оплачен",
+  paid: "Оплачен, готовим отправку",
+  processing: "В работе",
   in_progress: "В работе",
+  partial: "Выполнен частично",
   completed: "Выполнен",
   cancelled: "Отменён",
+  refunded: "Возврат средств",
+  error: "Ошибка — свяжитесь с поддержкой",
 };
 
 type Order = {
