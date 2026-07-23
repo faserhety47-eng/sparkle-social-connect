@@ -7,6 +7,7 @@ import { useSession } from "@/hooks/useSession";
 import { usePlatforms } from "@/hooks/usePlatforms";
 import { useSmmServices, humanizeCategory, type SmmService } from "@/hooks/useSmmServices";
 import { submitSmmOrder } from "@/lib/smm.functions";
+import { createGuestOrderPayment } from "@/lib/yookassa.functions";
 
 type Search = { platform?: string };
 
