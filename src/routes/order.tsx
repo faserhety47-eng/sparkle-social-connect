@@ -104,12 +104,36 @@ function OrderPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return toast.error("Войдите, чтобы оформить заказ");
     if (!selected) return toast.error("Выберите услугу");
     const linkOk = z.string().trim().url().max(500).safeParse(link).success;
     if (!linkOk) return toast.error("Введите корректную ссылку");
     if (count < selected.min_qty || count > selected.max_qty) {
       return toast.error(`Количество должно быть от ${selected.min_qty} до ${selected.max_qty}`);
+    }
+
+    // Гостевой заказ → оплата через ЮKassa
+    if (!user) {
+      const emailOk = z.string().trim().email().safeParse(guestEmail).success;
+      if (!emailOk) return toast.error("Укажите корректный email для чека и связи");
+      if (price < 100) return toast.error("Минимальная сумма гостевого заказа — 100 ₽. Увеличьте количество или войдите в аккаунт.");
+      setLoading(true);
+      try {
+        const res = await createGuest({
+          data: {
+            service_id: selected.id,
+            link: link.trim(),
+            quantity: count,
+            email: guestEmail.trim(),
+            contact: guestContact.trim(),
+            return_url: `${window.location.origin}/order`,
+          },
+        });
+        window.location.href = res.confirmation_url;
+      } catch (err) {
+        toast.error("Не удалось создать оплату: " + (err instanceof Error ? err.message : String(err)));
+        setLoading(false);
+      }
+      return;
     }
 
     setLoading(true);
