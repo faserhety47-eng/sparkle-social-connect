@@ -9,7 +9,7 @@ export const Route = createFileRoute("/support/$id")({
   head: () => ({
     meta: [
       { title: "Обращение — smm-cat.site" },
-      { name: "description", content: "Переписка по обращению в поддержку smm-cat.site." },
+      { name: "description", content: "Переписка с поддержкой smm-cat.site: следите за статусом вашего обращения, получайте ответы оператора и отправляйте уточнения по заказу в режиме онлайн." },
     ],
   }),
   component: TicketDetail,

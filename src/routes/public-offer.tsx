@@ -4,9 +4,9 @@ export const Route = createFileRoute("/public-offer")({
   head: () => ({
     meta: [
       { title: "Договор оферты — smm-cat.site" },
-      { name: "description", content: "Публичная оферта на оказание услуг сервисом smm-cat.site." },
+      { name: "description", content: "Публичная оферта smm-cat.site: условия оказания услуг продвижения в соцсетях, порядок оплаты, сроки выполнения, гарантии, возвраты и разрешение споров." },
       { property: "og:title", content: "Договор оферты — smm-cat.site" },
-      { property: "og:description", content: "Публичная оферта на оказание услуг сервисом smm-cat.site." },
+      { property: "og:description", content: "Публичная оферта smm-cat.site: условия оказания услуг продвижения в соцсетях, порядок оплаты, сроки выполнения, гарантии, возвраты и разрешение споров." },
       { property: "og:url", content: "https://smm-cat.site/public-offer" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

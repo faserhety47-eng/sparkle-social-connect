@@ -20,15 +20,16 @@ function Tile({ svc }: { svc: Platform }) {
         style={{ backgroundColor: svc.color || "#7B4FFF" }}
       >
         {builtin?.imageUrl ? (
-          <img src={builtin.imageUrl} alt="" className="h-8 w-8 object-contain" />
+          <img src={builtin.imageUrl} alt={`Иконка ${svc.name}`} className="h-8 w-8 object-contain" />
         ) : builtin?.Icon ? (
           <builtin.Icon width={28} height={28} color="#ffffff" />
         ) : hasImg ? (
-          <img src={svc.icon_url!} alt="" className="h-8 w-8 object-contain" />
+          <img src={svc.icon_url!} alt={`Иконка ${svc.name}`} className="h-8 w-8 object-contain" />
         ) : svc.icon_emoji ? (
           <span className="text-2xl">{svc.icon_emoji}</span>
         ) : imageIcon ? (
-          <img src={imageIcon} alt="" className="h-8 w-8 object-contain" />
+          <img src={imageIcon} alt={`Иконка ${svc.name}`} className="h-8 w-8 object-contain" />
+
         ) : Icon ? (
           <Icon width={28} height={28} color="#ffffff" />
         ) : (

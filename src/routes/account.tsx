@@ -19,7 +19,7 @@ export const Route = createFileRoute("/account")({
   head: () => ({
     meta: [
       { title: "Личный кабинет — smm-cat.site" },
-      { name: "description", content: "История заказов и оплата в smm-cat.site." },
+      { name: "description", content: "Личный кабинет smm-cat.site: баланс, история пополнений и заказов, повторная отправка накрутки, статусы выполнения и связь с поддержкой в один клик." },
       { property: "og:title", content: "Личный кабинет — smm-cat.site" },
       { property: "og:description", content: "Управление заказами smm-cat.site." },
     ],

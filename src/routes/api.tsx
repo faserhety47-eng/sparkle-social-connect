@@ -4,7 +4,7 @@ export const Route = createFileRoute("/api")({
   head: () => ({
     meta: [
       { title: "API smm-cat.site — документация для реселлеров" },
-      { name: "description", content: "Документация REST API smm-cat.site: список услуг, создание заказа, статус, баланс." },
+      { name: "description", content: "REST API smm-cat.site для реселлеров: получение прайс-листа, создание заказов на накрутку, проверка статуса, работа с балансом — примеры запросов и ответов." },
       { property: "og:title", content: "API smm-cat.site" },
       { property: "og:description", content: "REST API для реселлеров: создание заказов, статусы, баланс." },
       { property: "og:url", content: "https://smm-cat.site/api" },

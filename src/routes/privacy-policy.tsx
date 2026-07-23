@@ -4,9 +4,9 @@ export const Route = createFileRoute("/privacy-policy")({
   head: () => ({
     meta: [
       { title: "Политика конфиденциальности — smm-cat.site" },
-      { name: "description", content: "Политика обработки персональных данных пользователей сервиса smm-cat.site." },
+      { name: "description", content: "Политика конфиденциальности smm-cat.site: какие данные мы собираем, зачем, как храним и защищаем, права пользователей и порядок обращения к оператору." },
       { property: "og:title", content: "Политика конфиденциальности — smm-cat.site" },
-      { property: "og:description", content: "Политика обработки персональных данных пользователей сервиса smm-cat.site." },
+      { property: "og:description", content: "Политика конфиденциальности smm-cat.site: какие данные мы собираем, зачем, как храним и защищаем, права пользователей и порядок обращения к оператору." },
       { property: "og:url", content: "https://smm-cat.site/privacy-policy" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

@@ -64,6 +64,39 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 
 const YANDEX_METRIKA_SCRIPT = `(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();for(var j=0;j<document.scripts.length;j++){if(document.scripts[j].src===r){return;}}k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})(window,document,"script","https://mc.yandex.ru/metrika/tag.js?id=${YANDEX_METRIKA_ID}","ym");ym(${YANDEX_METRIKA_ID},"init",{ssr:true,webvisor:true,clickmap:true,ecommerce:"dataLayer",referrer:document.referrer,url:location.href,accurateTrackBounce:true,trackLinks:true});`;
 
+const ORGANIZATION_JSONLD = JSON.stringify({
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://smm-cat.site/#organization",
+      name: "smm-cat.site",
+      url: "https://smm-cat.site/",
+      logo: "https://smm-cat.site/icon-512.png",
+      sameAs: ["https://smm-cat.site/"],
+      contactPoint: [{
+        "@type": "ContactPoint",
+        contactType: "customer support",
+        email: "support@smm-cat.site",
+        availableLanguage: ["Russian"],
+      }],
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://smm-cat.site/#website",
+      url: "https://smm-cat.site/",
+      name: "smm-cat.site",
+      inLanguage: "ru",
+      publisher: { "@id": "https://smm-cat.site/#organization" },
+      potentialAction: {
+        "@type": "SearchAction",
+        target: "https://smm-cat.site/services?q={search_term_string}",
+        "query-input": "required name=search_term_string",
+      },
+    },
+  ],
+});
+
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
     meta: [
@@ -97,6 +130,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         type: "text/javascript",
         children: YANDEX_METRIKA_SCRIPT,
+      },
+      {
+        type: "application/ld+json",
+        children: ORGANIZATION_JSONLD,
       },
     ],
   }),

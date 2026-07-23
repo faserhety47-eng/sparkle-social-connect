@@ -7,7 +7,7 @@ export const Route = createFileRoute("/services")({
   head: () => ({
     meta: [
       { title: "Услуги smm-cat.site — 7 платформ для накрутки" },
-      { name: "description", content: "Каталог услуг накрутки smm-cat.site: Max, VK, Telegram, Одноклассники, Instagram, RuTube и YouTube." },
+      { name: "description", content: "Каталог услуг накрутки smm-cat.site: подписчики, лайки, просмотры и комментарии для Max, VK, Telegram, Одноклассников, Instagram, RuTube, YouTube и TikTok." },
       { property: "og:title", content: "Услуги smm-cat.site" },
       { property: "og:description", content: "Каталог из 7 платформ с прозрачными ценами." },
       { property: "og:url", content: "https://smm-cat.site/services" },

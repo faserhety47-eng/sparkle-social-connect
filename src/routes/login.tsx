@@ -8,7 +8,7 @@ export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
       { title: "Вход — smm-cat.site" },
-      { name: "description", content: "Вход в личный кабинет smm-cat.site." },
+      { name: "description", content: "Вход в личный кабинет smm-cat.site: проверяйте баланс, историю заказов на накрутку в Max, VK, Telegram, YouTube, Instagram, TikTok и оформляйте новые." },
       { property: "og:title", content: "Вход — smm-cat.site" },
       { property: "og:description", content: "Вход в личный кабинет." },
       { property: "og:url", content: "https://smm-cat.site/login" },
