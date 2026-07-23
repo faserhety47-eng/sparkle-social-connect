@@ -39,6 +39,8 @@ type Order = {
   created_at: string;
   guest_email: string | null;
   guest_contact: string | null;
+  external_status: string | null;
+  external_order_id: number | null;
 };
 
 type Message = { id: string; sender: string; body: string; created_at: string };
