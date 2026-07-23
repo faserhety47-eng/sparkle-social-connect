@@ -11,7 +11,10 @@ export const Route = createFileRoute("/login")({
       { name: "description", content: "Вход в личный кабинет smm-cat.site." },
       { property: "og:title", content: "Вход — smm-cat.site" },
       { property: "og:description", content: "Вход в личный кабинет." },
+      { property: "og:url", content: "https://smm-cat.site/login" },
+      { property: "og:type", content: "website" },
     ],
+    links: [{ rel: "canonical", href: "https://smm-cat.site/login" }],
   }),
   component: LoginPage,
 });

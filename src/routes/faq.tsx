@@ -8,7 +8,10 @@ export const Route = createFileRoute("/faq")({
       { name: "description", content: "Ответы на частые вопросы про накрутку, оплату, безопасность и сроки выполнения заказов smm-cat.site." },
       { property: "og:title", content: "F.A.Q. — smm-cat.site" },
       { property: "og:description", content: "Частые вопросы о работе SMM-сервиса smm-cat.site." },
+      { property: "og:url", content: "https://smm-cat.site/faq" },
+      { property: "og:type", content: "website" },
     ],
+    links: [{ rel: "canonical", href: "https://smm-cat.site/faq" }],
   }),
   component: FaqPage,
 });

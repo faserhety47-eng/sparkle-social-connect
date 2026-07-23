@@ -34,6 +34,7 @@ export const Route = createFileRoute("/")({
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: "https://smm-cat.site/og-cover.jpg" },
     ],
+    links: [{ rel: "canonical", href: "https://smm-cat.site/" }],
     scripts: [
       {
         type: "application/ld+json",
@@ -70,6 +71,10 @@ function Index() {
               <img
                 src={HERO_CAT}
                 alt="Милый кот-маскот smm-cat.site"
+                width={500}
+                height={500}
+                fetchPriority="high"
+                decoding="async"
                 className="w-64 sm:w-80 md:w-[420px] lg:w-[500px] h-auto drop-shadow-2xl select-none"
                 draggable={false}
               />

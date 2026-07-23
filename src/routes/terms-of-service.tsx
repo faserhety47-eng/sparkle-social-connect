@@ -7,9 +7,11 @@ export const Route = createFileRoute("/terms-of-service")({
       { name: "description", content: "Правила использования сервиса продвижения smm-cat.site." },
       { property: "og:title", content: "Пользовательское соглашение — smm-cat.site" },
       { property: "og:description", content: "Правила использования сервиса продвижения smm-cat.site." },
+      { property: "og:url", content: "https://smm-cat.site/terms-of-service" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
+    links: [{ rel: "canonical", href: "https://smm-cat.site/terms-of-service" }],
   }),
   component: TermsOfService,
 });

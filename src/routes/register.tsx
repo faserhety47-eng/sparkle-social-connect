@@ -11,7 +11,10 @@ export const Route = createFileRoute("/register")({
       { name: "description", content: "Создайте аккаунт smm-cat.site, чтобы оформлять и оплачивать заказы на продвижение." },
       { property: "og:title", content: "Регистрация — smm-cat.site" },
       { property: "og:description", content: "Создание аккаунта в smm-cat.site." },
+      { property: "og:url", content: "https://smm-cat.site/register" },
+      { property: "og:type", content: "website" },
     ],
+    links: [{ rel: "canonical", href: "https://smm-cat.site/register" }],
   }),
   component: RegisterPage,
 });

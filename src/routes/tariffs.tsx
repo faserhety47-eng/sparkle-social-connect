@@ -10,9 +10,11 @@ export const Route = createFileRoute("/tariffs")({
       { name: "description", content: "Актуальные тарифы smm-cat.site: минимальная стоимость подписчиков, лайков, просмотров и комментариев по всем платформам." },
       { property: "og:title", content: "Тарифы и цены — smm-cat.site" },
       { property: "og:description", content: "Прозрачные тарифы за подписчиков, лайки, просмотры и комментарии на всех поддерживаемых платформах." },
+      { property: "og:url", content: "https://smm-cat.site/tariffs" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
+    links: [{ rel: "canonical", href: "https://smm-cat.site/tariffs" }],
   }),
   component: TariffsPage,
 });

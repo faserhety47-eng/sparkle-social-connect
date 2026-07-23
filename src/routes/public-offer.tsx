@@ -7,9 +7,11 @@ export const Route = createFileRoute("/public-offer")({
       { name: "description", content: "Публичная оферта на оказание услуг сервисом smm-cat.site." },
       { property: "og:title", content: "Договор оферты — smm-cat.site" },
       { property: "og:description", content: "Публичная оферта на оказание услуг сервисом smm-cat.site." },
+      { property: "og:url", content: "https://smm-cat.site/public-offer" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
+    links: [{ rel: "canonical", href: "https://smm-cat.site/public-offer" }],
   }),
   component: PublicOffer,
 });

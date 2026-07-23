@@ -7,9 +7,11 @@ export const Route = createFileRoute("/privacy-policy")({
       { name: "description", content: "Политика обработки персональных данных пользователей сервиса smm-cat.site." },
       { property: "og:title", content: "Политика конфиденциальности — smm-cat.site" },
       { property: "og:description", content: "Политика обработки персональных данных пользователей сервиса smm-cat.site." },
+      { property: "og:url", content: "https://smm-cat.site/privacy-policy" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
+    links: [{ rel: "canonical", href: "https://smm-cat.site/privacy-policy" }],
   }),
   component: PrivacyPolicy,
 });
