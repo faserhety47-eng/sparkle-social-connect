@@ -31,6 +31,7 @@ import { Route as PSlugRouteImport } from './routes/p.$slug'
 import { Route as GuestOrderTokenRouteImport } from './routes/guest-order.$token'
 import { Route as NakrutkaTypePlatformRouteImport } from './routes/nakrutka.$type.$platform'
 import { Route as ApiPublicYookassaWebhookRouteImport } from './routes/api/public/yookassa-webhook'
+import { Route as ApiPublicGuestOrderStatusRouteImport } from './routes/api/public/guest-order-status'
 
 const TermsOfServiceRoute = TermsOfServiceRouteImport.update({
   id: '/terms-of-service',
@@ -143,6 +144,12 @@ const ApiPublicYookassaWebhookRoute =
     path: '/public/yookassa-webhook',
     getParentRoute: () => ApiRoute,
   } as any)
+const ApiPublicGuestOrderStatusRoute =
+  ApiPublicGuestOrderStatusRouteImport.update({
+    id: '/public/guest-order-status',
+    path: '/public/guest-order-status',
+    getParentRoute: () => ApiRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -165,6 +172,7 @@ export interface FileRoutesByFullPath {
   '/p/$slug': typeof PSlugRoute
   '/support/$id': typeof SupportIdRoute
   '/nakrutka/': typeof NakrutkaIndexRoute
+  '/api/public/guest-order-status': typeof ApiPublicGuestOrderStatusRoute
   '/api/public/yookassa-webhook': typeof ApiPublicYookassaWebhookRoute
   '/nakrutka/$type/$platform': typeof NakrutkaTypePlatformRoute
 }
@@ -189,6 +197,7 @@ export interface FileRoutesByTo {
   '/p/$slug': typeof PSlugRoute
   '/support/$id': typeof SupportIdRoute
   '/nakrutka': typeof NakrutkaIndexRoute
+  '/api/public/guest-order-status': typeof ApiPublicGuestOrderStatusRoute
   '/api/public/yookassa-webhook': typeof ApiPublicYookassaWebhookRoute
   '/nakrutka/$type/$platform': typeof NakrutkaTypePlatformRoute
 }
@@ -214,6 +223,7 @@ export interface FileRoutesById {
   '/p/$slug': typeof PSlugRoute
   '/support/$id': typeof SupportIdRoute
   '/nakrutka/': typeof NakrutkaIndexRoute
+  '/api/public/guest-order-status': typeof ApiPublicGuestOrderStatusRoute
   '/api/public/yookassa-webhook': typeof ApiPublicYookassaWebhookRoute
   '/nakrutka/$type/$platform': typeof NakrutkaTypePlatformRoute
 }
@@ -240,6 +250,7 @@ export interface FileRouteTypes {
     | '/p/$slug'
     | '/support/$id'
     | '/nakrutka/'
+    | '/api/public/guest-order-status'
     | '/api/public/yookassa-webhook'
     | '/nakrutka/$type/$platform'
   fileRoutesByTo: FileRoutesByTo
@@ -264,6 +275,7 @@ export interface FileRouteTypes {
     | '/p/$slug'
     | '/support/$id'
     | '/nakrutka'
+    | '/api/public/guest-order-status'
     | '/api/public/yookassa-webhook'
     | '/nakrutka/$type/$platform'
   id:
@@ -288,6 +300,7 @@ export interface FileRouteTypes {
     | '/p/$slug'
     | '/support/$id'
     | '/nakrutka/'
+    | '/api/public/guest-order-status'
     | '/api/public/yookassa-webhook'
     | '/nakrutka/$type/$platform'
   fileRoutesById: FileRoutesById
@@ -471,14 +484,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicYookassaWebhookRouteImport
       parentRoute: typeof ApiRoute
     }
+    '/api/public/guest-order-status': {
+      id: '/api/public/guest-order-status'
+      path: '/public/guest-order-status'
+      fullPath: '/api/public/guest-order-status'
+      preLoaderRoute: typeof ApiPublicGuestOrderStatusRouteImport
+      parentRoute: typeof ApiRoute
+    }
   }
 }
 
 interface ApiRouteChildren {
+  ApiPublicGuestOrderStatusRoute: typeof ApiPublicGuestOrderStatusRoute
   ApiPublicYookassaWebhookRoute: typeof ApiPublicYookassaWebhookRoute
 }
 
 const ApiRouteChildren: ApiRouteChildren = {
+  ApiPublicGuestOrderStatusRoute: ApiPublicGuestOrderStatusRoute,
   ApiPublicYookassaWebhookRoute: ApiPublicYookassaWebhookRoute,
 }
 
