@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsOfServiceRouteImport } from './routes/terms-of-service'
+import { Route as TariffsRouteImport } from './routes/tariffs'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ServicesRouteImport } from './routes/services'
@@ -33,6 +34,11 @@ import { Route as NakrutkaTypePlatformRouteImport } from './routes/nakrutka.$typ
 const TermsOfServiceRoute = TermsOfServiceRouteImport.update({
   id: '/terms-of-service',
   path: '/terms-of-service',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TariffsRoute = TariffsRouteImport.update({
+  id: '/tariffs',
+  path: '/tariffs',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SupportRoute = SupportRouteImport.update({
@@ -146,6 +152,7 @@ export interface FileRoutesByFullPath {
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRouteWithChildren
+  '/tariffs': typeof TariffsRoute
   '/terms-of-service': typeof TermsOfServiceRoute
   '/guest-order/$token': typeof GuestOrderTokenRoute
   '/p/$slug': typeof PSlugRoute
@@ -168,6 +175,7 @@ export interface FileRoutesByTo {
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRouteWithChildren
+  '/tariffs': typeof TariffsRoute
   '/terms-of-service': typeof TermsOfServiceRoute
   '/guest-order/$token': typeof GuestOrderTokenRoute
   '/p/$slug': typeof PSlugRoute
@@ -191,6 +199,7 @@ export interface FileRoutesById {
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRouteWithChildren
+  '/tariffs': typeof TariffsRoute
   '/terms-of-service': typeof TermsOfServiceRoute
   '/guest-order/$token': typeof GuestOrderTokenRoute
   '/p/$slug': typeof PSlugRoute
@@ -215,6 +224,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/sitemap.xml'
     | '/support'
+    | '/tariffs'
     | '/terms-of-service'
     | '/guest-order/$token'
     | '/p/$slug'
@@ -237,6 +247,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/sitemap.xml'
     | '/support'
+    | '/tariffs'
     | '/terms-of-service'
     | '/guest-order/$token'
     | '/p/$slug'
@@ -259,6 +270,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/sitemap.xml'
     | '/support'
+    | '/tariffs'
     | '/terms-of-service'
     | '/guest-order/$token'
     | '/p/$slug'
@@ -282,6 +294,7 @@ export interface RootRouteChildren {
   ServicesRoute: typeof ServicesRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SupportRoute: typeof SupportRouteWithChildren
+  TariffsRoute: typeof TariffsRoute
   TermsOfServiceRoute: typeof TermsOfServiceRoute
   GuestOrderTokenRoute: typeof GuestOrderTokenRoute
   PSlugRoute: typeof PSlugRoute
@@ -296,6 +309,13 @@ declare module '@tanstack/react-router' {
       path: '/terms-of-service'
       fullPath: '/terms-of-service'
       preLoaderRoute: typeof TermsOfServiceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tariffs': {
+      id: '/tariffs'
+      path: '/tariffs'
+      fullPath: '/tariffs'
+      preLoaderRoute: typeof TariffsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/support': {
@@ -460,6 +480,7 @@ const rootRouteChildren: RootRouteChildren = {
   ServicesRoute: ServicesRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SupportRoute: SupportRouteWithChildren,
+  TariffsRoute: TariffsRoute,
   TermsOfServiceRoute: TermsOfServiceRoute,
   GuestOrderTokenRoute: GuestOrderTokenRoute,
   PSlugRoute: PSlugRoute,
@@ -469,13 +490,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
