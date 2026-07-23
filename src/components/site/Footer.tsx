@@ -36,6 +36,7 @@ export function Footer() {
             <li><Link to="/privacy-policy" className="hover:text-primary">Политика конфиденциальности</Link></li>
             <li><Link to="/terms-of-service" className="hover:text-primary">Пользовательское соглашение</Link></li>
             <li><Link to="/public-offer" className="hover:text-primary">Договор оферты</Link></li>
+            <li><Link to="/tariffs" className="hover:text-primary">Тарифы и цены</Link></li>
           </ul>
         </div>
         <div>
