@@ -96,11 +96,12 @@ function OrderPage() {
   );
 
   useEffect(() => {
-    if (selected) {
-      if (count < selected.min_qty) setCount(selected.min_qty);
-      if (count > selected.max_qty) setCount(selected.max_qty);
-    }
-  }, [selected]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!selected) return;
+    if (count < selected.min_qty) setCount(selected.min_qty);
+    else if (count > selected.max_qty) setCount(selected.max_qty);
+    // Only re-clamp when the chosen service changes, not on every count edit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected?.id, selected?.min_qty, selected?.max_qty]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
