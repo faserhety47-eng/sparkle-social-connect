@@ -25,8 +25,8 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
 }
 
 export function createSupabaseServerPublicClient() {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_PUBLISHABLE_KEY;
+  const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const key = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
   if (!url || !key) throw new Error("Missing backend public configuration");
 
   return createClient<Database>(url, key, {
