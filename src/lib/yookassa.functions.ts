@@ -2,15 +2,6 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-const YK_API = "https://api.yookassa.ru/v3";
-
-function ykAuthHeader() {
-  const shop = process.env.YOOKASSA_SHOP_ID;
-  const secret = process.env.YOOKASSA_SECRET_KEY;
-  if (!shop || !secret) throw new Error("YooKassa credentials not configured");
-  return "Basic " + Buffer.from(`${shop}:${secret}`).toString("base64");
-}
-
 export const createYookassaTopup = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((raw) =>
@@ -20,57 +11,30 @@ export const createYookassaTopup = createServerFn({ method: "POST" })
     }).parse(raw),
   )
   .handler(async ({ data, context }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { createYooKassaPayment } = await import("@/lib/yookassa.server");
 
-    // 1. Local row (без payment_id — заполним после ответа API)
-    const { data: row, error: insErr } = await supabaseAdmin
-      .from("topup_payments")
-      .insert({
-        user_id: context.userId,
-        amount_rub: data.amount,
-        status: "pending",
-      })
-      .select("id")
-      .single();
-    if (insErr) throw new Error(insErr.message);
+    const { data: topupId, error: topupErr } = await context.supabase.rpc(
+      "create_account_yookassa_topup" as never,
+      { _amount: data.amount } as never,
+    );
+    if (topupErr) throw new Error(topupErr.message);
+    const topup_id = topupId as unknown as string;
 
-    // 2. Создаём платёж в ЮKassa
-    const idempotencyKey = crypto.randomUUID();
     const body = {
       amount: { value: data.amount.toFixed(2), currency: "RUB" },
       capture: true,
       confirmation: { type: "redirect", return_url: data.return_url },
       description: `Пополнение баланса smm-cat.site · ${context.userId.slice(0, 8)}`,
-      metadata: { user_id: context.userId, topup_id: row.id },
+      metadata: { user_id: context.userId, topup_id },
     };
 
-    const res = await fetch(`${YK_API}/payments`, {
-      method: "POST",
-      headers: {
-        "Authorization": ykAuthHeader(),
-        "Idempotence-Key": idempotencyKey,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
-    const text = await res.text();
-    if (!res.ok) {
-      await supabaseAdmin.from("topup_payments")
-        .update({ status: "failed" }).eq("id", row.id);
-      throw new Error(`YooKassa error [${res.status}]: ${text.slice(0, 300)}`);
-    }
-    const payment = JSON.parse(text) as {
-      id: string;
-      status: string;
-      confirmation?: { confirmation_url?: string };
-    };
+    const payment = await createYooKassaPayment(body);
 
-    await supabaseAdmin.from("topup_payments")
-      .update({
-        yookassa_payment_id: payment.id,
-        status: payment.status,
-      })
-      .eq("id", row.id);
+    const { error: attachErr } = await context.supabase.rpc(
+      "attach_yookassa_payment" as never,
+      { _topup_id: topup_id, _payment_id: payment.id, _status: payment.status } as never,
+    );
+    if (attachErr) throw new Error(attachErr.message);
 
     const url = payment.confirmation?.confirmation_url;
     if (!url) throw new Error("YooKassa: confirmation_url missing");
@@ -90,35 +54,27 @@ export const createGuestOrderPayment = createServerFn({ method: "POST" })
     }).parse(raw),
   )
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { createSupabaseServerPublicClient, createYooKassaPayment } = await import("@/lib/yookassa.server");
+    const supabasePublic = createSupabaseServerPublicClient();
 
-    const { data: rpc, error: rpcErr } = await supabaseAdmin.rpc("create_guest_smm_order", {
+    const { data: rpc, error: rpcErr } = await supabasePublic.rpc("create_guest_yookassa_payment" as never, {
       _service_id: data.service_id,
       _link: data.link,
       _quantity: data.quantity,
       _email: data.email,
       _contact: data.contact ?? "",
-    });
+    } as never);
     if (rpcErr) throw new Error(rpcErr.message);
-    const rowRet = Array.isArray(rpc) ? rpc[0] : rpc;
+    const rowRet = (Array.isArray(rpc) ? rpc[0] : rpc) as {
+      order_id: string;
+      guest_token: string;
+      amount: number;
+      topup_id: string;
+    };
     const orderId = rowRet.order_id as string;
     const guestToken = rowRet.guest_token as string;
     const amount = Number(rowRet.amount);
 
-    const { data: topup, error: insErr } = await supabaseAdmin
-      .from("topup_payments")
-      .insert({
-        user_id: null,
-        amount_rub: amount,
-        status: "pending",
-        order_id: orderId,
-        kind: "guest_order",
-      } as never)
-      .select("id")
-      .single();
-    if (insErr) throw new Error(insErr.message);
-
-    const idempotencyKey = crypto.randomUUID();
     const returnUrl = `${new URL(data.return_url).origin}/guest-order/${guestToken}`;
     const body = {
       amount: { value: amount.toFixed(2), currency: "RUB" },
@@ -136,31 +92,17 @@ export const createGuestOrderPayment = createServerFn({ method: "POST" })
           payment_subject: "service",
         }],
       },
-      metadata: { order_id: orderId, topup_id: topup.id, kind: "guest_order" },
+      metadata: { order_id: orderId, topup_id: rowRet.topup_id, kind: "guest_order" },
     };
 
-    const res = await fetch(`${YK_API}/payments`, {
-      method: "POST",
-      headers: {
-        "Authorization": ykAuthHeader(),
-        "Idempotence-Key": idempotencyKey,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
-    const text = await res.text();
-    if (!res.ok) {
-      await supabaseAdmin.from("topup_payments")
-        .update({ status: "failed" }).eq("id", topup.id);
-      throw new Error(`YooKassa error [${res.status}]: ${text.slice(0, 300)}`);
-    }
-    const payment = JSON.parse(text) as {
-      id: string; status: string; confirmation?: { confirmation_url?: string };
-    };
+    const payment = await createYooKassaPayment(body);
 
-    await supabaseAdmin.from("topup_payments")
-      .update({ yookassa_payment_id: payment.id, status: payment.status })
-      .eq("id", topup.id);
+    const { error: attachErr } = await supabasePublic.rpc("attach_yookassa_payment" as never, {
+      _topup_id: rowRet.topup_id,
+      _payment_id: payment.id,
+      _status: payment.status,
+    } as never);
+    if (attachErr) throw new Error(attachErr.message);
 
     const url = payment.confirmation?.confirmation_url;
     if (!url) throw new Error("YooKassa: confirmation_url missing");
