@@ -159,12 +159,14 @@ function OrderPage() {
     <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-14">
       <h1 className="text-3xl md:text-4xl font-extrabold">Оформить заказ</h1>
       <p className="mt-2 text-muted-foreground">
-        Выберите услугу — стоимость спишется с баланса и заказ моментально уйдёт в работу.
+        {user
+          ? "Выберите услугу — стоимость спишется с баланса и заказ моментально уйдёт в работу."
+          : "Оформите заказ без регистрации — оплата картой, СБП или ЮMoney через ЮKassa. После оплаты заказ уйдёт в работу автоматически."}
       </p>
 
       {!sessionLoading && !user && (
         <div className="mt-6 rounded-2xl border border-border bg-card/60 p-4 text-sm text-muted-foreground">
-          Для оформления заказа нужен аккаунт с балансом.{" "}
+          Есть аккаунт с балансом?{" "}
           <Link to="/login" className="text-primary font-semibold">Войти</Link>
           {" "}или{" "}
           <Link to="/register" className="text-primary font-semibold">зарегистрироваться</Link>.
