@@ -40,9 +40,18 @@ export function createSupabaseServerPublicClient() {
 }
 
 function ykAuthHeader() {
-  const shop = process.env.YOOKASSA_SHOP_ID;
-  const secret = process.env.YOOKASSA_SECRET_KEY;
-  if (!shop || !secret) throw new Error("YooKassa credentials not configured");
+  const shop =
+    process.env.YOOKASSA_SHOP_ID ||
+    process.env.YOOKASSA_SHOPID ||
+    process.env.YOOKASSA_ACCOUNT_ID;
+  const secret =
+    process.env.YOOKASSA_SECRET_KEY ||
+    process.env.YOOKASSA_API_KEY;
+  if (!shop || !secret) {
+    throw new Error(
+      "Учётные данные ЮKassa не настроены на сервере. Добавьте в файл .env строки YOOKASSA_SHOP_ID и YOOKASSA_SECRET_KEY, затем перезапустите сайт командой docker compose up -d --build.",
+    );
+  }
   return "Basic " + Buffer.from(`${shop}:${secret}`).toString("base64");
 }
 
