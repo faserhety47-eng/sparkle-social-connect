@@ -58,7 +58,7 @@ function GuestOrderPage() {
   const load = async () => {
     const { data, error } = await guestClient
       .from("orders")
-      .select("id, status, platform, service_type, link, quantity, price_rub, created_at, guest_email, guest_contact")
+      .select("id, status, platform, service_type, link, quantity, price_rub, created_at, guest_email, guest_contact, external_status, external_order_id")
       .eq("guest_token", token)
       .maybeSingle();
     if (error || !data) {
