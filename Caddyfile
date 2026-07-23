@@ -1,0 +1,11 @@
+www.smm-cat.site {
+    redir https://smm-cat.site{uri} permanent
+}
+
+smm-cat.site {
+    encode zstd gzip
+    reverse_proxy web:3000
+
+    @assets path *.css *.js *.woff2 *.woff *.png *.jpg *.jpeg *.webp *.svg *.ico *.mp4
+    header @assets Cache-Control "public, max-age=31536000, immutable"
+}
