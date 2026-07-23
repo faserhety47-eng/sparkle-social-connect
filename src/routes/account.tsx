@@ -1,10 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/useSession";
 import { SERVICES } from "@/data/services";
 import { usePaymentMethods } from "@/hooks/usePaymentMethods";
 import { OrderMessages } from "@/components/site/OrderMessages";
+import { createYookassaTopup } from "@/lib/yookassa.functions";
 import { toast } from "sonner";
 
 type Search = { order?: string };
@@ -75,6 +77,24 @@ function AccountPage() {
   const [loading, setLoading] = useState(true);
   const [openChat, setOpenChat] = useState<Record<string, boolean>>({});
   const { methods } = usePaymentMethods();
+  const [topupAmount, setTopupAmount] = useState<number>(500);
+  const [topupLoading, setTopupLoading] = useState(false);
+  const createTopup = useServerFn(createYookassaTopup);
+
+  const handleTopup = async () => {
+    if (!topupAmount || topupAmount < 100) return toast.error("Минимум 100 ₽");
+    if (topupAmount > 300000) return toast.error("Максимум 300 000 ₽");
+    setTopupLoading(true);
+    try {
+      const res = await createTopup({
+        data: { amount: Number(topupAmount), return_url: `${window.location.origin}/account` },
+      });
+      window.location.href = res.confirmation_url;
+    } catch (err) {
+      toast.error("Не удалось создать платёж: " + (err instanceof Error ? err.message : String(err)));
+      setTopupLoading(false);
+    }
+  };
 
   const loadAll = async () => {
     const [ordersRes, profRes, txnRes] = await Promise.all([
