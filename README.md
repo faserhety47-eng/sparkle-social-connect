@@ -21,6 +21,21 @@ npm i
 npm run dev
 ```
 
+## Переменные для оплаты на VPS
+
+Для оплаты через ЮKassa на сервере в файле `.env` должны быть строки:
+
+```env
+YOOKASSA_SHOP_ID="ваш_shop_id_из_ЮKassa"
+YOOKASSA_SECRET_KEY="ваш_секретный_ключ_ЮKassa"
+```
+
+После изменения `.env` перезапустите сайт:
+
+```sh
+docker compose up -d --build
+```
+
 ## Built with
 
 - TanStack Start
