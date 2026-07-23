@@ -8,6 +8,7 @@ import { usePlatforms } from "@/hooks/usePlatforms";
 import { useSmmServices, humanizeCategory, type SmmService } from "@/hooks/useSmmServices";
 import { submitSmmOrder } from "@/lib/smm.functions";
 import { createGuestOrderPayment } from "@/lib/yookassa.functions";
+import { reachGoal } from "@/lib/metrika";
 
 type Search = { platform?: string };
 
