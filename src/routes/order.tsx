@@ -20,7 +20,10 @@ export const Route = createFileRoute("/order")({
       { name: "description", content: "Оформите заказ на накрутку. Оплата с баланса и мгновенная отправка в работу." },
       { property: "og:title", content: "Оформить заказ — smm-cat.site" },
       { property: "og:description", content: "Быстрое оформление SMM-заказа с автосписанием." },
+      { property: "og:url", content: "https://smm-cat.site/order" },
+      { property: "og:type", content: "website" },
     ],
+    links: [{ rel: "canonical", href: "https://smm-cat.site/order" }],
   }),
   component: OrderPage,
 });

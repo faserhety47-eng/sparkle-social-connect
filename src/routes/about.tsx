@@ -10,7 +10,10 @@ export const Route = createFileRoute("/about")({
       { name: "description", content: "smm-cat.site — платформа для накрутки в 40+ соцсетях. 8 лет на рынке, 11.8 млн выполненных заказов, 115 тыс. клиентов." },
       { property: "og:title", content: "О компании — smm-cat.site" },
       { property: "og:description", content: "Кто мы, чем занимаемся и почему нам доверяют." },
+      { property: "og:url", content: "https://smm-cat.site/about" },
+      { property: "og:type", content: "website" },
     ],
+    links: [{ rel: "canonical", href: "https://smm-cat.site/about" }],
   }),
   component: About,
 });

@@ -12,9 +12,11 @@ export const Route = createFileRoute("/support")({
       { name: "description", content: "Отправьте обращение в службу поддержки smm-cat.site. Мы отвечаем быстро." },
       { property: "og:title", content: "Поддержка — smm-cat.site" },
       { property: "og:description", content: "Свяжитесь со службой поддержки smm-cat.site." },
+      { property: "og:url", content: "https://smm-cat.site/support" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
+    links: [{ rel: "canonical", href: "https://smm-cat.site/support" }],
   }),
   component: SupportPage,
 });

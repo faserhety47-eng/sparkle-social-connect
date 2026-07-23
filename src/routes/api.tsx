@@ -7,7 +7,10 @@ export const Route = createFileRoute("/api")({
       { name: "description", content: "Документация REST API smm-cat.site: список услуг, создание заказа, статус, баланс." },
       { property: "og:title", content: "API smm-cat.site" },
       { property: "og:description", content: "REST API для реселлеров: создание заказов, статусы, баланс." },
+      { property: "og:url", content: "https://smm-cat.site/api" },
+      { property: "og:type", content: "website" },
     ],
+    links: [{ rel: "canonical", href: "https://smm-cat.site/api" }],
   }),
   component: ApiDocs,
 });
