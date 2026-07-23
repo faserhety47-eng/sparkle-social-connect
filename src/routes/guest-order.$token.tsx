@@ -18,10 +18,14 @@ export const Route = createFileRoute("/guest-order/$token")({
 const STATUS_LABEL: Record<string, string> = {
   awaiting_payment: "Ожидает оплаты",
   payment_reported: "Оплата на проверке",
-  paid: "Оплачен",
+  paid: "Оплачен, готовим отправку",
+  processing: "В работе",
   in_progress: "В работе",
+  partial: "Выполнен частично",
   completed: "Выполнен",
   cancelled: "Отменён",
+  refunded: "Возврат средств",
+  error: "Ошибка — свяжитесь с поддержкой",
 };
 
 type Order = {
@@ -35,6 +39,8 @@ type Order = {
   created_at: string;
   guest_email: string | null;
   guest_contact: string | null;
+  external_status: string | null;
+  external_order_id: number | null;
 };
 
 type Message = { id: string; sender: string; body: string; created_at: string };
@@ -52,7 +58,7 @@ function GuestOrderPage() {
   const load = async () => {
     const { data, error } = await guestClient
       .from("orders")
-      .select("id, status, platform, service_type, link, quantity, price_rub, created_at, guest_email, guest_contact")
+      .select("id, status, platform, service_type, link, quantity, price_rub, created_at, guest_email, guest_contact, external_status, external_order_id")
       .eq("guest_token", token)
       .maybeSingle();
     if (error || !data) {
@@ -70,6 +76,34 @@ function GuestOrderPage() {
   };
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [token, guestClient]);
+
+  // Автообновление статуса из SMM.media (пока заказ активен)
+  useEffect(() => {
+    if (!order) return;
+    const done = ["completed", "cancelled", "refunded", "error"];
+    if (done.includes(order.status)) return;
+    let cancelled = false;
+    const sync = async () => {
+      try {
+        const res = await fetch("/api/public/guest-order-status", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ guest_token: token }),
+        });
+        if (!res.ok || cancelled) return;
+        const data = await res.json() as { status: string; external_status: string | null; external_order_id: string | null };
+        setOrder((prev) => prev ? {
+          ...prev,
+          status: data.status,
+          external_status: data.external_status,
+          external_order_id: data.external_order_id ? Number(data.external_order_id) : prev.external_order_id,
+        } : prev);
+      } catch { /* игнорируем сетевые сбои */ }
+    };
+    sync();
+    const id = setInterval(sync, 15000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, [order?.id, order?.status, token]);
 
   const reportPayment = async () => {
     if (!order) return;
@@ -129,6 +163,18 @@ function GuestOrderPage() {
           <div className="text-sm text-muted-foreground">Статус</div>
           <div className="font-semibold text-primary">{STATUS_LABEL[order.status] ?? order.status}</div>
         </div>
+        {order.external_status && (
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-muted-foreground">Статус в системе накрутки</div>
+            <div className="text-sm font-medium">{order.external_status}</div>
+          </div>
+        )}
+        {order.external_order_id && (
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-muted-foreground">Номер задания</div>
+            <div className="font-mono text-xs">#{order.external_order_id}</div>
+          </div>
+        )}
         <div className="flex items-center justify-between">
           <div className="text-sm text-muted-foreground">Ссылка</div>
           <div className="font-mono text-xs break-all text-right max-w-[70%]">{order.link}</div>

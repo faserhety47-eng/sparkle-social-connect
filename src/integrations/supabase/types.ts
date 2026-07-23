@@ -813,6 +813,14 @@ export type Database = {
         Args: { _order_id: string; _reason: string }
         Returns: undefined
       }
+      sync_guest_smm_status: {
+        Args: {
+          _external_status: string
+          _guest_token: string
+          _local_status: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "user"
