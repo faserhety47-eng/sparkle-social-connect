@@ -729,11 +729,19 @@ export type Database = {
         }
         Returns: undefined
       }
+      attach_yookassa_payment: {
+        Args: { _payment_id: string; _status: string; _topup_id: string }
+        Returns: undefined
+      }
       charge_and_create_smm_order: {
         Args: { _link: string; _quantity: number; _service_id: number }
         Returns: string
       }
       client_guest_token: { Args: never; Returns: string }
+      create_account_yookassa_topup: {
+        Args: { _amount: number }
+        Returns: string
+      }
       create_guest_smm_order: {
         Args: {
           _contact: string
@@ -746,6 +754,21 @@ export type Database = {
           amount: number
           guest_token: string
           order_id: string
+        }[]
+      }
+      create_guest_yookassa_payment: {
+        Args: {
+          _contact: string
+          _email: string
+          _link: string
+          _quantity: number
+          _service_id: number
+        }
+        Returns: {
+          amount: number
+          guest_token: string
+          order_id: string
+          topup_id: string
         }[]
       }
       credit_yookassa_topup: {
