@@ -729,11 +729,19 @@ export type Database = {
         }
         Returns: undefined
       }
+      attach_yookassa_payment: {
+        Args: { _payment_id: string; _status: string; _topup_id: string }
+        Returns: undefined
+      }
       charge_and_create_smm_order: {
         Args: { _link: string; _quantity: number; _service_id: number }
         Returns: string
       }
       client_guest_token: { Args: never; Returns: string }
+      create_account_yookassa_topup: {
+        Args: { _amount: number }
+        Returns: string
+      }
       create_guest_smm_order: {
         Args: {
           _contact: string
@@ -748,6 +756,21 @@ export type Database = {
           order_id: string
         }[]
       }
+      create_guest_yookassa_payment: {
+        Args: {
+          _contact: string
+          _email: string
+          _link: string
+          _quantity: number
+          _service_id: number
+        }
+        Returns: {
+          amount: number
+          guest_token: string
+          order_id: string
+          topup_id: string
+        }[]
+      }
       credit_yookassa_topup: {
         Args: { _payment_id: string }
         Returns: undefined
@@ -759,9 +782,28 @@ export type Database = {
         }
         Returns: boolean
       }
+      mark_guest_smm_order_error: {
+        Args: { _message: string; _order_id: string }
+        Returns: undefined
+      }
+      mark_guest_smm_order_started: {
+        Args: { _external_order_id: number; _order_id: string }
+        Returns: undefined
+      }
       pay_order_from_balance: {
         Args: { _order_id: string }
         Returns: undefined
+      }
+      process_yookassa_verified: {
+        Args: { _paid: boolean; _payment_id: string; _status: string }
+        Returns: {
+          needs_smm: boolean
+          payment_kind: string
+          related_order_id: string
+          smm_link: string
+          smm_quantity: number
+          smm_service_id: number
+        }[]
       }
       redeem_promo: {
         Args: { _code: string; _order_price: number }
