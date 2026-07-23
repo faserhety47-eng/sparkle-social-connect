@@ -637,6 +637,39 @@ export type Database = {
         }
         Relationships: []
       }
+      topup_payments: {
+        Row: {
+          amount_rub: number
+          created_at: string
+          credited: boolean
+          id: string
+          status: string
+          updated_at: string
+          user_id: string
+          yookassa_payment_id: string | null
+        }
+        Insert: {
+          amount_rub: number
+          created_at?: string
+          credited?: boolean
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+          yookassa_payment_id?: string | null
+        }
+        Update: {
+          amount_rub?: number
+          created_at?: string
+          credited?: boolean
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+          yookassa_payment_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -687,6 +720,10 @@ export type Database = {
         Returns: string
       }
       client_guest_token: { Args: never; Returns: string }
+      credit_yookassa_topup: {
+        Args: { _payment_id: string }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
