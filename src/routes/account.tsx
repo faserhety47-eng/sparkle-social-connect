@@ -172,7 +172,7 @@ function AccountPage() {
               {balance.toFixed(2)} ₽
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
-              Пополнение баланса — через администратора. Напишите нам в чат заказа или в поддержку.
+              Пополните баланс онлайн через ЮKassa — деньги зачислятся автоматически.
             </p>
           </div>
           <button
@@ -181,6 +181,47 @@ function AccountPage() {
           >
             {showTxns ? "Скрыть историю" : "История пополнений"}
           </button>
+        </div>
+
+        <div id="topup" className="mt-5 rounded-2xl border border-border bg-background/50 p-4">
+          <div className="text-sm font-semibold">Пополнить баланс</div>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            {[300, 500, 1000, 2000, 5000].map((v) => (
+              <button
+                key={v}
+                type="button"
+                onClick={() => setTopupAmount(v)}
+                className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                  topupAmount === v
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border hover:border-primary/50"
+                }`}
+              >
+                {v} ₽
+              </button>
+            ))}
+          </div>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <input
+              type="number"
+              min={100}
+              max={300000}
+              value={topupAmount}
+              onChange={(e) => setTopupAmount(Number(e.target.value))}
+              className="w-40 rounded-xl border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            />
+            <span className="text-sm text-muted-foreground">₽ (от 100 до 300 000)</span>
+            <button
+              onClick={handleTopup}
+              disabled={topupLoading}
+              className="btn-primary text-sm disabled:opacity-60"
+            >
+              {topupLoading ? "Открываем ЮKassa…" : "Оплатить через ЮKassa"}
+            </button>
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Оплата картой, СБП, ЮMoney и другими способами. Средства зачислятся автоматически после подтверждения платежа.
+          </p>
         </div>
         {showTxns && (
           <div className="mt-4 border-t border-border pt-4">
