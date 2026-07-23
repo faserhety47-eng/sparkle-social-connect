@@ -49,12 +49,15 @@ function OrderPage() {
   const navigate = useNavigate();
   const { platforms } = usePlatforms();
   const submit = useServerFn(submitSmmOrder);
+  const createGuest = useServerFn(createGuestOrderPayment);
 
   const [platform, setPlatform] = useState(initial ?? "");
   const [category, setCategory] = useState("");
   const [serviceId, setServiceId] = useState<number | "">("");
   const [link, setLink] = useState("");
   const [count, setCount] = useState(100);
+  const [guestEmail, setGuestEmail] = useState("");
+  const [guestContact, setGuestContact] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
